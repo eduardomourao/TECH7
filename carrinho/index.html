@@ -12,15 +12,25 @@
   <link href="_assets/images.tcdn.com.br/files/996644/themes/46/css/style.min__e4660e26.css" rel="stylesheet">
   <link href="_custom/tech7-theme.css" rel="stylesheet">
   <style>
+    /* Reset & Variáveis */
     :root {
-      --cart-bg: #ffffff;
+      --bar_top: #000000;
+      --bar_top_color: #ffffff;
+      --bg_body: #ffffff;
+      --color_primary: #ff6a00;
+      --color_second: #ff6a00;
+      --color_text: #0d0d0d;
+      --bg_button_primary: #ff6a00;
+      --bg_button_primary_hover: #e65f00;
+
+      --cart-bg: var(--bg_body);
       --cart-surface: #ffffff;
       --cart-muted-surface: #f8f9fa;
       --cart-border: #e5e7eb;
-      --cart-text: #111111;
+      --cart-text: var(--color_text);
       --cart-muted: #4b5563;
-      --cart-accent: #ff6a00;
-      --cart-accent-hover: #e85f00;
+      --cart-accent: var(--color_primary);
+      --cart-accent-hover: var(--bg_button_primary_hover);
       --cart-radius: 8px;
       --cart-shadow: 0 4px 20px rgba(17, 17, 17, 0.06);
     }
