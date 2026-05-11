@@ -12,19 +12,30 @@
   <link href="_assets/images.tcdn.com.br/files/996644/themes/46/css/style.min__e4660e26.css" rel="stylesheet">
   <link href="_custom/tech7-theme.css" rel="stylesheet">
   <style>
+    /* CSS Variables & Theme */
     :root {
-      --checkout-bg: #ffffff;
+      --bar_top: #000000;
+      --bar_top_color: #ffffff;
+      --bg_body: #ffffff;
+      --color_primary: #ff6a00;
+      --color_second: #ff6a00;
+      --color_text: #0d0d0d;
+      --bg_button_primary: #ff6a00;
+      --bg_button_primary_hover: #e65f00;
+
+      --checkout-bg: var(--bg_body);
       --checkout-surface: #ffffff;
-      --checkout-muted-surface: #f8f9fa;
+      --checkout-muted-surface: #f9fafb;
       --checkout-border: #e5e7eb;
-      --checkout-text: #111111;
-      --checkout-muted: #4b5563;
-      --checkout-accent: #ff6a00;
-      --checkout-accent-hover: #e85f00;
+      --checkout-text: var(--color_text);
+      --checkout-muted: #6b7280;
+      --checkout-accent: var(--color_primary);
+      --checkout-accent-hover: var(--bg_button_primary_hover);
+      --checkout-error: #ef4444;
       --checkout-success: #22c55e;
       --checkout-danger: #dc2626;
       --checkout-radius: 8px;
-      --checkout-shadow: 0 4px 20px rgba(17, 17, 17, 0.06);
+      --checkout-shadow: 0 4px 20px rgba(17,17,17,0.06);
     }
 
     * { box-sizing: border-box; }
