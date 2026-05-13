@@ -210,6 +210,52 @@
   var _insertParent = null;
   var _insertBefore = null;
 
+  function normalizeText(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function getVariationLabel(target) {
+    if (!target) return '';
+
+    if (target.tagName === 'SELECT') {
+      var selected = target.options[target.selectedIndex];
+      var label = target.closest('label');
+      var labelText = label ? normalizeText(label.querySelector('span') ? label.querySelector('span').textContent : '') : '';
+      var optionText = selected ? normalizeText(selected.textContent || selected.value) : normalizeText(target.value);
+      if (!target.value) return '';
+      return labelText ? labelText + ': ' + optionText : optionText;
+    }
+
+    var type = normalizeText(target.getAttribute('data-variant-type'));
+    var value = normalizeText(target.getAttribute('data-variant-value') || target.textContent);
+    return value ? (type ? type + ': ' + value : value) : '';
+  }
+
+  function selectVariationOption(option) {
+    if (!option) return;
+    var container = document.getElementById('t7-variacao-container');
+    if (!container) return;
+
+    var group = option.closest('ul, .lista_cor_variacao, #menuVars') || container;
+    var selectedOptions = group.querySelectorAll('[data-variant-value].t7-variant-selected, li.t7-variant-selected');
+    for (var i = 0; i < selectedOptions.length; i++) {
+      selectedOptions[i].classList.remove('t7-variant-selected');
+      selectedOptions[i].style.outline = '';
+      selectedOptions[i].style.boxShadow = '';
+      selectedOptions[i].style.borderRadius = '';
+    }
+
+    option.classList.add('t7-variant-selected');
+    option.style.outline = '2px solid #ff6a00';
+    option.style.boxShadow = '0 0 0 4px rgba(255,106,0,.18)';
+    option.style.borderRadius = '8px';
+    _variacaoSelecionada = getVariationLabel(option);
+
+    var variantId = option.getAttribute('data-id') || option.getAttribute('data-variant-id') || '';
+    var hiddenVariant = document.getElementById('variant_selected');
+    if (hiddenVariant && variantId) hiddenVariant.value = variantId;
+  }
+
   function extrairVariacao() {
     var form = document.getElementById('form_comprar');
     if (!form) return;
@@ -237,8 +283,15 @@
 
     container.addEventListener('change', function (e) {
       if (e.target.tagName === 'SELECT') {
-        _variacaoSelecionada = e.target.value || '';
+        _variacaoSelecionada = getVariationLabel(e.target);
       }
+    });
+
+    container.addEventListener('click', function (e) {
+      var option = e.target.closest('[data-variant-value], .lista_cor_variacao li');
+      if (!option || !container.contains(option)) return;
+      e.preventDefault();
+      selectVariationOption(option);
     });
 
     // Marca a primeira opÃ§Ã£o selecionada se houver apenas uma
@@ -246,9 +299,12 @@
     for (var i = 0; i < selects.length; i++) {
       if (selects[i].options.length === 2) { // placeholder + 1 opÃ§Ã£o
         selects[i].value = selects[i].options[1].value;
-        _variacaoSelecionada = selects[i].value;
+        _variacaoSelecionada = getVariationLabel(selects[i]);
       }
     }
+
+    var options = container.querySelectorAll('[data-variant-value], .lista_cor_variacao li');
+    if (!_variacaoSelecionada && options.length === 1) selectVariationOption(options[0]);
   }
 
   function temVariacao() {
