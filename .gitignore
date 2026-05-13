@@ -2,6 +2,7 @@ node_modules/
 .env
 .env.*
 banco.env
+vercel.env
 .codex/
 npm-debug.log*
 
