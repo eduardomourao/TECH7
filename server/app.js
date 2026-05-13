@@ -56,7 +56,9 @@ export function createApp(options = {}) {
       }
     });
 
-    app.use(prefix || "/", async (_req, _res, next) => {
+    app.use(prefix || "/", async (req, _res, next) => {
+      const isAdminLogin = req.method === "POST" && req.path === "/admin/login";
+      if (isAdminLogin) return next();
       try {
         await ensureSchema();
         next();
