@@ -101,7 +101,7 @@ export function createApp(options = {}) {
 export function runStartupChecks() {
   // Startup checks (do not crash if not configured yet, so the user can iterate).
   try {
-    if (process.env.DATABASE_URL) requireEnv("DATABASE_URL");
+    if (databaseUrl) requireEnv(databaseEnvName || "DATABASE_URL");
     if (process.env.MP_ACCESS_TOKEN) requireEnv("MP_ACCESS_TOKEN");
   } catch (e) {
     // eslint-disable-next-line no-console

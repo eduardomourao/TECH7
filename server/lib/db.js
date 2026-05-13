@@ -22,6 +22,20 @@ export const databaseConfig = resolveDatabaseConfig();
 export const databaseUrl = databaseConfig.url;
 export const databaseEnvName = databaseConfig.name;
 
+function sanitizeConnectionString(url) {
+  if (!url) return "";
+  try {
+    const parsed = new URL(url);
+    // Let pg SSL be controlled by the explicit ssl object below.
+    parsed.searchParams.delete("sslmode");
+    parsed.searchParams.delete("supa");
+    parsed.searchParams.delete("pgbouncer");
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
 function shouldRejectUnauthorized(url) {
   if (process.env.PGSSL_REJECT_UNAUTHORIZED) {
     return process.env.PGSSL_REJECT_UNAUTHORIZED !== "false";
@@ -33,10 +47,12 @@ function shouldRejectUnauthorized(url) {
   return !/supabase\.com/i.test(String(url || ""));
 }
 
+const normalizedDatabaseUrl = sanitizeConnectionString(databaseUrl);
+
 export const pool = new Pool({
-  connectionString: databaseUrl || undefined,
-  ssl: databaseUrl
-    ? { rejectUnauthorized: shouldRejectUnauthorized(databaseUrl) }
+  connectionString: normalizedDatabaseUrl || undefined,
+  ssl: normalizedDatabaseUrl
+    ? { rejectUnauthorized: shouldRejectUnauthorized(normalizedDatabaseUrl) }
     : undefined,
   max: Number(process.env.PGPOOL_MAX || 10),
   idleTimeoutMillis: Number(process.env.PGPOOL_IDLE_MS || 30000),
