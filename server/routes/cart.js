@@ -80,4 +80,3 @@ router.put("/:id/items", async (req, res) => {
   const full = await getCart(cartId);
   res.json(full);
 });
-

@@ -156,9 +156,9 @@ a[href*="app-central"] {
    TECH 7 — Dark Product Cards (somente cards de produto)
    ======================================================== */
 
-/* Fundo branco na seção do carrossel de destaques */
+/* Fundo escuro na seção do carrossel de destaques */
 .t7-product-carousel-section {
-  background: #ffffff !important;
+  background: #0a0a0a !important;
 }
 .t7-carousel-heading {
   color: #0d0d0d !important;
@@ -259,354 +259,360 @@ a[href*="app-central"] {
 </style>
 <!-- T7-CARD-STYLES --><style>
 /* ========================================================
-   TECH 7 - Swiper 3D Premium Carousel
+   TECH 7 — Carrossel Premium (Inspirado em clone de alta qualidade)
    ======================================================== */
 .t7-product-carousel-section {
-  --t7-bg: #060606;
-  --t7-card-bg: #1a1a1a;
-  --t7-card-border: rgba(255, 255, 255, .1);
-  --t7-orange: #FF6A00;
-  --t7-text: #ffffff;
-  --t7-muted: rgba(255, 255, 255, .68);
+  --t7-gold: #FF6A00;
+  --t7-gold-soft: rgba(255, 106, 0, 0.2);
+  --t7-panel-edge: rgba(214, 163, 75, 0.32);
+  --t7-copy: rgba(255,255,255,.76);
   position: relative;
-  background: radial-gradient(circle at 50% 12%, rgba(255, 106, 0, .2), transparent 34%), linear-gradient(180deg, #090909 0%, var(--t7-bg) 58%, #0f0f0f 100%) !important;
-  padding: 52px 0 36px;
+  background:
+    radial-gradient(circle at top center, rgba(255, 138, 32, 0.08), transparent 34%),
+    linear-gradient(180deg, #131313 0%, #0a0a0a 100%) !important;
+  padding: 26px 0 34px;
   overflow: hidden;
-  isolation: isolate;
-}
-.t7-product-carousel-section::before,
-.t7-product-carousel-section::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-  z-index: 0;
 }
 .t7-product-carousel-section::before {
+  content: "";
+  position: absolute;
   inset: 0;
-  background: linear-gradient(115deg, transparent 0 38%, rgba(255, 106, 0, .08) 48%, transparent 58% 100%), radial-gradient(circle at 18% 70%, rgba(255, 106, 0, .14), transparent 34%);
-  opacity: .85;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.015) 0, rgba(255,255,255,0) 14%, rgba(255,255,255,0.015) 28%, rgba(255,255,255,0) 42%, rgba(255,255,255,0.012) 56%, rgba(255,255,255,0) 70%, rgba(255,255,255,0.01) 84%, rgba(255,255,255,0) 100%);
+  opacity: .7;
 }
-.t7-product-carousel-section::after {
-  left: 50%;
-  bottom: 14px;
-  width: min(760px, 86vw);
-  height: 96px;
-  transform: translateX(-50%);
-  background: radial-gradient(ellipse at center, rgba(255, 106, 0, .18), transparent 68%);
-  filter: blur(8px);
-}
-.t7-carousel-header,
-.t7-carousel-wrap {
+.t7-carousel-header {
+  text-align: center;
+  margin-bottom: 28px;
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
-.t7-carousel-header { text-align: center; }
 .t7-carousel-heading {
-  color: var(--t7-text) !important;
+  color: #fff !important;
   font-family: 'Space Grotesk', sans-serif !important;
-  font-size: clamp(28px, 3.2vw, 44px);
+  font-size: 31px;
+  font-weight: 700;
   line-height: 1.05;
-  letter-spacing: -.035em;
-  margin: 0;
+  margin: 0 0 10px;
+  letter-spacing: -.02em;
 }
 .t7-carousel-heading span {
-  color: var(--t7-orange);
-  text-shadow: 0 0 26px rgba(255, 106, 0, .42);
+  color: #d6a34b;
 }
 .t7-carousel-desc {
-  color: var(--t7-muted) !important;
-  max-width: 720px;
-  margin: 8px auto 0;
+  color: var(--t7-copy) !important;
   font-family: 'Inter', sans-serif !important;
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
 }
 .t7-carousel-wrap {
-  margin-top: 18px;
-  overflow: visible;
+  position: relative;
+  max-width: 1580px;
+  margin: 0 auto;
+  padding: 0 58px;
+  z-index: 1;
 }
 .t7-product-swiper {
-  width: 100%;
-  min-height: 380px;
-  padding: 14px 42px 34px;
-  overflow: visible !important;
-  perspective: 1400px;
-  transform: translate3d(0,0,0);
+  overflow: hidden !important;
+  padding: 10px 0 18px;
 }
 .t7-product-swiper .swiper-wrapper {
   align-items: stretch;
-  transform-style: preserve-3d;
-  will-change: transform;
 }
 .t7-product-swiper .swiper-slide {
   height: auto;
   display: flex;
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-  transition: opacity .42s ease, filter .42s ease;
-  will-change: transform, opacity, filter;
+  opacity: .7;
+  transform: scale(.965);
+  transition: transform .65s ease, opacity .65s ease, filter .65s ease;
+  filter: saturate(.88);
 }
-.t7-product-swiper .swiper-slide:not(.swiper-slide-active) {
-  opacity: .58;
-  filter: saturate(.76) brightness(.8);
-}
-.t7-product-swiper .swiper-slide-prev,
-.t7-product-swiper .swiper-slide-next {
-  opacity: .82;
-  filter: saturate(.92) brightness(.9);
+.t7-product-swiper .swiper-slide-active,
+.t7-product-swiper .swiper-slide-next,
+.t7-product-swiper .swiper-slide-prev {
+  opacity: 1;
+  transform: scale(1);
+  filter: none;
 }
 .t7-carousel-link {
   display: flex;
   width: 100%;
-  color: inherit;
   text-decoration: none !important;
-  transform-style: preserve-3d;
-  outline-offset: 6px;
+  color: inherit;
 }
 .t7-carousel-card {
-  --t7-rotate-x: 0deg;
-  --t7-rotate-y: 0deg;
-  --t7-shadow-x: 0px;
-  --t7-shadow-y: 28px;
-  --t7-glow: .18;
   position: relative;
+  isolation: isolate;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   width: 100%;
-  min-height: 340px;
-  border-radius: 14px;
-  border: 1px solid var(--t7-card-border);
-  background: linear-gradient(145deg, rgba(255,255,255,.055), transparent 34%), var(--t7-card-bg);
+  min-height: 238px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 173, 70, 0.06), transparent 32%),
+    linear-gradient(180deg, rgba(33, 33, 33, 0.96) 0%, rgba(17, 17, 17, 0.98) 100%);
+  border: 1px solid var(--t7-panel-edge);
+  border-radius: 18px;
+  padding: 20px 22px;
+  gap: 22px;
   overflow: hidden;
-  transform: translate3d(0,0,0) rotateX(var(--t7-rotate-x)) rotateY(var(--t7-rotate-y));
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-  box-shadow: var(--t7-shadow-x) var(--t7-shadow-y) 52px rgba(0, 0, 0, .56), 0 0 calc(32px + (var(--t7-glow) * 38px)) rgba(255, 106, 0, var(--t7-glow));
-  transition: transform .42s cubic-bezier(.2,.74,.22,1), border-color .32s ease, box-shadow .42s ease, filter .32s ease;
-  will-change: transform, box-shadow;
+  transition: transform .35s ease, border-color .35s ease, box-shadow .35s ease;
+  box-shadow:
+    0 0 26px rgba(255, 160, 58, 0.08),
+    0 22px 46px rgba(0,0,0,.38),
+    inset 0 0 0 1px rgba(255,255,255,.025);
 }
-.t7-carousel-card::before,
+.t7-carousel-card::before {
+  content: "";
+  position: absolute;
+  top: -34%;
+  left: -8%;
+  width: 52%;
+  height: 120%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 215, 145, 0.16) 0%, rgba(255, 170, 71, 0.08) 32%, rgba(255, 170, 71, 0) 74%);
+  opacity: .95;
+  pointer-events: none;
+}
 .t7-carousel-card::after {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: auto 22px -16px;
+  height: 54px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(255, 161, 59, 0.22) 0%, rgba(255, 161, 59, 0.08) 38%, rgba(255, 161, 59, 0) 76%);
+  filter: blur(14px);
+  opacity: .8;
   pointer-events: none;
-  border-radius: inherit;
 }
-.t7-carousel-card::before {
-  background: radial-gradient(circle at var(--t7-pointer-x, 50%) var(--t7-pointer-y, 20%), rgba(255, 106, 0, .38), transparent 26%), linear-gradient(120deg, transparent 22%, rgba(255,255,255,.18) 48%, transparent 72%);
-  mix-blend-mode: screen;
-  opacity: calc(.18 + (var(--t7-glow) * .78));
-  transform: translateZ(38px);
-  transition: opacity .32s ease;
+.t7-carousel-card > * {
+  position: relative;
+  z-index: 1;
 }
-.t7-carousel-card::after {
-  border: 1px solid rgba(255, 106, 0, calc(.14 + (var(--t7-glow) * .45)));
-  box-shadow: inset 0 0 28px rgba(255, 106, 0, calc(.08 + (var(--t7-glow) * .18)));
+.t7-product-swiper .swiper-slide-active .t7-carousel-card,
+.t7-product-swiper .swiper-slide-next .t7-carousel-card,
+.t7-product-swiper .swiper-slide-prev .t7-carousel-card {
+  box-shadow:
+    0 0 34px rgba(255, 160, 58, 0.12),
+    0 22px 46px rgba(0,0,0,.38),
+    inset 0 0 0 1px rgba(255,255,255,.025);
 }
-.t7-product-swiper .swiper-slide-active .t7-carousel-card {
-  --t7-glow: .34;
-  border-color: rgba(255, 106, 0, .72);
-  transform: translate3d(0, -6px, 72px) rotateX(var(--t7-rotate-x)) rotateY(var(--t7-rotate-y));
-}
-.t7-product-swiper .swiper-slide-active .t7-carousel-card:hover {
-  --t7-glow: .55;
-  border-color: rgba(255, 106, 0, .95);
+.t7-carousel-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 186, 92, 0.54);
+  box-shadow:
+    0 0 42px rgba(255, 160, 58, 0.16),
+    0 24px 54px rgba(0,0,0,.46),
+    0 0 24px rgba(255, 160, 58, 0.12);
 }
 .t7-carousel-img-wrap {
-  position: relative;
-  height: 198px;
-  padding: 18px;
+  width: 158px;
+  min-width: 158px;
+  min-height: 170px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: visible;
-  transform: translateZ(46px);
-  transform-style: preserve-3d;
-}
-.t7-carousel-img-wrap::before {
-  content: "";
-  position: absolute;
-  width: 76%;
-  height: 76%;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(255, 106, 0, .24), transparent 68%);
-  filter: blur(14px);
-  transform: translateZ(-34px);
-}
-.t7-carousel-img-wrap::after {
-  content: "";
-  position: absolute;
-  left: 20%;
-  right: 20%;
-  bottom: 10px;
-  height: 26px;
-  border-radius: 999px;
-  background: radial-gradient(ellipse at center, rgba(0,0,0,.78), transparent 70%);
-  filter: blur(8px);
-  transform: translateZ(-46px) rotateX(68deg);
-  opacity: .72;
+  background:
+    radial-gradient(circle at 50% 14%, rgba(255,255,255,.92), rgba(246,246,246,.98) 56%, rgba(232,232,232,.98) 100%);
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.68);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.82),
+    0 18px 28px rgba(0,0,0,.18);
 }
 .t7-carousel-img {
-  position: relative;
-  z-index: 2;
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 92%;
+  max-height: 92%;
   object-fit: contain;
   display: block;
-  transform: translate3d(0,0,74px) scale(1.02);
-  filter: drop-shadow(0 24px 34px rgba(0,0,0,.58));
-  transition: transform .46s cubic-bezier(.2,.74,.22,1), filter .36s ease;
-  will-change: transform;
+  padding: 10px;
+  transform: translateZ(0);
+  transition: transform .8s ease;
 }
-.t7-product-swiper .swiper-slide-active .t7-carousel-img { animation: t7DisplayFloat 4.8s ease-in-out infinite; }
+.t7-carousel-card:hover .t7-carousel-img {
+  transform: scale(1.045);
+}
 .t7-carousel-info {
-  position: relative;
-  z-index: 2;
   flex: 1;
-  padding: 14px 16px 18px;
-  color: var(--t7-text);
-  transform: translateZ(34px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2px 0;
+  min-width: 0;
 }
 .t7-carousel-badge {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
-  padding: 5px 9px;
+  justify-content: center;
+  padding: 6px 15px;
   border-radius: 999px;
-  background: rgba(255, 106, 0, .13);
-  border: 1px solid rgba(255, 106, 0, .34);
-  color: #ffb46e;
+  border: 1px solid rgba(214, 163, 75, 0.4);
+  color: #dcb563;
+  background: rgba(255, 173, 70, 0.05);
   font-family: 'Inter', sans-serif !important;
   font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .08em;
+  font-weight: 700;
+  letter-spacing: .12em;
   text-transform: uppercase;
+  margin-bottom: 16px;
+  width: fit-content;
 }
 .t7-carousel-title {
-  color: var(--t7-text);
+  color: #fff;
   font-family: 'Space Grotesk', sans-serif !important;
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 700;
-  line-height: 1.12;
-  margin-top: 10px;
-  text-shadow: 0 0 18px rgba(255, 106, 0, .18);
+  line-height: 1.16;
+  margin: 0 0 6px;
 }
 .t7-carousel-sub {
-  color: var(--t7-muted);
+  color: rgba(255,255,255,.72);
   font-family: 'Inter', sans-serif !important;
   font-size: 13px;
-  margin-top: 7px;
+  line-height: 1.38;
+  margin: 0 0 12px;
+}
+.t7-carousel-quality-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #f0c46f;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.t7-carousel-quality-badge svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  flex-shrink: 0;
 }
 .t7-carousel-price {
-  color: var(--t7-orange);
+  color: #d8a44d;
   font-family: 'Space Grotesk', sans-serif !important;
-  font-size: 20px;
-  font-weight: 800;
-  margin-top: 14px;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 18px;
 }
 .t7-carousel-cta {
   display: inline-flex;
   align-items: center;
-  margin-top: 12px;
-  color: #fff;
-  font-family: 'Inter', sans-serif !important;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: .07em;
-  text-transform: uppercase;
-  transition: color .25s ease, transform .25s ease, text-shadow .25s ease;
-}
-.t7-carousel-card:hover .t7-carousel-cta,
-.t7-product-swiper .swiper-slide-active .t7-carousel-cta {
-  color: var(--t7-orange);
-  text-shadow: 0 0 18px rgba(255, 106, 0, .45);
-  transform: translateX(3px);
-}
-.t7-product-swiper .swiper-button-prev,
-.t7-product-swiper .swiper-button-next {
-  width: 44px;
-  height: 44px;
-  margin-top: -22px;
+  justify-content: space-between;
+  gap: 18px;
+  min-width: 220px;
+  padding: 12px 20px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.22);
-  background: rgba(26,26,26,.72);
-  color: var(--t7-orange);
-  transform: translate3d(0,0,60px);
-  transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease, background .28s ease;
+  border: 1px solid rgba(214, 163, 75, 0.55);
+  color: #f6e1b1;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color .25s ease, color .25s ease;
+  width: fit-content;
+  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+  cursor: pointer;
 }
-.t7-product-swiper .swiper-button-prev:hover,
-.t7-product-swiper .swiper-button-next:hover {
-  border-color: rgba(255, 106, 0, .78);
-  background: rgba(255, 106, 0, .14);
-  box-shadow: 0 0 30px rgba(255, 106, 0, .28);
-  transform: translate3d(0,-2px,70px);
+.t7-carousel-cta:hover,
+.t7-carousel-card:hover .t7-carousel-cta {
+  border-color: #f0c46f;
+  color: #fff;
 }
-.t7-product-swiper .swiper-button-prev::after,
-.t7-product-swiper .swiper-button-next::after {
-  font-size: 18px;
-  font-weight: 900;
+.t7-carousel-cta svg {
+  width: 16px;
+  height: 16px;
+  fill: #dcb563;
+  transition: fill .25s ease;
 }
-.t7-swiper-pagination { bottom: 10px !important; }
+.t7-carousel-cta:hover svg,
+.t7-carousel-card:hover .t7-carousel-cta svg {
+  fill: #fff;
+}
+.t7-swiper-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgba(214, 163, 75, 0.45);
+  background: rgba(8, 8, 8, 0.92);
+  color: #e1b04d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform .25s ease, border-color .25s ease, color .25s ease, box-shadow .25s ease, background .25s ease;
+  font-size: 26px;
+  user-select: none;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03),
+    0 10px 22px rgba(0,0,0,.35);
+}
+.t7-swiper-nav:hover {
+  transform: translateY(-50%) scale(1.06);
+  border-color: rgba(240, 196, 111, 0.8);
+  color: #fff;
+  background: rgba(18, 18, 18, 0.98);
+  box-shadow:
+    0 0 20px rgba(255, 160, 58, 0.14),
+    0 14px 28px rgba(0,0,0,.4);
+}
+.t7-swiper-prev { left: -18px; }
+.t7-swiper-next { right: -18px; }
+.t7-swiper-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+}
 .t7-swiper-pagination .swiper-pagination-bullet {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
   background: rgba(255,255,255,.42);
   opacity: 1;
-  transition: width .25s ease, background .25s ease, box-shadow .25s ease;
+  cursor: pointer;
+  transition: transform .25s ease, background .25s ease;
+  border: none;
+  padding: 0;
 }
 .t7-swiper-pagination .swiper-pagination-bullet-active {
-  width: 26px;
-  border-radius: 999px;
-  background: var(--t7-orange);
-  box-shadow: 0 0 18px rgba(255,106,0,.55);
-}
-.t7-product-swiper.t7-swiper-fallback { overflow: hidden !important; padding-inline: 18px; }
-.t7-product-swiper.t7-swiper-fallback .swiper-wrapper {
-  display: flex;
-  gap: 18px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 12px;
-}
-.t7-product-swiper.t7-swiper-fallback .swiper-slide {
-  flex: 0 0 min(320px, 82vw);
-  scroll-snap-align: center;
-}
-@keyframes t7DisplayFloat {
-  0% { transform: translate3d(0,0,74px) scale(1.02) rotateX(0deg); }
-  50% { transform: translate3d(0,-9px,96px) scale(1.045) rotateX(1.4deg); }
-  100% { transform: translate3d(0,0,74px) scale(1.02) rotateX(0deg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .t7-product-swiper .swiper-slide,
-  .t7-carousel-card,
-  .t7-carousel-img,
-  .t7-carousel-cta,
-  .t7-product-swiper .swiper-button-prev,
-  .t7-product-swiper .swiper-button-next,
-  .t7-swiper-pagination .swiper-pagination-bullet {
-    transition: none !important;
-    animation: none !important;
-  }
+  background: var(--t7-gold);
+  transform: scale(1.16);
 }
 @media (max-width: 1024px) {
-  .t7-product-carousel-section { padding: 40px 0 30px; }
-  .t7-carousel-wrap { margin-top: 16px; }
-  .t7-product-swiper { min-height: 336px; padding-inline: 24px; padding-bottom: 30px; perspective: 1000px; }
-  .t7-carousel-card { min-height: 296px; }
-  .t7-carousel-img-wrap { height: 160px; }
+  .t7-carousel-wrap { padding: 0 44px; }
+  .t7-carousel-card { min-height: 220px; padding: 18px; gap: 18px; }
+  .t7-carousel-img-wrap { width: 132px; min-width: 132px; min-height: 154px; }
+  .t7-carousel-title { font-size: 18px; }
+  .t7-carousel-cta { min-width: 200px; }
 }
 @media (max-width: 767px) {
-  .t7-product-carousel-section { padding: 32px 0 24px; }
-  .t7-carousel-wrap { margin-top: 12px; }
-  .t7-product-swiper { min-height: 284px; padding: 8px 10px 28px; perspective: 760px; }
-  .t7-product-swiper .swiper-slide:not(.swiper-slide-active) { opacity: .68; filter: saturate(.82) brightness(.82); }
-  .t7-carousel-card { min-height: 252px; transform: translate3d(0,0,0) !important; }
-  .t7-product-swiper .swiper-slide-active .t7-carousel-card { transform: translate3d(0,-3px,28px) !important; }
-  .t7-carousel-img-wrap { height: 126px; padding: 10px; }
-  .t7-carousel-title { font-size: 17px; }
+  .t7-product-carousel-section { padding: 26px 0 22px; }
+  .t7-carousel-heading { font-size: 24px; }
+  .t7-carousel-desc { font-size: 13px; }
+  .t7-carousel-wrap { padding: 0 14px; }
+  .t7-swiper-nav { display: none; }
+  .t7-carousel-card { min-height: 0; padding: 16px; gap: 14px; }
+  .t7-carousel-img-wrap { width: 106px; min-width: 106px; min-height: 126px; border-radius: 14px; }
+  .t7-carousel-title { font-size: 15px; }
+  .t7-carousel-sub,
+  .t7-carousel-quality-badge { font-size: 12px; }
   .t7-carousel-price { font-size: 18px; }
-  .t7-product-swiper .swiper-button-prev,
-  .t7-product-swiper .swiper-button-next { display: none; }
+  .t7-carousel-cta { min-width: 0; width: 100%; }
+}
+@media (max-width: 480px) {
+  .t7-carousel-card { gap: 12px; }
+  .t7-carousel-img-wrap { width: 88px; min-width: 88px; min-height: 108px; padding: 6px; }
+  .t7-carousel-info { padding: 4px 0; }
+  .t7-carousel-badge { margin-bottom: 12px; }
+  .t7-carousel-title { font-size: 14px; }
 }
 .product.nb,
 .product.nb.show-down,
@@ -685,14 +691,97 @@ a[href*="app-central"] {
   margin-bottom: 20px;
 }
 .header .logo img {
-  width: 270px !important;
-  max-width: 270px !important;
+  width: clamp(160px, 18vw, 270px) !important;
+  max-width: 100% !important;
   height: auto !important;
+  max-height: 72px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+.header .logo {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  text-decoration: none !important;
+  min-width: 0;
+  padding: 4px 0;
+}
+.header .logo .title-store {
+  color: #ffffff !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.wrapper.menu-icons,
+.wrapper.menu-icons.position-header {
+  position: relative !important;
+  top: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+.wrapper.menu-icons > .header,
+.header {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  z-index: 20 !important;
+  margin: 0 !important;
+}
+.header .bg {
+  padding: 12px 0 10px !important;
+}
+.header .line.container {
+  min-height: 92px !important;
+  gap: 16px !important;
+}
+.header .logo {
+  padding: 0 !important;
+}
+.header .logo img {
+  max-height: 62px !important;
+}
+.header .search-header {
+  max-width: 800px !important;
+  margin: 0 auto !important;
+}
+.header .search-header .input-search {
+  min-height: 48px !important;
+}
+.header .account,
+.header .cart-header .area {
+  min-height: 46px !important;
+}
+.header .nav {
+  position: relative !important;
+  top: auto !important;
+  margin-top: 0 !important;
+}
+.t7-product-carousel-section {
+  clear: both;
 }
 @media (max-width: 767px) {
+  .header .bg {
+    padding: 8px 0 6px !important;
+  }
+  .header .line.container {
+    min-height: 74px !important;
+    gap: 8px !important;
+  }
   .header .logo img {
-    width: 205px !important;
-    max-width: 205px !important;
+    width: clamp(132px, 42vw, 205px) !important;
+    max-height: 50px !important;
+  }
+  .header .search-header .input-search {
+    min-height: 40px !important;
   }
 }
 </style><!-- /T7-CARD-STYLES -->
@@ -844,14 +933,7 @@ a[href*="app-central"] {
                             OUTROS
                                                     </a></li><li><a class="" href="tampas-e-carcacas/realme/index.html">
                             REALME
-                                                    </a></li></ul></li></ul></div><div class="contact"><div class="box-contact flex align-center"><svg class="icon" viewbox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M26.948 12.168v-1.23a11.239 11.239 0 0 0-2.931-7.711A10.11 10.11 0 0 0 16.514 0H15.5A10.11 10.11 0 0 0 8 3.227a11.239 11.239 0 0 0-2.931 7.711v1.23a4.415 4.415 0 0 0-4.114 4.4v1.923a4.41 4.41 0 0 0 4.4 4.4h2.48a.809.809 0 0 0 .807-.807v-9.123a.809.809 0 0 0-.807-.807H6.679v-1.216c0-5.318 3.792-9.324 8.813-9.324h1.015c5.029 0 8.813 4.007 8.813 9.324v1.217h-1.155a.809.809 0 0 0-.807.807v9.116a.809.809 0 0 0 .807.807h1.129c-.329 4.208-3.227 5.183-4.571 5.405a2.837 2.837 0 0 0-2.7-1.956H16.01a2.834 2.834 0 0 0 0 5.667h2.024a2.837 2.837 0 0 0 2.729-2.084 7.631 7.631 0 0 0 2.736-.934 7.121 7.121 0 0 0 3.415-6.1 4.408 4.408 0 0 0 4.134-4.4v-1.925a4.392 4.392 0 0 0-4.1-4.39zm-19.906 9.1H5.368a2.792 2.792 0 0 1-2.79-2.79v-1.92a2.792 2.792 0 0 1 2.79-2.79h1.674zm10.992 9.116H16.01a1.217 1.217 0 0 1 0-2.434h2.024a1.217 1.217 0 0 1 0 2.434zm11.408-11.903a2.792 2.792 0 0 1-2.79 2.79h-1.674v-7.5h1.674a2.792 2.792 0 0 1 2.79 2.79z"></path></svg><div><div class="title">Precisa de ajuda?</div><div class="option"><div class="value">Atendimento por Telefone</div><a class="content" href="https://wa.me/5531973548107">(31) 97354-8107 Whatsapp</a></div></div></div><div class="rastreio"><div class="title">Rastrear pedido</div><form action="https://www2.correios.com.br/sistemas/rastreamento/ctrl/ctrlRastreamento.cfm?" method="post" target="_blank"><input name="track" type="hidden" value="track"/><input autocomplete="off" name="objetos" placeholder="Digite seu código aqui" type="text"/><button class="botao-commerce">Rastrear</button></form></div></div></div><div class="shadow-cart"></div><div class="wrapper menu-icons position-header"><div class="bar-top"><div class="container flex justify-between"><span class="item" href=""><span data-logged-user="false">Olá, seja bem-vindo(a)!</span></span><a class="item" href="https://wa.me/5531973548107"><svg height="16" viewbox="0 0 480.56 480.56" width="16" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M365.354,317.9c-15.7-15.5-35.3-15.5-50.9,0c-11.9,11.8-23.8,23.6-35.5,35.6c-3.2,3.3-5.9,4-9.8,1.8
-                    c-7.7-4.2-15.9-7.6-23.3-12.2c-34.5-21.7-63.4-49.6-89-81c-12.7-15.6-24-32.3-31.9-51.1c-1.6-3.8-1.3-6.3,1.8-9.4
-                    c11.9-11.5,23.5-23.3,35.2-35.1c16.3-16.4,16.3-35.6-0.1-52.1c-9.3-9.4-18.6-18.6-27.9-28c-9.6-9.6-19.1-19.3-28.8-28.8
-                    c-15.7-15.3-35.3-15.3-50.9,0.1c-12,11.8-23.5,23.9-35.7,35.5c-11.3,10.7-17,23.8-18.2,39.1c-1.9,24.9,4.2,48.4,12.8,71.3
-                    c17.6,47.4,44.4,89.5,76.9,128.1c43.9,52.2,96.3,93.5,157.6,123.3c27.6,13.4,56.2,23.7,87.3,25.4c21.4,1.2,40-4.2,54.9-20.9
-                    c10.2-11.4,21.7-21.8,32.5-32.7c16-16.2,16.1-35.8,0.2-51.8C403.554,355.9,384.454,336.9,365.354,317.9z"></path><path d="M346.254,238.2l36.9-6.3c-5.8-33.9-21.8-64.6-46.1-89c-25.7-25.7-58.2-41.9-94-46.9l-5.2,37.1
-                    c27.7,3.9,52.9,16.4,72.8,36.3C329.454,188.2,341.754,212,346.254,238.2z"></path><path d="M403.954,77.8c-42.6-42.6-96.5-69.5-156-77.8l-5.2,37.1c51.4,7.2,98,30.5,134.8,67.2c34.9,34.9,57.8,79,66.1,127.5
-                    l36.9-6.3C470.854,169.3,444.354,118.3,403.954,77.8z"></path></svg><span class="text ic-contact">Atendimento ao cliente: (31) 97354-8107 Whatsapp</span></a><div class="item pointer"><svg height="16" viewbox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 1.481)"><path d="M15.824 2.4a.57.57 0 0 0-.417-.176H5.926a.6.6 0 0 0-.593.593v1.775H3.852a1.428 1.428 0 0 0-.542.12 1.416 1.416 0 0 0-.468.3l-1.833 1.83A1.261 1.261 0 0 0 .8 7.12a1.686 1.686 0 0 0-.13.282 1.536 1.536 0 0 0-.06.343q-.018.218-.023.32t0 .352V11.7a.569.569 0 0 0-.417.176.569.569 0 0 0-.17.424.745.745 0 0 0 .037.245.351.351 0 0 0 .125.171q.075.056.153.107a.511.511 0 0 0 .218.055l.208.019h1.037a2.284 2.284 0 0 0 .694 1.676 2.284 2.284 0 0 0 1.676.694 2.284 2.284 0 0 0 1.676-.694 2.284 2.284 0 0 0 .694-1.676h3.556a2.37 2.37 0 0 0 4.046 1.676 2.284 2.284 0 0 0 .694-1.676H15.258l.208-.019a.51.51 0 0 0 .218-.055q.065-.042.153-.107a.35.35 0 0 0 .125-.171A.738.738 0 0 0 16 12.3V2.815a.57.57 0 0 0-.176-.415zM4.981 13.722a1.162 1.162 0 0 1-1.667 0 1.185 1.185 0 0 1 .834-2.022 1.179 1.179 0 0 1 .833 2.019zm.352-5.574H1.778V7.87a.277.277 0 0 1 .083-.2l1.806-1.809a.277.277 0 0 1 .2-.083h1.466zm7.944 5.574a1.163 1.163 0 1 1 .352-.833 1.139 1.139 0 0 1-.351.833z" transform="translate(0 -2.222)"></path></g></svg><a class="text" href="https://www2.correios.com.br/sistemas/rastreamento/ctrl/ctrlRastreamento.cfm?" target="_blank" rel="noopener noreferrer">Rastrear minha compra</a><div class="modal-white not-width"><div class="line-options flex"><div class="box-contact"><svg class="icon" viewbox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M26.948 12.168v-1.23a11.239 11.239 0 0 0-2.931-7.711A10.11 10.11 0 0 0 16.514 0H15.5A10.11 10.11 0 0 0 8 3.227a11.239 11.239 0 0 0-2.931 7.711v1.23a4.415 4.415 0 0 0-4.114 4.4v1.923a4.41 4.41 0 0 0 4.4 4.4h2.48a.809.809 0 0 0 .807-.807v-9.123a.809.809 0 0 0-.807-.807H6.679v-1.216c0-5.318 3.792-9.324 8.813-9.324h1.015c5.029 0 8.813 4.007 8.813 9.324v1.217h-1.155a.809.809 0 0 0-.807.807v9.116a.809.809 0 0 0 .807.807h1.129c-.329 4.208-3.227 5.183-4.571 5.405a2.837 2.837 0 0 0-2.7-1.956H16.01a2.834 2.834 0 0 0 0 5.667h2.024a2.837 2.837 0 0 0 2.729-2.084 7.631 7.631 0 0 0 2.736-.934 7.121 7.121 0 0 0 3.415-6.1 4.408 4.408 0 0 0 4.134-4.4v-1.925a4.392 4.392 0 0 0-4.1-4.39zm-19.906 9.1H5.368a2.792 2.792 0 0 1-2.79-2.79v-1.92a2.792 2.792 0 0 1 2.79-2.79h1.674zm10.992 9.116H16.01a1.217 1.217 0 0 1 0-2.434h2.024a1.217 1.217 0 0 1 0 2.434zm11.408-11.903a2.792 2.792 0 0 1-2.79 2.79h-1.674v-7.5h1.674a2.792 2.792 0 0 1 2.79 2.79z"></path></svg><div class="title">Precisa de ajuda?</div><div class="option"><div class="value">Atendimento por Telefone</div><a class="content" href="https://wa.me/5531973548107">(31) 97354-8107 Whatsapp</a></div></div><div class="rastreio"><div class="title">Rastrear pedido</div><form action="https://www2.correios.com.br/sistemas/rastreamento/ctrl/ctrlRastreamento.cfm?" method="post" target="_blank"><input name="track" type="hidden" value="track"/><input autocomplete="off" name="objetos" placeholder="Digite seu código aqui" type="text"/><button class="botao-commerce">Rastrear</button></form></div></div></div></div><div class="item"><div class="social flex"><a href="https://www.facebook.com/tech7" rel="noreferrer noopener" target="_blank" title="Facebook"><span class="dot"><svg class="icon" viewbox="0 0 96.124 96.123" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M72.089,0.02L59.624,0C45.62,0,36.57,9.285,36.57,23.656v10.907H24.037c-1.083,0-1.96,0.878-1.96,1.961v15.803   c0,1.083,0.878,1.96,1.96,1.96h12.533v39.876c0,1.083,0.877,1.96,1.96,1.96h16.352c1.083,0,1.96-0.878,1.96-1.96V54.287h14.654   c1.083,0,1.96-0.877,1.96-1.96l0.006-15.803c0-0.52-0.207-1.018-0.574-1.386c-0.367-0.368-0.867-0.575-1.387-0.575H56.842v-9.246   c0-4.444,1.059-6.7,6.848-6.7l8.397-0.003c1.082,0,1.959-0.878,1.959-1.96V1.98C74.046,0.899,73.17,0.022,72.089,0.02z"></path></svg></span></a><a href="https://www.instagram.com/tech7/" rel="noreferrer noopener" target="_blank" title="Instagram"><span class="dot"><svg class="icon" viewbox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M13.656 0H2.344A2.347 2.347 0 0 0 0 2.344v11.312A2.347 2.347 0 0 0 2.344 16h11.312A2.347 2.347 0 0 0 16 13.656V2.344A2.347 2.347 0 0 0 13.656 0zM8.031 12.188a4.219 4.219 0 1 1 4.219-4.219 4.223 4.223 0 0 1-4.219 4.219zm4.688-7.5a1.406 1.406 0 1 1 1.406-1.406 1.408 1.408 0 0 1-1.406 1.406zm0 0"></path><path d="M12.719 2.813a.469.469 0 1 0 .469.469.469.469 0 0 0-.469-.469zm0 0"></path><path d="M7.066 4.688A2.316 2.316 0 1 0 9.382 7a2.319 2.319 0 0 0-2.316-2.312zm0 0" transform="translate(.955 1)"></path></svg></span></a></div></div></div></div><header class="header"><div class="bg bg-mob"><div class="line flex align-center justify-between container"><div class="menu"><div></div><div></div><div></div></div><div class="space"></div><a class="logo" href="index.html"><img alt="TECH 7" src="logo.png"/><div class="title-store">TECH 7</div></a><form action="/loja/busca.php?loja=996644" class="search-header" data-search="suggestion" method="get"><input name="loja" type="hidden" value="996644"/><input autocomplete="off" autocorrect="off" class="input-search" data-input="suggestion" name="palavra_busca" placeholder="O que você procura?" spellcheck="false" type="text"/><button class="button-search" title="Botão de Busca"><svg class="icon" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M23.277 20.457l-5.184-5.184c-.028-.028-.06-.047-.089-.072A9.813 9.813 0 1 0 15.2 18c.026.029.045.061.072.089l5.184 5.184a1.994 1.994 0 1 0 2.82-2.82zM9.81 16.219a6.409 6.409 0 1 1 6.409-6.409 6.409 6.409 0 0 1-6.409 6.409z"></path></svg></button></form><div class="space"></div><div class="account"><svg class="icon-user" viewbox="0 0 15.32 15.32" xmlns="http://www.w3.org/2000/svg"><path d="M10.341 9.447a5.04 5.04 0 0 0 2.426-4.341 5.107 5.107 0 1 0-10.213 0 5.04 5.04 0 0 0 2.425 4.341A7.894 7.894 0 0 0 0 15.32h1.277a6.543 6.543 0 0 1 12.767 0h1.276a7.688 7.688 0 0 0-4.979-5.873zM3.83 5.107a3.83 3.83 0 1 1 3.83 3.83 3.841 3.841 0 0 1-3.83-3.83z"></path></svg><span>Minha conta</span><div class="modal-white tray-hide" data-logged-user="false"><a class="link-modal botao-commerce" href="/my-account/login">Entrar</a><span class="step"><span class="bg">ou</span></span><a class="register" href="/cadastro">Cliente novo? Cadastre-se</a></div><div class="modal-white tray-hide" data-logged-user="true"><a class="link-modal botao-commerce" href="/central-do-cliente">Minha conta</a><span class="step"><span class="bg">ou</span></span><a class="register" href="/loja/logout.php?loja=996644">Sair</a></div></div><div class="cart-header"><div class="area"><svg class="icon" viewbox="0 0 30.476 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(-1256 -49)"><g transform="translate(1258.432 49)"><path d="M29.8 27.661L27.966 7.028a.882.882 0 0 0-.877-.8h-3.77a6.322 6.322 0 0 0-12.643 0H6.907a.877.877 0 0 0-.877.8L4.2 27.661c0 .026-.007.052-.007.079A4.56 4.56 0 0 0 8.995 32H25a4.56 4.56 0 0 0 4.8-4.26.319.319 0 0 0-.007-.079zM17 1.767a4.559 4.559 0 0 1 4.555 4.456h-9.112A4.559 4.559 0 0 1 17 1.767zm8 28.466H8.995a2.819 2.819 0 0 1-3.036-2.454L7.712 8h2.958v2.68a.883.883 0 1 0 1.767 0V8h9.116v2.68a.883.883 0 1 0 1.767 0V8h2.958l1.76 19.782A2.824 2.824 0 0 1 25 30.233z" transform="translate(-4.191)"></path></g></g></svg><span class="number" data-cart="amount"></span></div><div class="cart-sidebar flex flex-column"><div class="header-cart">Meu carrinho</div><div class="content-cart flex-grow flex flex-column justify-between empty"><div class="list"><div class="error"><div class="text">Carrinho Vazio</div></div></div></div><div class="footer-cart"><div class="text-info flex align-center justify-end"><div class="total"><span>Total (valor sem frete):</span><span class="value"></span></div></div><div class="line justify-end"><a class="botao-commerce" href="/loja/redirect_cart_service.php?loja=996644" rel="nofollow">Fechar pedido</a></div></div></div><div class="shadow-cart-header"></div></div></div></div><nav class="nav"><div class="container"><ul class="list flex grow"><li class="relative" data-id="1" data-level="0"><a class="icon-show sub vertical-icon" href="baterias-celular/index.html"><img alt="BATERIAS" class="icon" src="_assets/images.tcdn.com.br/img/img_prod/996644/categoria_img_1_20220331152230.png"/><div class="name">BATERIAS</div></a><div class="sub-line-category flex product-sub"><div class="header-sub">BATERIAS</div><div class="over flex"><ul class="list-line-sub"><li><a class="second-nivel" href="baterias/apple/index.html">APPLE</a></li><li><a class="second-nivel" href="baterias/samsung/index.html">SAMSUNG</a></li><li><a class="second-nivel" href="baterias/xiaomi-redmi/index.html">XIAOMI REDMI</a></li><li><a class="second-nivel" href="baterias/motorola/index.html">MOTOROLA</a></li><li><a class="second-nivel" href="baterias/zenfone/index.html">ZENFONE</a></li><li><a class="second-nivel" href="baterias/lenovo/index.html">LENOVO</a></li><li><a class="second-nivel" href="baterias/lg/index.html">LG</a></li><li><a class="second-nivel" href="baterias/nokia/index.html">NOKIA</a></li><li><a class="second-nivel" href="baterias/alcatel/index.html">ALCATEL</a></li><li><a class="second-nivel" href="baterias/blu/index.html">BLU</a></li><li><a class="second-nivel" href="baterias/cce/index.html">CCE</a></li><li><a class="second-nivel" href="baterias/multilaser/index.html">MULTILASER</a></li><li><a class="second-nivel" href="baterias/positivo/index.html">POSITIVO</a></li><li><a class="second-nivel" href="baterias/sony-experia/index.html">SONY EXPERIA</a></li><li><a class="second-nivel" href="baterias/zz-outras/index.html">OUTRAS</a></li><li><a class="second-nivel" href="baterias-celular/infinix/index.html">INFINIX</a></li><li><a class="second-nivel" href="baterias-celular/realme/index.html">REALME</a></li></ul><div class="col-product"><div class="product nb show-down"><div class="image"><a class="space-image second" href="baterias/samsung/tela-display-lcd-samsung-m54-m546-original-retirada/index.html"><img alt="Tela Display Lcd Samsung M54 M546 Original Retirada" class="lazyload transform" data-src="_assets/images.tcdn.com.br/img/img_prod/996644/180_tela_display_lcd_samsung_m54_m546_original_retirada_7247_1_cf-e05e1376.jpg"/><img alt="Tela Display Lcd Samsung M54 M546 Original Retirada" class="second-image transform" data-src="_assets/images.tcdn.com.br/img/img_prod/996644/180_tela_display_lcd_samsung_m54_m546_original_retirada_7247_2_6c-00b69ec9.jpg"/><div class="seals"><div class="seal featured">DESTAQUE</div><div class="seal new">LANÇAMENTO</div></div></a></div><a class="info-product" href="baterias/samsung/tela-display-lcd-samsung-m54-m546-original-retirada/index.html"><div class="product-name">Tela Display Lcd Samsung M54 M546 Original Retirada</div><div class="down-line"><div class="list-star flex justify-center"><div class="icon"></div><div class="icon"></div><div class="icon"></div><div class="icon"></div><div class="icon"></div></div><div class="box-price"><div class="price"><div class="product-price"><span class="price-off">
+                                                    </a></li></ul></li></ul></div><div class="contact"><div class="box-contact flex align-center"><svg class="icon" viewbox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M26.948 12.168v-1.23a11.239 11.239 0 0 0-2.931-7.711A10.11 10.11 0 0 0 16.514 0H15.5A10.11 10.11 0 0 0 8 3.227a11.239 11.239 0 0 0-2.931 7.711v1.23a4.415 4.415 0 0 0-4.114 4.4v1.923a4.41 4.41 0 0 0 4.4 4.4h2.48a.809.809 0 0 0 .807-.807v-9.123a.809.809 0 0 0-.807-.807H6.679v-1.216c0-5.318 3.792-9.324 8.813-9.324h1.015c5.029 0 8.813 4.007 8.813 9.324v1.217h-1.155a.809.809 0 0 0-.807.807v9.116a.809.809 0 0 0 .807.807h1.129c-.329 4.208-3.227 5.183-4.571 5.405a2.837 2.837 0 0 0-2.7-1.956H16.01a2.834 2.834 0 0 0 0 5.667h2.024a2.837 2.837 0 0 0 2.729-2.084 7.631 7.631 0 0 0 2.736-.934 7.121 7.121 0 0 0 3.415-6.1 4.408 4.408 0 0 0 4.134-4.4v-1.925a4.392 4.392 0 0 0-4.1-4.39zm-19.906 9.1H5.368a2.792 2.792 0 0 1-2.79-2.79v-1.92a2.792 2.792 0 0 1 2.79-2.79h1.674zm10.992 9.116H16.01a1.217 1.217 0 0 1 0-2.434h2.024a1.217 1.217 0 0 1 0 2.434zm11.408-11.903a2.792 2.792 0 0 1-2.79 2.79h-1.674v-7.5h1.674a2.792 2.792 0 0 1 2.79 2.79z"></path></svg><div><div class="title">Precisa de ajuda?</div><div class="option"><div class="value">Atendimento por Telefone</div><a class="content" href="https://wa.me/5531973548107">(31) 97354-8107 Whatsapp</a></div></div></div><div class="rastreio"><div class="title">Rastrear pedido</div><form action="https://www2.correios.com.br/sistemas/rastreamento/ctrl/ctrlRastreamento.cfm?" method="post" target="_blank"><input name="track" type="hidden" value="track"/><input autocomplete="off" name="objetos" placeholder="Digite seu código aqui" type="text"/><button class="botao-commerce">Rastrear</button></form></div></div></div><div class="shadow-cart"></div><div class="wrapper menu-icons"><header class="header"><div class="bg bg-mob"><div class="line flex align-center justify-between container"><div class="menu"><div></div><div></div><div></div></div><div class="space"></div><a class="logo" href="index.html"><img alt="TECH 7" src="logo.png"/><div class="title-store">TECH 7</div></a><form action="busca/index.html" class="search-header" data-search="suggestion" method="get"><input name="loja" type="hidden" value="996644"/><input autocomplete="off" autocorrect="off" class="input-search" data-input="suggestion" name="palavra_busca" placeholder="O que você procura?" spellcheck="false" type="text"/><button class="button-search" title="Botão de Busca"><svg class="icon" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M23.277 20.457l-5.184-5.184c-.028-.028-.06-.047-.089-.072A9.813 9.813 0 1 0 15.2 18c.026.029.045.061.072.089l5.184 5.184a1.994 1.994 0 1 0 2.82-2.82zM9.81 16.219a6.409 6.409 0 1 1 6.409-6.409 6.409 6.409 0 0 1-6.409 6.409z"></path></svg></button></form><div class="space"></div><div class="account"><svg class="icon-user" viewbox="0 0 15.32 15.32" xmlns="http://www.w3.org/2000/svg"><path d="M10.341 9.447a5.04 5.04 0 0 0 2.426-4.341 5.107 5.107 0 1 0-10.213 0 5.04 5.04 0 0 0 2.425 4.341A7.894 7.894 0 0 0 0 15.32h1.277a6.543 6.543 0 0 1 12.767 0h1.276a7.688 7.688 0 0 0-4.979-5.873zM3.83 5.107a3.83 3.83 0 1 1 3.83 3.83 3.841 3.841 0 0 1-3.83-3.83z"></path></svg><span>Minha conta</span><div class="modal-white tray-hide" data-logged-user="false"><a class="link-modal botao-commerce" href="/my-account/login">Entrar</a><span class="step"><span class="bg">ou</span></span><a class="register" href="/cadastro">Cliente novo? Cadastre-se</a></div><div class="modal-white tray-hide" data-logged-user="true"><a class="link-modal botao-commerce" href="/central-do-cliente">Minha conta</a><span class="step"><span class="bg">ou</span></span><a class="register" href="/loja/logout.php?loja=996644">Sair</a></div></div><div class="cart-header"><div class="area"><svg class="icon" viewbox="0 0 30.476 32" xmlns="http://www.w3.org/2000/svg"><g transform="translate(-1256 -49)"><g transform="translate(1258.432 49)"><path d="M29.8 27.661L27.966 7.028a.882.882 0 0 0-.877-.8h-3.77a6.322 6.322 0 0 0-12.643 0H6.907a.877.877 0 0 0-.877.8L4.2 27.661c0 .026-.007.052-.007.079A4.56 4.56 0 0 0 8.995 32H25a4.56 4.56 0 0 0 4.8-4.26.319.319 0 0 0-.007-.079zM17 1.767a4.559 4.559 0 0 1 4.555 4.456h-9.112A4.559 4.559 0 0 1 17 1.767zm8 28.466H8.995a2.819 2.819 0 0 1-3.036-2.454L7.712 8h2.958v2.68a.883.883 0 1 0 1.767 0V8h9.116v2.68a.883.883 0 1 0 1.767 0V8h2.958l1.76 19.782A2.824 2.824 0 0 1 25 30.233z" transform="translate(-4.191)"></path></g></g></svg><span class="number" data-cart="amount"></span></div><div class="cart-sidebar flex flex-column"><div class="header-cart">Meu carrinho</div><div class="content-cart flex-grow flex flex-column justify-between empty"><div class="list"><div class="error"><div class="text">Carrinho Vazio</div></div></div></div><div class="footer-cart"><div class="text-info flex align-center justify-end"><div class="total"><span>Total (valor sem frete):</span><span class="value"></span></div></div><div class="line justify-end"><a class="botao-commerce" href="/loja/redirect_cart_service.php?loja=996644" rel="nofollow">Fechar pedido</a></div></div></div><div class="shadow-cart-header"></div></div></div></div><nav class="nav"><div class="container"><ul class="list flex grow"><li class="relative" data-id="1" data-level="0"><a class="icon-show sub vertical-icon" href="baterias-celular/index.html"><img alt="BATERIAS" class="icon" src="_assets/images.tcdn.com.br/img/img_prod/996644/categoria_img_1_20220331152230.png"/><div class="name">BATERIAS</div></a><div class="sub-line-category flex product-sub"><div class="header-sub">BATERIAS</div><div class="over flex"><ul class="list-line-sub"><li><a class="second-nivel" href="baterias/apple/index.html">APPLE</a></li><li><a class="second-nivel" href="baterias/samsung/index.html">SAMSUNG</a></li><li><a class="second-nivel" href="baterias/xiaomi-redmi/index.html">XIAOMI REDMI</a></li><li><a class="second-nivel" href="baterias/motorola/index.html">MOTOROLA</a></li><li><a class="second-nivel" href="baterias/zenfone/index.html">ZENFONE</a></li><li><a class="second-nivel" href="baterias/lg/index.html">LG</a></li><li><a class="second-nivel" href="baterias/nokia/index.html">NOKIA</a></li><li><a class="second-nivel" href="baterias/alcatel/index.html">ALCATEL</a></li><li><a class="second-nivel" href="baterias/blu/index.html">BLU</a></li><li><a class="second-nivel" href="baterias/cce/index.html">CCE</a></li><li><a class="second-nivel" href="baterias/multilaser/index.html">MULTILASER</a></li><li><a class="second-nivel" href="baterias/positivo/index.html">POSITIVO</a></li><li><a class="second-nivel" href="baterias/sony-experia/index.html">SONY EXPERIA</a></li><li><a class="second-nivel" href="baterias/zz-outras/index.html">OUTRAS</a></li><li><a class="second-nivel" href="baterias-celular/infinix/index.html">INFINIX</a></li><li><a class="second-nivel" href="baterias-celular/realme/index.html">REALME</a></li></ul><div class="col-product"><div class="product nb show-down"><div class="image"><a class="space-image second" href="baterias/samsung/tela-display-lcd-samsung-m54-m546-original-retirada/index.html"><img alt="Tela Display Lcd Samsung M54 M546 Original Retirada" class="lazyload transform" data-src="_assets/images.tcdn.com.br/img/img_prod/996644/180_tela_display_lcd_samsung_m54_m546_original_retirada_7247_1_cf-e05e1376.jpg"/><img alt="Tela Display Lcd Samsung M54 M546 Original Retirada" class="second-image transform" data-src="_assets/images.tcdn.com.br/img/img_prod/996644/180_tela_display_lcd_samsung_m54_m546_original_retirada_7247_2_6c-00b69ec9.jpg"/><div class="seals"><div class="seal featured">DESTAQUE</div><div class="seal new">LANÇAMENTO</div></div></a></div><a class="info-product" href="baterias/samsung/tela-display-lcd-samsung-m54-m546-original-retirada/index.html"><div class="product-name">Tela Display Lcd Samsung M54 M546 Original Retirada</div><div class="down-line"><div class="list-star flex justify-center"><div class="icon"></div><div class="icon"></div><div class="icon"></div><div class="icon"></div><div class="icon"></div></div><div class="box-price"><div class="price"><div class="product-price"><span class="price-off">
                                                     R$ 475,00
                                             </span></div></div><div class="product-payment"><br/><span class="txt-corparcelas"><span class="txt-corparcelas"><span class="preco-parc2"> ou
                                             <strong class="color"> 3<span>x</span></strong></span></span></span><span class="preco-de"> de </span><span class="txt-cadaparcelas"><strong class="preco-parc2">R$
@@ -865,7 +947,32 @@ a[href*="app-central"] {
                                             <strong class="color"> 3<span>x</span></strong></span></span></span><span class="preco-de"> de </span><span class="txt-cadaparcelas"><strong class="preco-parc2">R$
                                         <span><span>38<span>,<span>83</span></span></span></span></strong></span><span class="operadora"> com juros </span><span class="txt-forma-pagamento">MasterCard - Vindi</span><!-- 3|38.83|{lower_price}|79 --></div></div></div></a><div class="variants hide-on-mobile"><form class="list-variants" data-api-cart="1" data-id="5317" data-variants=""><div class="flex add-cart"><input required="" type="number" value="1"/><button class="action">Adicionar ao carrinho</button></div></form></div></div></div></div></div></li><li class="relative" data-id="11" data-level="0"><a class="icon-show sub vertical-icon" href="tampas-e-carcacas/index.html"><img alt="TAMPAS e CARCAÇAS" class="icon" src="_assets/images.tcdn.com.br/img/img_prod/996644/categoria_img_11_20220331152405.png"/><div class="name">TAMPAS e CARCAÇAS</div></a><div class="sub-line-category flex product-sub"><div class="header-sub">TAMPAS e CARCAÇAS</div><div class="over flex"><ul class="list-line-sub"><li><a class="second-nivel" href="tampas-e-carcacas/apple/index.html">APPLE</a></li><li><a class="second-nivel" href="tampas-e-carcacas/samsung/index.html">SAMSUNG</a></li><li><a class="second-nivel" href="tampas-e-carcacas/xiaomi-redmi/index.html">XIAOMI REDMI</a></li><li><a class="second-nivel" href="tampas-e-carcacas/motorola/index.html">MOTOROLA</a></li><li><a class="second-nivel" href="tampas-e-carcacas/zenfone/index.html">ZENFONE</a></li><li><a class="second-nivel" href="tampas-e-carcacas/sony-experia/index.html">SONY EXPERIA</a></li><li><a class="second-nivel" href="tampas-e-carcacas/alcatel/index.html">ALCATEL</a></li><li><a class="second-nivel" href="tampas-e-carcacas/lenovo/index.html">LENOVO</a></li><li><a class="second-nivel" href="tampas-e-carcacas/lg/index.html">LG</a></li><li><a class="second-nivel" href="tampas-e-carcacas/blu/index.html">BLU</a></li><li><a class="second-nivel" href="tampas-e-carcacas/cce/index.html">CCE</a></li><li><a class="second-nivel" href="tampas-e-carcacas/multilaser/index.html">MULTILASER</a></li><li><a class="second-nivel" href="tampas-e-carcacas/nokia/index.html">NOKIA</a></li><li><a class="second-nivel" href="tampas-e-carcacas/positivo/index.html">POSITIVO</a></li><li><a class="second-nivel" href="tampas-e-carcacas/outros/index.html">OUTROS</a></li><li><a class="second-nivel" href="tampas-e-carcacas/realme/index.html">REALME</a></li></ul><div class="col-product"><div class="product variant nb show-down"><div class="image"><a class="space-image second" href="tampas-e-carcacas/apple/tampa-traseira-iph-8g/index.html"><img alt="Tampa Traseira Iphone 8G" class="lazyload transform" data-src="_assets/images.tcdn.com.br/img/img_prod/996644/180_tampa_traseira_iphone_8g_647_1_0cbf4b6072a7e38881e4e8feea32c635.jpg"/><img alt="Tampa Traseira Iphone 8G" class="second-image transform" data-src="_assets/images.tcdn.com.br/img/img_prod/996644/180_tampa_traseira_iphone_8g_647_2_e7de2cd6723be7264452766f7326cc11.jpg"/><div class="seals"><div class="seal new">LANÇAMENTO</div></div></a></div><a class="info-product" href="tampas-e-carcacas/apple/tampa-traseira-iph-8g/index.html"><div class="product-name">Tampa Traseira Iphone 8G</div><div class="down-line"><div class="list-star flex justify-center"><div class="icon"></div><div class="icon"></div><div class="icon"></div><div class="icon"></div><div class="icon"></div></div><div class="box-price"><div class="price"><div class="product-price"><span class="price-off">
                                                     R$ 15,00
-</span></div></div><div class="product-payment"></div></div></div></a><div class="variants hide-on-mobile"><form class="list-variants" data-api-cart="1" data-id="647" data-variants='[{"price":{"price":15,"payment":""},"id":"571","stock":3,"option":"Branco"},{"price":{"price":15,"payment":""},"id":"573","stock":10,"option":"Preto"},{"price":{"price":15,"payment":""},"id":"2279","stock":3,"option":"Rose"},{"price":{"price":15,"payment":""},"id":"3299","stock":5,"option":"Vermelho"}]'><label><span>Cor</span><select class="first" required=""><option hidden="" value="">Selecione</option><option value="Branco">Branco</option><option value="Preto">Preto</option><option value="Rose">Rose</option><option value="Vermelho">Vermelho</option></select></label><div class="flex add-cart"><input required="" type="number" value="1"/><button class="action">Adicionar ao carrinho</button></div></form></div></div></div></div></div></li></ul></div></nav></header></div></div><div class="t7-product-carousel-section"><div class="t7-carousel-header container"><h2 class="t7-carousel-heading">Destaques <span>Top de Linha</span></h2><p class="t7-carousel-desc">Displays originais para iPhone e Galaxy — linha premium em estoque</p></div><div class="t7-carousel-wrap"><div class="swiper-container t7-product-swiper"><div class="swiper-wrapper"><div class="swiper-slide"><a href="display-e-lcd/apple/tela-display-lcd-iphone-16-jk-troca-ci/index.html" title="Display iPhone 16"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Display iPhone 16" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_iphone_16_jk_troca_ci_9186_1_adc8f22e9709be6d6c5-1c8beb08.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge t7-badge-apple">Apple</span><div class="t7-carousel-title">Display iPhone 16</div><div class="t7-carousel-sub">JK Troca Ci - Original</div><div class="t7-carousel-price">Consulte preco</div><div class="t7-carousel-cta">Ver produto →</div></div></div></a></div><div class="swiper-slide"><a href="display-e-lcd/apple/tela-display-lcd-iphone-16-plus-jk-troca-ci/index.html" title="Display iPhone 16 Plus"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Display iPhone 16 Plus" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_iphone_16_plus_jk_troca_ci_9188_1_4273e3fac8deab-8d99a78a.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge t7-badge-apple">Apple</span><div class="t7-carousel-title">Display iPhone 16 Plus</div><div class="t7-carousel-sub">JK Troca Ci - Original</div><div class="t7-carousel-price">Consulte preco</div><div class="t7-carousel-cta">Ver produto →</div></div></div></a></div><div class="swiper-slide"><a href="display-e-lcd/apple/tela-display-lcd-iphone-16-pro-max-jk-troca-ci/index.html" title="Display iPhone 16 Pro Max"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Display iPhone 16 Pro Max" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_iphone_16_pro_max_jk_troca_ci_8770_1_1e9068ddecc-cd63012a.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge t7-badge-apple">Apple</span><div class="t7-carousel-title">Display iPhone 16 Pro Max</div><div class="t7-carousel-sub">JK Troca Ci - Original</div><div class="t7-carousel-price">Consulte preco</div><div class="t7-carousel-cta">Ver produto →</div></div></div></a></div><div class="swiper-slide"><a href="display/samsung/tela-display-lcd-samsung-s23-s911-oled-com-aro/index.html" title="Display Samsung S23"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Display Samsung S23" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s23_s911_oled_com_aro_6871_1_1aeb0189cf6-9b46ba01.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge t7-badge-samsung">Samsung</span><div class="t7-carousel-title">Display Samsung S23</div><div class="t7-carousel-sub">S911 OLED com Aro</div><div class="t7-carousel-price">Consulte preco</div><div class="t7-carousel-cta">Ver produto →</div></div></div></a></div><div class="swiper-slide"><a href="display/samsung/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro/index.html" title="Display Samsung S23 Plus"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Display Samsung S23 Plus" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s23_plus_s916_oled_com_aro_6873_1_aeaa97-2724068d.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge t7-badge-samsung">Samsung</span><div class="t7-carousel-title">Display Samsung S23 Plus</div><div class="t7-carousel-sub">S916 OLED com Aro</div><div class="t7-carousel-price">Consulte preco</div><div class="t7-carousel-cta">Ver produto →</div></div></div></a></div><div class="swiper-slide"><a href="display/samsung/tela-display-lcd-samsung-s23-ultra-5g-s918-oled-com-aro/index.html" title="Display Samsung S23 Ultra"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Display Samsung S23 Ultra" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s23_ultra_5g_s918_oled_com_aro_6419_1_e6-28c3bf2f.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge t7-badge-samsung">Samsung</span><div class="t7-carousel-title">Display Samsung S23 Ultra</div><div class="t7-carousel-sub">S918 OLED com Aro</div><div class="t7-carousel-price">Consulte preco</div><div class="t7-carousel-cta">Ver produto →</div></div></div></a></div><div class="swiper-slide"><a href="display/samsung/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro/index.html" title="Display Samsung S23 FE"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Display Samsung S23 FE" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s23_fe_s771_oled_com_aro_7724_1_7c50a8ff-73435f9b.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge t7-badge-samsung">Samsung</span><div class="t7-carousel-title">Display Samsung S23 FE</div><div class="t7-carousel-sub">S711 OLED com Aro</div><div class="t7-carousel-price">Consulte preco</div><div class="t7-carousel-cta">Ver produto →</div></div></div></a></div><div class="swiper-slide"><a href="display-e-lcd/samsung/tela-display-lcd-samsung-s23-5g-s911-original-retirada-sem-aro/index.html" title="Display Samsung S23 5G"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Display Samsung S23 5G" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s23_5g_s911_sem_aro_original_retirada_77-4fa741b4.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge t7-badge-samsung">Samsung</span><div class="t7-carousel-title">Display Samsung S23 5G</div><div class="t7-carousel-sub">S911 Original Retirada</div><div class="t7-carousel-price">Consulte preco</div><div class="t7-carousel-cta">Ver produto →</div></div></div></a></div><div class="swiper-slide"><a href="display-e-lcd/samsung/tela-display-lcd-samsung-s24-plus-s926-sem-aro-original-nacional/index.html" title="Display Samsung S24 Plus"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Display Samsung S24 Plus" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s24_plus_s926_sem_aro_original_retirada-b40af83d.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge t7-badge-samsung">Samsung</span><div class="t7-carousel-title">Display Samsung S24 Plus</div><div class="t7-carousel-sub">S926 Original Nacional</div><div class="t7-carousel-price">Consulte preco</div><div class="t7-carousel-cta">Ver produto →</div></div></div></a></div><div class="swiper-slide"><a href="display-e-lcd/samsung/tela-display-lcd-samsung-s24-fe-s721-sem-aro-original-nacional/index.html" title="Display Samsung S24 FE"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Display Samsung S24 FE" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s24_fe_s721_sem_aro_original_nacional_87-6a87a5b9.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge t7-badge-samsung">Samsung</span><div class="t7-carousel-title">Display Samsung S24 FE</div><div class="t7-carousel-sub">S721 Original Nacional</div><div class="t7-carousel-price">Consulte preco</div><div class="t7-carousel-cta">Ver produto →</div></div></div></a></div></div><div class="swiper-pagination t7-swiper-pagination"></div><div class="swiper-button-prev t7-swiper-prev"></div><div class="swiper-button-next t7-swiper-next"></div></div></div></div><script>
+</span></div></div><div class="product-payment"></div></div></div></a><div class="variants hide-on-mobile"><form class="list-variants" data-api-cart="1" data-id="647" data-variants='[{"price":{"price":15,"payment":""},"id":"571","stock":3,"option":"Branco"},{"price":{"price":15,"payment":""},"id":"573","stock":10,"option":"Preto"},{"price":{"price":15,"payment":""},"id":"2279","stock":3,"option":"Rose"},{"price":{"price":15,"payment":""},"id":"3299","stock":5,"option":"Vermelho"}]'><label><span>Cor</span><select class="first" required=""><option hidden="" value="">Selecione</option><option value="Branco">Branco</option><option value="Preto">Preto</option><option value="Rose">Rose</option><option value="Vermelho">Vermelho</option></select></label><div class="flex add-cart"><input required="" type="number" value="1"/><button class="action">Adicionar ao carrinho</button></div></form></div></div></div></div></div></li></ul></div></nav></header></div></div><div class="t7-product-carousel-section">
+  <div class="t7-carousel-header container">
+    <h2 class="t7-carousel-heading">Destaques <span>Top de Linha</span></h2>
+    <p class="t7-carousel-desc">Displays originais para iPhone e Galaxy — linha premium em estoque</p>
+  </div>
+  <div class="t7-carousel-wrap">
+    <div class="t7-swiper-nav t7-swiper-prev">&#10094;</div>
+    <div class="swiper-container t7-product-swiper">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide"><a href="display-e-lcd/apple/tela-display-lcd-iphone-16-jk-troca-ci/index.html" class="t7-carousel-link"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Display iPhone 16" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_iphone_16_jk_troca_ci_9186_1_adc8f22e9709be6d6c5-1c8beb08.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge">Apple</span><div class="t7-carousel-title">Display iPhone 16</div><div class="t7-carousel-sub">JK Troca Ci - Alta qualidade</div><div class="t7-carousel-quality-badge"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Alta qualidade</div><div class="t7-carousel-price">R$ 1.350,00</div><span class="t7-carousel-cta">Ver produto <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></span></div></div></a></div>
+        <div class="swiper-slide"><a href="display-e-lcd/apple/tela-display-lcd-iphone-16-plus-jk-troca-ci/index.html" class="t7-carousel-link"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Display iPhone 16 Plus" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_iphone_16_plus_jk_troca_ci_9188_1_4273e3fac8deab-8d99a78a.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge">Apple</span><div class="t7-carousel-title">Display iPhone 16 Plus</div><div class="t7-carousel-sub">JK Troca Ci - Alta qualidade</div><div class="t7-carousel-quality-badge"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Alta qualidade</div><div class="t7-carousel-price">R$ 475,00</div><span class="t7-carousel-cta">Ver produto <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></span></div></div></a></div>
+        <div class="swiper-slide"><a href="display-e-lcd/apple/tela-display-lcd-iphone-16-pro-max-jk-troca-ci/index.html" class="t7-carousel-link"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Display iPhone 16 Pro Max" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_iphone_16_pro_max_jk_troca_ci_8770_1_1e9068ddecc-cd63012a.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge">Apple</span><div class="t7-carousel-title">Display iPhone 16 Pro Max</div><div class="t7-carousel-sub">JK Troca Ci - Alta qualidade</div><div class="t7-carousel-quality-badge"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Alta qualidade</div><div class="t7-carousel-price">R$ 48,00</div><span class="t7-carousel-cta">Ver produto <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></span></div></div></a></div>
+        <div class="swiper-slide"><a href="display/samsung/tela-display-lcd-samsung-s23-s911-oled-com-aro/index.html" class="t7-carousel-link"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Tela Display Samsung S23" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s23_s911_oled_com_aro_6871_1_1aeb0189cf6-9b46ba01.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge">Samsung</span><div class="t7-carousel-title">Tela Display Samsung S23 S911 OLED</div><div class="t7-carousel-sub">Com Aro - Alta qualidade</div><div class="t7-carousel-quality-badge"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Alta qualidade</div><div class="t7-carousel-price">R$ 1.050,00</div><span class="t7-carousel-cta">Ver produto <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></span></div></div></a></div>
+        <div class="swiper-slide"><a href="display/samsung/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro/index.html" class="t7-carousel-link"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Tela Display Samsung S23 Plus" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s23_plus_s916_oled_com_aro_6873_1_aeaa97-2724068d.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge">Samsung</span><div class="t7-carousel-title">Tela Display Samsung S23 Plus S916 OLED</div><div class="t7-carousel-sub">Com Aro - Alta qualidade</div><div class="t7-carousel-quality-badge"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Alta qualidade</div><div class="t7-carousel-price">R$ 650,00</div><span class="t7-carousel-cta">Ver produto <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></span></div></div></a></div>
+        <div class="swiper-slide"><a href="display/samsung/tela-display-lcd-samsung-s23-ultra-5g-s918-oled-com-aro/index.html" class="t7-carousel-link"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Tela Display Samsung S23 Ultra" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s23_ultra_5g_s918_oled_com_aro_6419_1_e6-28c3bf2f.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge">Samsung</span><div class="t7-carousel-title">Tela Display Samsung S23 Ultra 5G S918 OLED</div><div class="t7-carousel-sub">Com Aro - Alta qualidade</div><div class="t7-carousel-quality-badge"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Alta qualidade</div><div class="t7-carousel-price">R$ 720,00</div><span class="t7-carousel-cta">Ver produto <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></span></div></div></a></div>
+        <div class="swiper-slide"><a href="display/samsung/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro/index.html" class="t7-carousel-link"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Tela Display Samsung S23 FE" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s23_fe_s771_oled_com_aro_7724_1_7c50a8ff-73435f9b.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge">Samsung</span><div class="t7-carousel-title">Tela Display Samsung S23 FE S711 OLED</div><div class="t7-carousel-sub">Com Aro - Alta qualidade</div><div class="t7-carousel-quality-badge"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Alta qualidade</div><div class="t7-carousel-price">R$ 48,00</div><span class="t7-carousel-cta">Ver produto <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></span></div></div></a></div>
+        <div class="swiper-slide"><a href="display-e-lcd/samsung/tela-display-lcd-samsung-s23-5g-s911-original-retirada-sem-aro/index.html" class="t7-carousel-link"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Tela Display Samsung S23 5G" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s23_5g_s911_original_retirada_7179_1_397-66566614.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge">Samsung</span><div class="t7-carousel-title">Tela Display Samsung S23 5G S911</div><div class="t7-carousel-sub">Original Retirada - Alta qualidade</div><div class="t7-carousel-quality-badge"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Alta qualidade</div><div class="t7-carousel-price">R$ 1.050,00</div><span class="t7-carousel-cta">Ver produto <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></span></div></div></a></div>
+        <div class="swiper-slide"><a href="display-e-lcd/samsung/tela-display-lcd-samsung-s24-plus-s926-sem-aro-original-nacional/index.html" class="t7-carousel-link"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Tela Display Samsung S24 Plus" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s24_plus_s926_sem_aro_original_nacional_8968_1_aebe6451f6b9e2f301995ab0b9cffe60.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge">Samsung</span><div class="t7-carousel-title">Tela Display Samsung S24 Plus S926</div><div class="t7-carousel-sub">Sem Aro - Alta qualidade</div><div class="t7-carousel-quality-badge"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Alta qualidade</div><div class="t7-carousel-price">R$ 1.050,00</div><span class="t7-carousel-cta">Ver produto <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></span></div></div></a></div>
+        <div class="swiper-slide"><a href="display-e-lcd/samsung/tela-display-lcd-samsung-s24-fe-s721-sem-aro-original-nacional/index.html" class="t7-carousel-link"><div class="t7-carousel-card"><div class="t7-carousel-img-wrap"><img alt="Tela Display Samsung S24 FE" class="t7-carousel-img" src="_assets/images.tcdn.com.br/img/img_prod/996644/tela_display_lcd_samsung_s24_fe_s721_sem_aro_original_nacional_8970_1_a1ac0b28e148d21af49dcd477016a541.jpg" loading="eager"/></div><div class="t7-carousel-info"><span class="t7-carousel-badge">Samsung</span><div class="t7-carousel-title">Tela Display Samsung S24 FE S721</div><div class="t7-carousel-sub">Sem Aro - Alta qualidade</div><div class="t7-carousel-quality-badge"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Alta qualidade</div><div class="t7-carousel-price">R$ 48,00</div><span class="t7-carousel-cta">Ver produto <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></span></div></div></a></div>
+      </div>
+    </div>
+    <div class="t7-swiper-nav t7-swiper-next">&#10095;</div>
+  </div>
+  <div class="t7-swiper-pagination"></div>
+</div>
+<script>
 (function () {
   function onReady(callback) {
     if (document.readyState === "loading") {
@@ -874,16 +981,12 @@ a[href*="app-central"] {
       callback();
     }
   }
-
   onReady(function () {
     var section = document.querySelector(".t7-product-carousel-section");
     var swiperEl = section ? section.querySelector(".t7-product-swiper") : null;
-    if (!section || !swiperEl || swiperEl.getAttribute("data-t7-3d") === "ready") return;
-    swiperEl.setAttribute("data-t7-3d", "ready");
-    section.classList.add("t7-3d-ready");
-
+    if (!section || !swiperEl || swiperEl.getAttribute("data-t7-ready") === "ready") return;
+    swiperEl.setAttribute("data-t7-ready", "ready");
     var slides = Array.prototype.slice.call(swiperEl.querySelectorAll(".swiper-slide"));
-    var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var priceByHref = {
       "display-e-lcd/apple/tela-display-lcd-iphone-16-jk-troca-ci/index.html": "R$ 1.350,00",
       "display-e-lcd/apple/tela-display-lcd-iphone-16-plus-jk-troca-ci/index.html": "R$ 475,00",
@@ -897,130 +1000,52 @@ a[href*="app-central"] {
       "display-e-lcd/samsung/tela-display-lcd-samsung-s24-fe-s721-sem-aro-original-nacional/index.html": "R$ 48,00"
     };
 
-    function setCardDefaults(card) {
-      card.style.setProperty("--t7-rotate-x", "0deg");
-      card.style.setProperty("--t7-rotate-y", "0deg");
-      card.style.setProperty("--t7-shadow-x", "0px");
-      card.style.setProperty("--t7-shadow-y", "28px");
-      card.style.setProperty("--t7-pointer-x", "50%");
-      card.style.setProperty("--t7-pointer-y", "18%");
-      card.style.setProperty("--t7-glow", "0.22");
-    }
-
-    function enhanceSlide(slide, index) {
+    function enrichSlide(slide) {
       var link = slide.querySelector("a[href]");
-      var card = slide.querySelector(".t7-carousel-card");
-      var title = slide.querySelector(".t7-carousel-title");
-      var priceNode = slide.querySelector(".t7-carousel-price");
+      var priceEl = slide.querySelector(".t7-carousel-price");
       if (link) {
         var href = link.getAttribute("href");
-        if (priceNode && href && priceByHref[href]) priceNode.textContent = priceByHref[href];
-        link.classList.add("t7-carousel-link");
-        if (!link.getAttribute("aria-label") && title) {
-          link.setAttribute("aria-label", "Ver produto " + title.textContent.trim());
+        if (priceEl && href && priceByHref[href]) priceEl.textContent = priceByHref[href];
+        if (!link.getAttribute("aria-label")) {
+          var title = slide.querySelector(".t7-carousel-title");
+          if (title) link.setAttribute("aria-label", "Ver produto " + title.textContent.trim());
         }
       }
-      if (!card) return;
-      card.setAttribute("data-t7-card", String(index));
-      setCardDefaults(card);
-      if (reducedMotion) return;
-
-      card.addEventListener("pointermove", function (event) {
-        var rect = card.getBoundingClientRect();
-        if (!rect.width || !rect.height) return;
-        var px = (event.clientX - rect.left) / rect.width;
-        var py = (event.clientY - rect.top) / rect.height;
-        var rotateY = (px - 0.5) * 13;
-        var rotateX = (0.5 - py) * 9;
-        var shadowX = (px - 0.5) * -24;
-        var shadowY = 24 + (py * 16);
-        card.style.setProperty("--t7-rotate-x", rotateX.toFixed(2) + "deg");
-        card.style.setProperty("--t7-rotate-y", rotateY.toFixed(2) + "deg");
-        card.style.setProperty("--t7-shadow-x", shadowX.toFixed(1) + "px");
-        card.style.setProperty("--t7-shadow-y", shadowY.toFixed(1) + "px");
-        card.style.setProperty("--t7-pointer-x", (px * 100).toFixed(1) + "%");
-        card.style.setProperty("--t7-pointer-y", (py * 100).toFixed(1) + "%");
-        card.style.setProperty("--t7-glow", "0.58");
-      });
-      card.addEventListener("pointerleave", function () { setCardDefaults(card); });
     }
-
-    function syncActiveState() {
-      slides.forEach(function (slide) {
-        var active = slide.classList.contains("swiper-slide-active");
-        var card = slide.querySelector(".t7-carousel-card");
-        slide.classList.toggle("t7-slide-active-3d", active);
-        if (card && !active) setCardDefaults(card);
-      });
-    }
-
-    slides.forEach(enhanceSlide);
+    slides.forEach(enrichSlide);
 
     function initSwiper() {
       if (!window.Swiper) {
         swiperEl.classList.add("t7-swiper-fallback");
         return;
       }
-
-      var swiperInstance = new window.Swiper(swiperEl, {
+      var swiper = new window.Swiper(swiperEl, {
         loop: slides.length > 3,
-        centeredSlides: true,
+        centeredSlides: false,
+        centerInsufficientSlides: false,
         grabCursor: true,
-        speed: 520,
         watchSlidesProgress: true,
-        preloadImages: false,
-        updateOnImagesReady: true,
+        speed: 820,
         slidesPerView: 3,
-        spaceBetween: 24,
-        effect: "coverflow",
-        coverflowEffect: {
-          rotate: 18,
-          stretch: 0,
-          depth: 180,
-          modifier: 1,
-          slideShadows: false
+        spaceBetween: 22,
+        autoplay: {
+          delay: 3600,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true
         },
-        autoplay: reducedMotion ? false : {
-          delay: 3000,
-          disableOnInteraction: false
-        },
-        pagination: {
-          el: ".t7-swiper-pagination",
-          clickable: true
-        },
-        navigation: {
-          nextEl: ".t7-swiper-next",
-          prevEl: ".t7-swiper-prev"
-        },
+        pagination: { el: ".t7-swiper-pagination", clickable: true },
+        navigation: { nextEl: ".t7-swiper-next", prevEl: ".t7-swiper-prev" },
         breakpoints: {
-          767: {
-            slidesPerView: 1.08,
-            spaceBetween: 14,
-            coverflowEffect: { rotate: 8, stretch: 0, depth: 80, modifier: .85, slideShadows: false }
-          },
-          1024: {
-            slidesPerView: 2.15,
-            spaceBetween: 20,
-            coverflowEffect: { rotate: 14, stretch: 0, depth: 130, modifier: .95, slideShadows: false }
-          }
-        },
-        on: {
-          init: syncActiveState,
-          slideChangeTransitionStart: syncActiveState,
-          slideChangeTransitionEnd: syncActiveState,
-          resize: syncActiveState
+          0: { slidesPerView: 1.08, spaceBetween: 12 },
+          640: { slidesPerView: 1.18, spaceBetween: 14 },
+          768: { slidesPerView: 1.55, spaceBetween: 16 },
+          1024: { slidesPerView: 2.2, spaceBetween: 18 },
+          1280: { slidesPerView: 3, spaceBetween: 22 }
         }
       });
-      swiperEl.t7Swiper = swiperInstance;
-      if (swiperInstance.autoplay && swiperInstance.autoplay.start) swiperInstance.autoplay.start();
-      window.setTimeout(syncActiveState, 80);
+      swiperEl.t7Swiper = swiper;
     }
-
-    if (window.Swiper) {
-      initSwiper();
-      return;
-    }
-
+    if (window.Swiper) { initSwiper(); return; }
     var script = document.createElement("script");
     script.src = "_assets/images.tcdn.com.br/files/996644/themes/46/js/swiper.min__e4660e26.js";
     script.onload = initSwiper;
@@ -1028,6 +1053,7 @@ a[href*="app-central"] {
     document.head.appendChild(script);
   });
 })();
+</script>
 </script><script id="T7-FALLBACK-IMG">document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll(".section-showcase img.lazyload,.section-showcase img.second-image").forEach(function(img){if(!img.getAttribute("src")&&img.getAttribute("data-src")){img.setAttribute("src",img.getAttribute("data-src"));}});});</script><div class="banner-info container"><div class="open_desk flex justify-between"><div class="item"><div class="line flex justify-center align-center"><img alt="TECNOLOGIA" class="icon" src="_assets/images.tcdn.com.br/files/996644/themes/46/img/settings/line-pagamento__e4660e26.png"/><span class="text"><span class="featured">TECNOLOGIA</span> Produtos de alta Qualidade
                         </span></div></div><div class="item"><div class="line flex justify-center align-center"><img alt="ENTREGA RÁPIDA" class="icon" src="_assets/images.tcdn.com.br/files/996644/themes/46/img/settings/line-frete__e4660e26.png"/><span class="text"><span class="featured">ENTREGA RÁPIDA</span> Enviamos suas compras para todo Brasil
                         </span></div></div><div class="item"><div class="line flex justify-center align-center"><img alt="SITE SEGURO" class="icon" src="_assets/images.tcdn.com.br/files/996644/themes/46/img/settings/line-seguro__e4660e26.png"/><span class="text"><span class="featured">SITE SEGURO</span> Compre com segurança
@@ -1100,22 +1126,237 @@ a[href*="app-central"] {
                 replaceHref('a[href^="/loja/logout.php"]', "loja/logout.php/index.html");
                 replaceHref('a[href^="/loja/redirect_cart_service.php"]', "loja/redirect_cart_service.php/index.html");
 
-                document.querySelectorAll('form[action^="/loja/busca.php"]').forEach(function(form) {
-                    form.setAttribute("action", "loja/busca.php/index.html");
+                document.querySelectorAll('form[action^="/loja/busca.php"], form[action="busca/index.html"]').forEach(function(form) {
+                    form.setAttribute("action", "busca/index.html");
                     form.addEventListener("submit", function(event) {
                         event.preventDefault();
                         var field = form.querySelector('input[name="palavra_busca"]');
                         var query = field && field.value ? "?q=" + encodeURIComponent(field.value.trim()) : "";
-                        window.location.href = "loja/busca.php/index.html" + query;
+                        window.location.href = "busca/index.html" + query;
                     });
                 });
             });
+        </script><style>
+            .search-header {
+                position: relative !important;
+            }
+            .t7-search-suggestions {
+                position: absolute;
+                top: calc(100% + 12px);
+                right: 0;
+                width: min(720px, 86vw);
+                max-height: 430px;
+                overflow-y: auto;
+                z-index: 999999;
+                display: none;
+                padding: 8px;
+                border: 1px solid rgba(255,106,0,.35);
+                border-radius: 8px;
+                background: #101010;
+                box-shadow: 0 22px 48px rgba(0,0,0,.45);
+            }
+            .t7-search-suggestions.is-open {
+                display: block;
+            }
+            .t7-search-suggestion-row {
+                display: grid;
+                grid-template-columns: 74px minmax(0, 1fr) auto;
+                align-items: center;
+                gap: 12px;
+                min-height: 78px;
+                padding: 8px 10px;
+                color: #fff;
+                text-decoration: none !important;
+                border-radius: 8px;
+                border: 1px solid transparent;
+            }
+            .t7-search-suggestion-row:hover,
+            .t7-search-suggestion-row:focus-visible {
+                border-color: rgba(255,106,0,.65);
+                background: rgba(255,106,0,.08);
+                outline: none;
+            }
+            .t7-search-suggestion-img {
+                width: 64px;
+                height: 62px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 5px;
+                border-radius: 6px;
+                background: #fff;
+            }
+            .t7-search-suggestion-img img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+            }
+            .t7-search-suggestion-meta {
+                min-width: 0;
+            }
+            .t7-search-suggestion-brand {
+                margin-bottom: 4px;
+                color: #ffb46e;
+                font-size: 10px;
+                font-weight: 800;
+                text-transform: uppercase;
+            }
+            .t7-search-suggestion-name {
+                color: #fff;
+                font: 700 14px/1.22 "Space Grotesk", Inter, sans-serif;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            .t7-search-suggestion-action {
+                color: #ff6a00;
+                font-size: 11px;
+                font-weight: 800;
+                white-space: nowrap;
+                text-transform: uppercase;
+            }
+            .t7-search-suggestion-empty {
+                padding: 14px;
+                color: #d7d7d7;
+                font-size: 13px;
+            }
+            @media (max-width: 720px) {
+                .t7-search-suggestions {
+                    left: 0;
+                    right: auto;
+                    width: min(92vw, 520px);
+                    max-height: 360px;
+                }
+                .t7-search-suggestion-row {
+                    grid-template-columns: 58px minmax(0, 1fr);
+                    min-height: 68px;
+                }
+                .t7-search-suggestion-img {
+                    width: 52px;
+                    height: 52px;
+                }
+                .t7-search-suggestion-action {
+                    display: none;
+                }
+            }
+        </style><script>
+            (function() {
+                function normalize(value) {
+                    return String(value || "")
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .toLowerCase()
+                        .trim();
+                }
+
+                function escapeHtml(value) {
+                    return String(value || "").replace(/[&<>"']/g, function(char) {
+                        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char];
+                    });
+                }
+
+                function assetUrl(value) {
+                    if (!value) return "logo.png";
+                    if (/^https?:\/\//i.test(value)) return value;
+                    return String(value).replace(/^\/+/, "");
+                }
+
+                function productUrl(value) {
+                    return String(value || "index.html").replace(/^\/+/, "");
+                }
+
+                function closePanel(panel) {
+                    panel.classList.remove("is-open");
+                    panel.innerHTML = "";
+                }
+
+                function setupSearchSuggestion(form) {
+                    var input = form.querySelector('input[name="palavra_busca"], input[name="q"], .input-search');
+                    if (!input || form.dataset.t7SuggestionReady) return;
+                    form.dataset.t7SuggestionReady = "1";
+
+                    var panel = document.createElement("div");
+                    panel.className = "t7-search-suggestions";
+                    panel.setAttribute("role", "listbox");
+                    form.appendChild(panel);
+
+                    function render(term) {
+                        var normalized = normalize(term);
+                        if (!normalized) {
+                            closePanel(panel);
+                            return;
+                        }
+
+                        fetch('/api/search?q=' + encodeURIComponent(term) + '&limit=8', { cache: 'no-store' })
+                            .then(function(response) {
+                                if (!response.ok) throw new Error('search unavailable');
+                                return response.json();
+                            })
+                            .then(function(data) {
+                                var matches = data && Array.isArray(data.items) ? data.items : [];
+                                panel.classList.add('is-open');
+                                if (!matches.length) {
+                                    panel.innerHTML = '<div class="t7-search-suggestion-empty">Nenhum produto encontrado.</div>';
+                                    return;
+                                }
+
+                                panel.innerHTML = matches.map(function(item) {
+                                    return '<a class="t7-search-suggestion-row" role="option" href="' + productUrl(item.url) + '">' +
+                                        '<span class="t7-search-suggestion-img"><img src="' + assetUrl(item.image) + '" alt="' + escapeHtml(item.title) + '" loading="lazy"></span>' +
+                                        '<span class="t7-search-suggestion-meta">' +
+                                        '<span class="t7-search-suggestion-brand">' + escapeHtml(item.brand || item.category || "TECH 7") + '</span>' +
+                                        '<span class="t7-search-suggestion-name">' + escapeHtml(item.title) + '</span>' +
+                                        '</span>' +
+                                        '<span class="t7-search-suggestion-action">Ver produto</span>' +
+                                        '</a>';
+                                }).join('');
+                            })
+                            .catch(function() {
+                                closePanel(panel);
+                            });
+                    }
+
+                    ["input", "keyup"].forEach(function(eventName) {
+                        input.addEventListener(eventName, function(event) {
+                            if (event.key === "Enter") return;
+                            event.stopImmediatePropagation();
+                            render(input.value);
+                        }, true);
+                    });
+
+                    form.addEventListener("submit", function(event) {
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                        var term = input.value ? input.value.trim() : "";
+                        window.location.href = "busca/index.html" + (term ? "?q=" + encodeURIComponent(term) : "");
+                    }, true);
+
+                    document.addEventListener("click", function(event) {
+                        if (!form.contains(event.target)) closePanel(panel);
+                    });
+                }
+
+                function init() {
+                    document.querySelectorAll(".search-header").forEach(setupSearchSuggestion);
+                }
+
+                if (document.readyState === "loading") {
+                    document.addEventListener("DOMContentLoaded", init);
+                } else {
+                    init();
+                }
+            })();
         </script><script type="text/javascript">
             if(/MSIE \d|Trident.*rv:/.test(navigator.userAgent)){
                 document.write('<script src="https://images.tcdn.com.br/files/996644/themes/46/js/navigator.min.js?c670cbd0ba0da11a70f877f1dbc08658.js"><\/script>');
             }
         </script><script async="" data-store="996644" defer="" id="pageview-script" src="_assets/images.tcdn.com.br/commerce/assets/store/js/dist/pageview.min__f46324de.js" type="text/javascript"></script><!-- Inicio bloco bottom --><!-- Fim bloco bottom --><meta content="c5237273-47de-4d25-86b2-2b240f77be04" name="adopt-website-id"/><script class="adopt-injector" src="_assets/tag.goadopt.io/injector__c04b3bb2.js"></script><script>window.adoptHideAfterConsent = true;</script><script src="./preco-loader.js"></script>
 </body></html>
+
+
+
+
 
 
 

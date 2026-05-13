@@ -1,5 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import "dotenv/config";
 import express from "express";
 
 import { requireEnv, safeJson } from "./lib/env.js";
@@ -40,6 +41,13 @@ app.get("/api/health", async (_req, res) => {
 
 app.use("/api", apiRouter);
 
+app.get("/loja/busca.php", (req, res) => {
+  const term = String(req.query.palavra_busca || req.query.q || "").trim();
+  const params = new URLSearchParams();
+  if (term) params.set("q", term);
+  res.redirect(302, `/busca/index.html${params.toString() ? `?${params}` : ""}`);
+});
+
 // Serve static site.
 app.use(express.static(STATIC_DIR, { extensions: ["html"] }));
 
@@ -69,4 +77,3 @@ app.listen(PORT, () => {
     })
   );
 });
-

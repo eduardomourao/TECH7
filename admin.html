@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin â€” TECH 7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, system-ui, sans-serif; background: #111; color: #e5e5e5; min-height: 100vh; }
+    .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .login-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 14px; padding: 40px; width: 100%; max-width: 400px; }
+    .login-card h1 { font-size: 22px; margin-bottom: 8px; color: #fff; }
+    .login-card p { color: #888; font-size: 14px; margin-bottom: 24px; }
+    .login-card input { width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #333; background: #222; color: #fff; font-size: 14px; margin-bottom: 16px; }
+    .login-card input:focus { outline: none; border-color: #ff6a00; }
+    .login-card button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #ff6a00; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; }
+    .login-card button:hover { background: #e65f00; }
+    .login-card .error { color: #ef4444; font-size: 13px; margin-top: 8px; display: none; }
+
+    .app-screen { display: none; }
+    .topbar { background: #1a1a1a; border-bottom: 1px solid #2a2a2a; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar h1 { font-size: 18px; color: #fff; }
+    .topbar .logout { background: none; border: 1px solid #333; color: #999; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    .topbar .logout:hover { border-color: #ff6a00; color: #fff; }
+    .tabs { background: #1a1a1a; border-bottom: 1px solid #2a2a2a; display: flex; gap: 0; padding: 0 24px; }
+    .tabs button { padding: 12px 20px; background: none; border: none; color: #888; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
+    .tabs button:hover { color: #fff; }
+    .tabs button.active { color: #ff6a00; border-bottom-color: #ff6a00; }
+    .tab-content { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
+    .tab-content.active { display: block; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #222; white-space: nowrap; }
+    th { color: #888; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+    td { color: #ccc; }
+    tr:hover td { background: #1a1a1a; }
+
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+    .badge-pending { background: #3b3b00; color: #ffd700; }
+    .badge-paid { background: #003b1f; color: #22c55e; }
+    .badge-cancelled { background: #3b0000; color: #ef4444; }
+    .badge-failed { background: #3b0000; color: #ef4444; }
+    .badge-refunded { background: #2a1a3b; color: #a855f7; }
+
+    .btn { padding: 6px 14px; border-radius: 6px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .btn-sm { padding: 4px 10px; font-size: 11px; }
+    .btn-primary { background: #ff6a00; color: #fff; }
+    .btn-primary:hover { background: #e65f00; }
+    .btn-outline { background: none; border: 1px solid #333; color: #ccc; }
+    .btn-outline:hover { border-color: #ff6a00; color: #fff; }
+    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-success { background: #16a34a; color: #fff; }
+
+    input[type="text"], input[type="number"], select { padding: 6px 10px; border-radius: 6px; border: 1px solid #333; background: #222; color: #fff; font-size: 13px; width: 100%; max-width: 160px; }
+    input:focus, select:focus { outline: none; border-color: #ff6a00; }
+
+    .inline-edit { display: flex; gap: 6px; align-items: center; }
+    .inline-edit input { max-width: 80px; }
+    .inline-edit button { padding: 4px 8px; font-size: 11px; }
+
+    .order-detail { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+    .order-detail h2 { font-size: 16px; color: #fff; margin-bottom: 16px; }
+    .order-detail .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .order-detail .field label { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 2px; }
+    .order-detail .field span { font-size: 14px; color: #fff; }
+    .order-detail .status-select { display: flex; gap: 8px; align-items: center; margin-top: 16px; }
+    .order-detail .status-select select { max-width: 160px; }
+
+    .toast { position: fixed; top: 18px; right: 18px; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; color: #fff; z-index: 9999; transform: translateY(-10px); opacity: 0; transition: all .25s; pointer-events: none; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-success { background: #16a34a; }
+    .toast-error { background: #dc2626; }
+
+    .loading { text-align: center; padding: 40px; color: #666; }
+    .pagination { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 20px; }
+    .pagination button { padding: 6px 12px; border-radius: 6px; border: 1px solid #333; background: none; color: #ccc; cursor: pointer; font-size: 13px; }
+    .pagination button:hover { border-color: #ff6a00; }
+    .pagination button:disabled { opacity: .4; cursor: default; }
+    .pagination span { font-size: 13px; color: #888; }
+
+    .back-btn { background: none; border: none; color: #ff6a00; cursor: pointer; font-size: 13px; margin-bottom: 16px; display: inline-block; }
+    .back-btn:hover { text-decoration: underline; }
+
+    @media (max-width: 768px) {
+      .tabs { padding: 0 12px; overflow-x: auto; }
+      .tab-content { padding: 12px; }
+      .order-detail .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <h1>ðŸ” Admin TECH 7</h1>
+      <p>Digite usuario e senha de administrador</p>
+      <input type="text" id="usernameInput" placeholder="Usuario" autocomplete="off">
+      <input type="password" id="passwordInput" placeholder="Senha" autocomplete="off">
+      <button id="loginBtn">Entrar</button>
+      <div class="error" id="loginError">Credenciais invalidas</div>
+    </div>
+  </div>
+
+  <div class="app-screen" id="appScreen">
+    <div class="topbar">
+      <h1>âš™ï¸ Admin â€” TECH 7</h1>
+      <button class="logout" id="logoutBtn">Sair</button>
+    </div>
+    <div class="tabs">
+      <button class="active" data-tab="products">Produtos</button>
+      <button data-tab="orders">Pedidos</button>
+    </div>
+    <div class="tab-content active" id="tab-products"></div>
+    <div class="tab-content" id="tab-orders"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/js/admin.js"></script>
+</body>
+</html>
+
