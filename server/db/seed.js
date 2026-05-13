@@ -1,8 +1,9 @@
 import { pool } from "../lib/db.js";
+import { databaseUrl } from "../lib/db.js";
 import { newId } from "../lib/ids.js";
 
 async function run() {
-  if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required for db:seed");
+  if (!databaseUrl) throw new Error("A database URL is required for db:seed");
 
   // Minimal seed so the cart UI can be tested immediately.
   const products = [
@@ -45,4 +46,3 @@ run().catch((e) => {
   console.error("seed failed", e);
   process.exit(1);
 });
-

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { pool } from "../lib/db.js";
+import { databaseEnvName, databaseUrl, pool } from "../lib/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,8 +23,8 @@ async function appliedSet() {
 }
 
 async function run() {
-  if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL is required for db:migrate");
+  if (!databaseUrl) {
+    throw new Error("A database URL is required for db:migrate");
   }
 
   await ensureMigrationsTable();
@@ -54,6 +54,8 @@ async function run() {
   }
 
   await pool.end();
+  // eslint-disable-next-line no-console
+  console.log("[migrate] complete", { source: databaseEnvName });
 }
 
 run().catch((e) => {
@@ -61,4 +63,3 @@ run().catch((e) => {
   console.error("[migrate] failed", e);
   process.exit(1);
 });
-

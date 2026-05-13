@@ -4,7 +4,8 @@ import "dotenv/config";
 import express from "express";
 
 import { requireEnv, safeJson } from "./lib/env.js";
-import { pool } from "./lib/db.js";
+import { databaseEnvName, databaseUrl, pool } from "./lib/db.js";
+import { ensureSchema } from "./lib/schema.js";
 import { router as apiRouter } from "./routes/api.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -45,15 +46,24 @@ export function createApp(options = {}) {
     app.get(joinRoute(prefix, "/health"), async (_req, res) => {
       try {
         // Lightweight DB check (optional if DATABASE_URL isn't set yet).
-        if (process.env.DATABASE_URL) {
+        if (databaseUrl) {
+          await ensureSchema();
           await pool.query("select 1 as ok");
         }
-        res.json({ ok: true });
+        res.json({ ok: true, database: databaseUrl ? "connected" : "not_configured", source: databaseEnvName || null });
       } catch (err) {
         res.status(500).json({ ok: false, error: String(err?.message || err) });
       }
     });
 
+    app.use(prefix || "/", async (_req, _res, next) => {
+      try {
+        await ensureSchema();
+        next();
+      } catch (error) {
+        next(error);
+      }
+    });
     app.use(prefix || "/", apiRouter);
     app.use(joinRoute(prefix, "/*"), (_req, res) => {
       res.status(404).json({ error: "api_not_found" });

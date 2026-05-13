@@ -2,7 +2,7 @@ import "dotenv/config";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { pool } from "../lib/db.js";
+import { databaseUrl, pool } from "../lib/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,7 +28,7 @@ function toSectionFromUrl(url, fallback) {
 }
 
 async function run() {
-  if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required for catalog import");
+  if (!databaseUrl) throw new Error("A database URL is required for catalog import");
 
   const raw = await fs.readFile(INDEX_PATH, "utf8");
   const parsed = JSON.parse(raw);
