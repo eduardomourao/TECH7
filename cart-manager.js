@@ -188,6 +188,10 @@
         }
         if (existing) {
           existing.quantidade += (parseInt(produto.quantidade || produto.qty || 1, 10) || 1);
+          var novoPreco = _parseMoney(produto.preco != null ? produto.preco : produto.price);
+          if (novoPreco > 0) existing.preco = novoPreco;
+          if (produto.imagem || produto.image) existing.imagem = String(produto.imagem || produto.image || '');
+          if (produto.url) existing.url = String(produto.url || '');
         } else {
           items.push(_normalizeItem(produto, items.length));
         }

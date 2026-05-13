@@ -28,19 +28,25 @@
   /* ================================================================ */
 
   function getProductId() {
-    // Gera um ID a partir do pathname: /categoria/marca/slug
-    var parts = window.location.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
-    // Remove index.html do final se existir
-    if (parts[parts.length - 1] === 'index.html' || parts[parts.length - 1] === 'index.htm') {
-      parts.pop();
-    }
-    // Pega as 3 Ãºltimas partes: secao / marca / slug
-    var slug = parts.pop() || '';
-    var marca = parts.pop() || '';
-    var secao = parts.pop() || '';
+    var productPath = getProductPathParts();
+    var slug = productPath.slug;
+    var marca = productPath.marca;
+    var secao = productPath.secao;
     // Gera ID Ãºnico do produto
     var raw = (secao + '-' + marca + '-' + slug).toLowerCase().replace(/[^a-z0-9-]/g, '');
     return raw || 'prod-' + Date.now().toString(36);
+  }
+
+  function getProductPathParts() {
+    var parts = window.location.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
+    if (parts[parts.length - 1] === 'index.html' || parts[parts.length - 1] === 'index.htm') {
+      parts.pop();
+    }
+    return {
+      slug: parts.pop() || '',
+      marca: parts.pop() || '',
+      secao: parts.pop() || ''
+    };
   }
 
   function getProductSlug() {
@@ -71,6 +77,47 @@
   // O JSON jÃ¡ foi carregado por preco-loader.js via fetch e cacheado
   var _precoCache = null;
 
+  function getPrecoFromJson() {
+    var productPath = getProductPathParts();
+    if (!productPath.slug) return Promise.resolve(null);
+
+    var load = _precoCache ? Promise.resolve(_precoCache) : fetch('/precos.json', { cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) return null;
+        return r.json();
+      })
+      .then(function (data) {
+        _precoCache = data || null;
+        return _precoCache;
+      });
+
+    return load.then(function (data) {
+      if (!data) return null;
+
+      var preco = data[productPath.secao] && data[productPath.secao][productPath.marca]
+        ? data[productPath.secao][productPath.marca][productPath.slug]
+        : undefined;
+
+      if (typeof preco === 'undefined') {
+        var secoes = Object.keys(data);
+        for (var i = 0; i < secoes.length; i++) {
+          var marcas = data[secoes[i]] || {};
+          var marcaKeys = Object.keys(marcas);
+          for (var j = 0; j < marcaKeys.length; j++) {
+            if (typeof marcas[marcaKeys[j]][productPath.slug] !== 'undefined') {
+              preco = marcas[marcaKeys[j]][productPath.slug];
+              break;
+            }
+          }
+          if (typeof preco !== 'undefined') break;
+        }
+      }
+
+      var n = getNum(preco);
+      return n > 0 ? n : null;
+    }).catch(function () { return null; });
+  }
+
   function getPrecoFromApi(productId) {
     return fetch('/api/products/' + encodeURIComponent(productId), { cache: 'no-store' })
       .then(function (r) {
@@ -79,9 +126,35 @@
       })
       .then(function (data) {
         if (!data || data.price_cents == null) return null;
-        return Number(data.price_cents) / 100;
+        var price = Number(data.price_cents) / 100;
+        return price > 0 ? price : null;
       })
       .catch(function () { return null; });
+  }
+
+  function getPrecoFromDataLayer() {
+    var dl = window.dataLayer;
+    if (!Array.isArray(dl)) return 0;
+    for (var i = 0; i < dl.length; i++) {
+      var item = dl[i] || {};
+      var n = getNum(item.priceSell || item.price);
+      if (n > 0) return n;
+      if (Array.isArray(item.listSku)) {
+        for (var j = 0; j < item.listSku.length; j++) {
+          var sku = item.listSku[j] || {};
+          n = getNum(sku.sellPrice || sku.price);
+          if (n > 0) return n;
+        }
+      }
+    }
+    return 0;
+  }
+
+  function getPreco(productId) {
+    return getPrecoFromJson().then(function (precoJson) {
+      if (precoJson) return precoJson;
+      return getPrecoFromApi(productId);
+    });
   }
 
   /* ================================================================ */
@@ -260,7 +333,10 @@
       imagem: produto.imagem,
       variacao: produto.variacao || '',
       quantidade: produto.quantidade || 1,
-      url: produto.url || window.location.href
+      url: produto.url || window.location.href,
+      slug: produto.slug || '',
+      marca: produto.marca || '',
+      section: produto.section || produto.secao || ''
     };
 
     if (window.CartManager) CartManager.adicionar(dados);
@@ -304,8 +380,13 @@
     removerFormTray();
 
     // 3. Busca preÃ§o e monta UI
-    getPrecoFromApi(id).then(function (preco) {
+    getPreco(id).then(function (preco) {
       var precoFinal = preco || 0;
+
+      if (precoFinal === 0) {
+        var precoDataLayer = getPrecoFromDataLayer();
+        if (precoDataLayer > 0) precoFinal = precoDataLayer;
+      }
 
       // Fallback: tenta ler o preÃ§o do DOM (Ãºltimo recurso)
       if (precoFinal === 0) {
@@ -317,7 +398,17 @@
         if (vp) { var n = getNum(vp.textContent); if (n > 0) precoFinal = n; }
       }
 
-      var dados = { id: id, nome: nome, preco: precoFinal, imagem: imagem, url: url };
+      var productPath = getProductPathParts();
+      var dados = {
+        id: id,
+        nome: nome,
+        preco: precoFinal,
+        imagem: imagem,
+        url: url,
+        slug: productPath.slug,
+        marca: productPath.marca,
+        section: productPath.secao
+      };
       var ui = criarUICompra(dados);
 
       // Encontra onde inserir

@@ -20,7 +20,24 @@ function priceToCents(value) {
 
 async function ensureProduct(productId, snapshot) {
   const existing = await pool.query(`select id from products where id = $1 and active = true`, [productId]);
-  if (existing.rowCount > 0) return true;
+  if (existing.rowCount > 0) {
+    if (snapshot && typeof snapshot === "object") {
+      const imageUrl = String(snapshot.image_url || snapshot.image || snapshot.imagem || "").trim() || null;
+      const priceCents = priceToCents(snapshot.price ?? snapshot.preco);
+      await pool.query(
+        `
+          update products
+          set
+            price_cents = case when $2 > 0 then $2 else price_cents end,
+            image_url = coalesce($3, image_url),
+            updated_at = now()
+          where id = $1
+        `,
+        [productId, priceCents, imageUrl]
+      );
+    }
+    return true;
+  }
 
   if (!snapshot || typeof snapshot !== "object") return false;
 
@@ -40,6 +57,7 @@ async function ensureProduct(productId, snapshot) {
         name = excluded.name,
         brand = excluded.brand,
         section = excluded.section,
+        price_cents = case when excluded.price_cents > 0 then excluded.price_cents else products.price_cents end,
         image_url = coalesce(excluded.image_url, products.image_url),
         active = true,
         updated_at = now()
