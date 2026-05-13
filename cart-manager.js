@@ -444,9 +444,9 @@
 
     // Ações
     html += '<div style="display:grid;gap:8px;padding:14px 16px;">' +
-      '<a href="carrinho/" style="display:block;text-align:center;padding:10px;border-radius:8px;' +
+      '<a href="/carrinho/" style="display:block;text-align:center;padding:10px;border-radius:8px;' +
       'background:#ff6a00;color:#fff;font-weight:800;text-decoration:none;font-size:14px;">Ver meu carrinho</a>' +
-      '<a href="checkout/" style="display:block;text-align:center;padding:10px;border-radius:8px;' +
+      '<a href="/checkout/" style="display:block;text-align:center;padding:10px;border-radius:8px;' +
       'background:#0d0d0d;color:#fff;font-weight:800;text-decoration:none;font-size:14px;">Finalizar Compra</a>' +
       '</div>';
 

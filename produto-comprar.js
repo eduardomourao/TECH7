@@ -278,8 +278,8 @@
       }, 300);
     }
 
-    // Redireciona
-    setTimeout(function () { window.location.href = 'carrinho/'; }, 150);
+    // Redireciona para o carrinho (absoluto da raiz)
+    setTimeout(function () { window.location.href = '/carrinho/'; }, 150);
   }
 
   /* ================================================================ */
@@ -341,18 +341,12 @@
   /* ================================================================ */
 
   function init() {
-    // Carrega scripts necessÃ¡rios
-    if (!document.getElementById('cart-js-loaded')) {
-      var s = document.createElement('script');
-      s.id = 'cart-js-loaded';
-      s.src = '_assets/js/cart.js';
-      document.head.appendChild(s);
-    }
+    // Carrega CSS do carrinho (cart-manager.js jÃ¡ foi carregado por preco-loader.js)
     if (!document.getElementById('cart-css-loaded')) {
       var c = document.createElement('link');
       c.id = 'cart-css-loaded';
       c.rel = 'stylesheet';
-      c.href = '_assets/css/cart.css';
+      c.href = '/_assets/css/cart.css';
       document.head.appendChild(c);
     }
 

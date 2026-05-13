@@ -16,6 +16,17 @@
   }
   window.addEventListener('load', removeAvisoModal, { once: true });
 
+  // Carrega o gerenciador global do carrinho em TODAS as páginas
+  function loadScript(id, src) {
+    if (document.getElementById(id)) return;
+    var s = document.createElement('script');
+    s.id = id;
+    s.src = src;
+    s.defer = true;
+    document.body.appendChild(s);
+  }
+  loadScript('cart-manager-loaded', '/cart-manager.js');
+
   var path = window.location.pathname;
   var parts = path.replace(/\/+$/, '').split('/').filter(Boolean);
 
@@ -24,6 +35,9 @@
   }
 
   if (parts.length < 3) return;
+
+  // Em páginas de produto, carrega o botão de compra customizado
+  loadScript('produto-comprar-loaded', '/produto-comprar.js');
 
   var slug  = parts.pop();
   var marca = parts.pop();
