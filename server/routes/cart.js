@@ -76,7 +76,7 @@ async function getCart(cartId) {
   if (cartRes.rowCount === 0) return null;
   const itemsRes = await pool.query(
     `
-      select ci.product_id, ci.qty, p.name, p.slug, p.price_cents, p.currency, p.image_url
+      select ci.product_id, ci.qty, p.name, p.slug, p.brand, p.section, p.price_cents, p.currency, p.image_url
       from cart_items ci
       join products p on p.id = ci.product_id
       where ci.cart_id = $1

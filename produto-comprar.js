@@ -23,6 +23,10 @@
     return parseFloat(s) || 0;
   }
 
+  function formatMoney(value) {
+    return Number(getNum(value)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
   /* ================================================================ */
   /* ExtraÃ§Ã£o de dados do produto (0 Tray)                             */
   /* ================================================================ */
@@ -41,6 +45,13 @@
     var parts = window.location.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
     if (parts[parts.length - 1] === 'index.html' || parts[parts.length - 1] === 'index.htm') {
       parts.pop();
+    }
+    if (parts.length === 2) {
+      return {
+        slug: parts[1] || '',
+        marca: '',
+        secao: parts[0] || ''
+      };
     }
     return {
       slug: parts.pop() || '',
@@ -119,6 +130,8 @@
   }
 
   function getPrecoFromApi(productId) {
+    var productPath = getProductPathParts();
+
     return fetch('/api/products/' + encodeURIComponent(productId), { cache: 'no-store' })
       .then(function (r) {
         if (!r.ok) return null;
@@ -129,7 +142,26 @@
         var price = Number(data.price_cents) / 100;
         return price > 0 ? price : null;
       })
-      .catch(function () { return null; });
+      .catch(function () { return null; })
+      .then(function (price) {
+        if (price) return price;
+        if (!productPath.slug) return null;
+        return fetch('/api/products?limit=20&q=' + encodeURIComponent(productPath.slug), { cache: 'no-store' })
+          .then(function (r) {
+            if (!r.ok) return null;
+            return r.json();
+          })
+          .then(function (data) {
+            var items = data && Array.isArray(data.items) ? data.items : [];
+            for (var i = 0; i < items.length; i++) {
+              if (items[i].slug === productPath.slug && items[i].price_cents > 0) {
+                return Number(items[i].price_cents) / 100;
+              }
+            }
+            return null;
+          })
+          .catch(function () { return null; });
+      });
   }
 
   function getPrecoFromDataLayer() {
@@ -150,10 +182,22 @@
     return 0;
   }
 
+  function getPrecoFromEmbeddedPage() {
+    var html = document.documentElement ? document.documentElement.innerHTML : '';
+    var match = html.match(/"priceSell"\s*:\s*"([^"]+)"/) ||
+      html.match(/"priceSell"\s*:\s*([0-9]+(?:[.,][0-9]+)?)/) ||
+      html.match(/"price"\s*:\s*"([^"]+)"/) ||
+      html.match(/"price"\s*:\s*([0-9]+(?:[.,][0-9]+)?)/);
+    var n = match ? getNum(match[1]) : 0;
+    return n > 0 ? n : 0;
+  }
+
   function getPreco(productId) {
     return getPrecoFromJson().then(function (precoJson) {
       if (precoJson) return precoJson;
       return getPrecoFromApi(productId);
+    }).then(function (precoApi) {
+      return precoApi || getPrecoFromEmbeddedPage() || null;
     });
   }
 
@@ -163,6 +207,8 @@
 
   var _variacaoHtml = null; // HTML dos selects de variaÃ§Ã£o
   var _variacaoSelecionada = '';
+  var _insertParent = null;
+  var _insertBefore = null;
 
   function extrairVariacao() {
     var form = document.getElementById('form_comprar');
@@ -219,6 +265,8 @@
 
     // Extrai variaÃ§Ãµes antes de remover
     extrairVariacao();
+    _insertParent = form.parentNode;
+    _insertBefore = form.nextSibling;
 
     // Remove o form
     if (form.parentNode) form.parentNode.removeChild(form);
@@ -245,6 +293,12 @@
     var container = document.createElement('div');
     container.className = 't7-buy-wrapper';
     container.style.cssText = 'display:flex;flex-direction:column;gap:12px;margin-top:16px;';
+
+    var price = document.createElement('div');
+    price.className = 't7-buy-price';
+    price.style.cssText = 'font-size:30px;line-height:1.15;font-weight:900;color:#ff6a00;letter-spacing:-.02em;';
+    price.textContent = dados.preco > 0 ? formatMoney(dados.preco) : 'Preco sob consulta';
+    container.appendChild(price);
 
     // VariaÃ§Ãµes
     if (_variacaoHtml) {
@@ -324,7 +378,10 @@
 
   function adicionarAoCarrinho(produto, btn) {
     var api = window.CartManager || window.cartManager;
-    if (!api) return;
+    if (!api) {
+      feedbackErro(btn, 'Carrinho indisponivel');
+      return;
+    }
 
     var dados = {
       id: produto.id,
@@ -339,8 +396,10 @@
       section: produto.section || produto.secao || ''
     };
 
-    if (window.CartManager) CartManager.adicionar(dados);
-    else api.adicionar(dados);
+    var resultado = window.CartManager ? CartManager.adicionar(dados) : api.adicionar(dados);
+    var sync = resultado && typeof resultado.then === 'function'
+      ? resultado
+      : Promise.resolve(resultado);
 
     // Feedback visual rÃ¡pido
     if (btn) {
@@ -354,8 +413,12 @@
       }, 300);
     }
 
-    // Redireciona para o carrinho (absoluto da raiz)
-    setTimeout(function () { window.location.href = '/carrinho/'; }, 150);
+    // Redireciona apenas depois da tentativa de sincronizacao.
+    sync.then(function () {
+      window.location.href = '/carrinho/';
+    }).catch(function () {
+      window.location.href = '/carrinho/';
+    });
   }
 
   /* ================================================================ */
@@ -372,8 +435,11 @@
     var url = window.location.href;
 
     // Verifica se estamos numa pÃ¡gina de produto (tem og:title diferente do index)
+    var pathParts = window.location.pathname.split('/').filter(Boolean);
+    if (pathParts[pathParts.length - 1] === 'index.html' || pathParts[pathParts.length - 1] === 'index.htm') pathParts.pop();
     var isProductPage = !!document.querySelector('meta[property="og:title"]') &&
-      window.location.pathname.split('/').filter(Boolean).length >= 3;
+      pathParts.length >= 2 &&
+      !!document.querySelector('#form_comprar, [data-app="product.buy-form"], #bt_comprar, #button-buy');
     if (!isProductPage) return;
 
     // 2. Remove form Tray
@@ -413,7 +479,9 @@
 
       // Encontra onde inserir
       var target = document.querySelector('.product-colum-right, .product-right, .box-col-product');
-      if (target) {
+      if (_insertParent) {
+        _insertParent.insertBefore(ui, _insertBefore);
+      } else if (target) {
         target.appendChild(ui);
       } else {
         // Fallback: insere apÃ³s h1.product-name

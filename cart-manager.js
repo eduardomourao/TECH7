@@ -67,6 +67,20 @@
     } catch (e) {}
   }
 
+  function _productUrlFromServer(item) {
+    if (!item || !item.slug) return '';
+    var parts = [];
+    var section = String(item.section || '').replace(/^\/+|\/+$/g, '');
+    var brand = String(item.brand || '').replace(/^\/+|\/+$/g, '');
+    var slug = String(item.slug || '').replace(/^\/+|\/+$/g, '');
+    if (section) parts.push(section);
+    if (brand && brand !== 'tech7' && brand !== 'catalogo') parts.push(brand);
+    if (slug) parts.push(slug);
+    if (!parts.length) return '';
+    parts.push('index.html');
+    return parts.join('/');
+  }
+
   function _mapServerItem(item) {
     return {
       id: String(item.product_id || item.id || ''),
@@ -75,7 +89,7 @@
       quantidade: Math.max(1, Number(item.qty || item.quantidade || 1)),
       imagem: String(item.image_url || item.imagem || ''),
       variacao: '',
-      url: item.slug ? (String(item.section || '').replace(/^\/+|\/+$/g, '') + '/' + String(item.slug) + '/index.html').replace(/^\/+/, '') : ''
+      url: _productUrlFromServer(item)
     };
   }
 
@@ -95,9 +109,28 @@
     });
   }
 
-  function _syncFromServerCart(cart) {
+  function _syncFromServerCart(cart, preserveLocalWhenServerEmpty) {
     if (!cart || !Array.isArray(cart.items)) return [];
-    var next = cart.items.map(_mapServerItem).filter(function (it) { return !!it.id; });
+    var local = _load();
+    if (preserveLocalWhenServerEmpty && cart.items.length === 0 && local.length > 0) {
+      _dispatch(local);
+      return local;
+    }
+    var byId = {};
+    for (var i = 0; i < local.length; i++) {
+      byId[local[i].id] = local[i];
+    }
+    var next = cart.items.map(function (item) {
+      var mapped = _mapServerItem(item);
+      var current = byId[mapped.id];
+      if (current) {
+        if (current.url) mapped.url = current.url;
+        if (current.variacao) mapped.variacao = current.variacao;
+        if (current.imagem && !mapped.imagem) mapped.imagem = current.imagem;
+        if (current.preco > 0 && mapped.preco <= 0) mapped.preco = current.preco;
+      }
+      return mapped;
+    }).filter(function (it) { return !!it.id; });
     _save(next);
     _dispatch(next);
     return next;
@@ -109,7 +142,7 @@
       return _fetchJson('/api/cart/' + encodeURIComponent(cid), { cache: 'no-store' })
         .then(function (cart) {
           _setCartId(cart.id);
-          _syncFromServerCart(cart);
+          _syncFromServerCart(cart, true);
           return cart;
         })
         .catch(function () {
@@ -117,7 +150,7 @@
           return _fetchJson('/api/cart', { method: 'POST', headers: { 'content-type': 'application/json' } })
             .then(function (cart) {
               _setCartId(cart.id);
-              _syncFromServerCart(cart);
+              _syncFromServerCart(cart, true);
               return cart;
             });
         });
@@ -125,7 +158,7 @@
     return _fetchJson('/api/cart', { method: 'POST', headers: { 'content-type': 'application/json' } })
       .then(function (cart) {
         _setCartId(cart.id);
-        _syncFromServerCart(cart);
+        _syncFromServerCart(cart, true);
         return cart;
       });
   }
@@ -201,15 +234,18 @@
       for (var j = 0; j < nextItems.length; j++) {
         if (nextItems[j].id === String(produto.id)) { finalQty = nextItems[j].quantidade; break; }
       }
-      _syncItemServer(String(produto.id), finalQty, false, {
+      return _syncItemServer(String(produto.id), finalQty, false, {
         name: produto.nome || produto.name || produto.titulo || 'Produto TECH 7',
         slug: produto.slug || '',
         brand: produto.marca || produto.brand || 'TECH 7',
         section: produto.section || produto.categoria || 'catalogo',
         image_url: produto.imagem || produto.image || '',
         price: _parseMoney(produto.preco != null ? produto.preco : produto.price)
-      }).catch(function () {});
-      return nextItems;
+      }).then(function () {
+        return nextItems;
+      }).catch(function () {
+        return nextItems;
+      });
     },
 
     remover: function (id) {
