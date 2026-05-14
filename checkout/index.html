@@ -807,19 +807,69 @@
         };
       }
 
-      async function processarPIX(dadosPedido) {
-        // TODO: integrar API de pagamento PIX aqui.
-        // Enviar dadosPedido para o endpoint da API e receber qrCodeUrl, codigoPix e expiresIn.
-        return new Promise(function (resolve) {
-          setTimeout(function () {
-            resolve({
-              codigoPix: 'PIX-TECH7-' + Date.now(),
-              qrCodeUrl: '',
-              expiresIn: 900,
-              pedido: '#T7' + Math.floor(10000 + Math.random() * 89999)
-            });
-          }, 1200);
+      async function apiJson(url, options) {
+        var response = await fetch(url, options || {});
+        var data = await response.json().catch(function () { return {}; });
+        if (!response.ok) {
+          throw new Error(data.error || 'Falha na comunicacao com o servidor.');
+        }
+        return data;
+      }
+
+      async function criarPedidoServidor(dadosPedido) {
+        var cart = await apiJson('/api/cart', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' }
         });
+
+        for (var i = 0; i < dadosPedido.itens.length; i++) {
+          var item = dadosPedido.itens[i];
+          await apiJson('/api/cart/' + encodeURIComponent(cart.id) + '/items', {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              productId: item.id,
+              qty: item.qty,
+              product: {
+                id: item.id,
+                nome: item.nome,
+                preco: item.preco,
+                imagem: item.img,
+                variacao: item.variacao
+              }
+            })
+          });
+        }
+
+        return apiJson('/api/orders', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            cartId: cart.id,
+            customer: dadosPedido.cliente,
+            shipping: dadosPedido.entrega
+          })
+        });
+      }
+
+      async function processarPIX(dadosPedido) {
+        var order = await criarPedidoServidor(dadosPedido);
+        var payment = await apiJson('/api/payments/woovi', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            orderId: order.id,
+            customer: dadosPedido.cliente
+          })
+        });
+
+        return {
+          codigoPix: payment.brCode,
+          qrCodeUrl: payment.qrCodeImage,
+          expiresIn: payment.expiresIn,
+          pedido: order.id,
+          paymentLinkUrl: payment.paymentLinkUrl
+        };
       }
 
       function mostrarConfirmacao(numeroPedido) {
@@ -881,11 +931,34 @@
         button.disabled = true;
         button.textContent = 'Gerando PIX...';
         orderSnapshot = montarDadosPedido();
-        var result = await processarPIX(orderSnapshot);
-        document.getElementById('pix-codigo').value = result.codigoPix;
-        document.getElementById('pix-qrcode-container').textContent = 'PIX gerado. Aguardando confirmacao.';
-        document.getElementById('payment-status').textContent = 'PIX - aguardando confirmacao';
-        mostrarConfirmacao(result.pedido);
+        var pixGerado = false;
+        try {
+          var result = await processarPIX(orderSnapshot);
+          pixGerado = true;
+          document.getElementById('pix-codigo').value = result.codigoPix;
+          var qrContainer = document.getElementById('pix-qrcode-container');
+          qrContainer.innerHTML = '';
+          if (result.qrCodeUrl) {
+            var img = document.createElement('img');
+            img.src = result.qrCodeUrl;
+            img.alt = 'QR Code PIX';
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            qrContainer.appendChild(img);
+          } else {
+            qrContainer.textContent = 'PIX gerado. Use o codigo copia e cola.';
+          }
+          document.getElementById('payment-status').textContent = 'PIX aguardando confirmacao - Pedido ' + result.pedido;
+          button.textContent = 'PIX gerado';
+        } catch (error) {
+          document.getElementById('payment-status').textContent = 'Falha ao gerar PIX';
+          document.getElementById('pix-qrcode-container').textContent = error.message || 'Nao foi possivel gerar o PIX.';
+        } finally {
+          if (!pixGerado) {
+            button.disabled = false;
+            button.textContent = 'Gerar PIX e finalizar pedido';
+          }
+        }
       });
 
       renderSummary();

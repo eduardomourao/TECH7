@@ -165,10 +165,13 @@
     }).then(function (order) {
       if (!order || !order.id) throw new Error('Pedido invalido');
       document.getElementById('co-pedido-id').textContent = order.id;
-      return fetch('/api/payments/mercadopago', {
+      return fetch('/api/payments/woovi', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ orderId: order.id })
+        body: JSON.stringify({
+          orderId: order.id,
+          customer: { nome: nome, telefone: tel, email: email }
+        })
       }).then(function (res) {
         if (!res.ok) throw new Error('Falha ao gerar pagamento');
         return res.json();
@@ -176,11 +179,26 @@
     }).then(function (payment) {
       var spinner = document.getElementById('pix-spinner');
       if (spinner) spinner.style.display = 'none';
-      if (payment && payment.initPoint) {
-        window.location.href = payment.initPoint;
+      if (payment && payment.brCode) {
+        var pixCode = document.getElementById('pix-codigo');
+        var qrBox = document.getElementById('pix-qrcode-container');
+        if (pixCode) pixCode.value = payment.brCode;
+        if (qrBox) {
+          qrBox.innerHTML = '';
+          if (payment.qrCodeImage) {
+            var img = document.createElement('img');
+            img.src = payment.qrCodeImage;
+            img.alt = 'QR Code PIX';
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            qrBox.appendChild(img);
+          } else {
+            qrBox.textContent = 'PIX gerado. Use o codigo copia e cola.';
+          }
+        }
         return;
       }
-      throw new Error('Link de pagamento indisponivel');
+      throw new Error('PIX indisponivel');
     }).catch(function (err) {
       var spinner = document.getElementById('pix-spinner');
       if (spinner) spinner.style.display = 'none';

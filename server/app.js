@@ -103,6 +103,7 @@ export function runStartupChecks() {
   try {
     if (databaseUrl) requireEnv(databaseEnvName || "DATABASE_URL");
     if (process.env.MP_ACCESS_TOKEN) requireEnv("MP_ACCESS_TOKEN");
+    if (process.env.WOOVI_APP_ID) requireEnv("WOOVI_APP_ID");
   } catch (e) {
     // eslint-disable-next-line no-console
     console.warn("[startup] config warning:", safeJson({ error: String(e?.message || e) }));
