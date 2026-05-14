@@ -100,7 +100,7 @@ router.get("/:id", async (req, res) => {
   res.json(cart);
 });
 
-router.put("/:id/items", async (req, res) => {
+async function upsertCartItem(req, res) {
   const cartId = req.params.id;
   const { productId, qty, product } = req.body || {};
 
@@ -143,4 +143,8 @@ router.put("/:id/items", async (req, res) => {
 
   const full = await getCart(cartId);
   res.json(full);
-});
+}
+
+// Accept both PUT and POST for compatibility with older frontends.
+router.put("/:id/items", upsertCartItem);
+router.post("/:id/items", upsertCartItem);
