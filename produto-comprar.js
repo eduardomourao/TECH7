@@ -92,6 +92,12 @@
     var productPath = getProductPathParts();
     if (!productPath.slug) return Promise.resolve(null);
 
+    if (window.Tech7Prices && typeof window.Tech7Prices.resolve === 'function') {
+      return window.Tech7Prices.resolve(productPath).then(function (result) {
+        return result && result.found && result.price > 0 ? result.price : null;
+      });
+    }
+
     var load = _precoCache ? Promise.resolve(_precoCache) : fetch('/precos.json', { cache: 'no-store' })
       .then(function (r) {
         if (!r.ok) return null;
@@ -125,79 +131,18 @@
       }
 
       var n = getNum(preco);
+      if (n <= 0) console.warn('produto-comprar: produto sem preco mapeado em precos.json', productPath);
       return n > 0 ? n : null;
-    }).catch(function () { return null; });
-  }
-
-  function getPrecoFromApi(productId) {
-    var productPath = getProductPathParts();
-
-    return fetch('/api/products/' + encodeURIComponent(productId), { cache: 'no-store' })
-      .then(function (r) {
-        if (!r.ok) return null;
-        return r.json();
-      })
-      .then(function (data) {
-        if (!data || data.price_cents == null) return null;
-        var price = Number(data.price_cents) / 100;
-        return price > 0 ? price : null;
-      })
-      .catch(function () { return null; })
-      .then(function (price) {
-        if (price) return price;
-        if (!productPath.slug) return null;
-        return fetch('/api/products?limit=20&q=' + encodeURIComponent(productPath.slug), { cache: 'no-store' })
-          .then(function (r) {
-            if (!r.ok) return null;
-            return r.json();
-          })
-          .then(function (data) {
-            var items = data && Array.isArray(data.items) ? data.items : [];
-            for (var i = 0; i < items.length; i++) {
-              if (items[i].slug === productPath.slug && items[i].price_cents > 0) {
-                return Number(items[i].price_cents) / 100;
-              }
-            }
-            return null;
-          })
-          .catch(function () { return null; });
-      });
-  }
-
-  function getPrecoFromDataLayer() {
-    var dl = window.dataLayer;
-    if (!Array.isArray(dl)) return 0;
-    for (var i = 0; i < dl.length; i++) {
-      var item = dl[i] || {};
-      var n = getNum(item.priceSell || item.price);
-      if (n > 0) return n;
-      if (Array.isArray(item.listSku)) {
-        for (var j = 0; j < item.listSku.length; j++) {
-          var sku = item.listSku[j] || {};
-          n = getNum(sku.sellPrice || sku.price);
-          if (n > 0) return n;
-        }
-      }
-    }
-    return 0;
-  }
-
-  function getPrecoFromEmbeddedPage() {
-    var html = document.documentElement ? document.documentElement.innerHTML : '';
-    var match = html.match(/"priceSell"\s*:\s*"([^"]+)"/) ||
-      html.match(/"priceSell"\s*:\s*([0-9]+(?:[.,][0-9]+)?)/) ||
-      html.match(/"price"\s*:\s*"([^"]+)"/) ||
-      html.match(/"price"\s*:\s*([0-9]+(?:[.,][0-9]+)?)/);
-    var n = match ? getNum(match[1]) : 0;
-    return n > 0 ? n : 0;
+    }).catch(function (err) {
+      console.warn('produto-comprar: nao foi possivel carregar precos.json', err);
+      return null;
+    });
   }
 
   function getPreco(productId) {
     return getPrecoFromJson().then(function (precoJson) {
-      if (precoJson) return precoJson;
-      return getPrecoFromApi(productId);
-    }).then(function (precoApi) {
-      return precoApi || getPrecoFromEmbeddedPage() || null;
+      if (!precoJson) console.warn('produto-comprar: produto sem preco em precos.json', getProductPathParts());
+      return precoJson || null;
     });
   }
 
@@ -504,21 +449,6 @@
     // 3. Busca preÃ§o e monta UI
     getPreco(id).then(function (preco) {
       var precoFinal = preco || 0;
-
-      if (precoFinal === 0) {
-        var precoDataLayer = getPrecoFromDataLayer();
-        if (precoDataLayer > 0) precoFinal = precoDataLayer;
-      }
-
-      // Fallback: tenta ler o preÃ§o do DOM (Ãºltimo recurso)
-      if (precoFinal === 0) {
-        var pi = document.getElementById('preco_atual');
-        if (pi && pi.value) { var n = getNum(pi.value); if (n > 0) precoFinal = n; }
-      }
-      if (precoFinal === 0) {
-        var vp = document.getElementById('variacaoPreco');
-        if (vp) { var n = getNum(vp.textContent); if (n > 0) precoFinal = n; }
-      }
 
       var productPath = getProductPathParts();
       var dados = {

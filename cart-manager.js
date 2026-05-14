@@ -41,6 +41,41 @@
     };
   }
 
+  function _resolveOfficialPrice(produto) {
+    if (!produto || !global.Tech7Prices || typeof global.Tech7Prices.resolve !== 'function') {
+      return Promise.resolve(produto);
+    }
+
+    var slug = produto.slug || '';
+    if (!slug && produto.url) {
+      var path = String(produto.url).replace(/^https?:\/\/[^/]+/i, '').split('?')[0].replace(/\/+$/, '');
+      var parts = path.split('/').filter(Boolean);
+      if (parts[parts.length - 1] === 'index.html' || parts[parts.length - 1] === 'index.htm') parts.pop();
+      slug = parts[parts.length - 1] || '';
+      if (!produto.marca && parts.length >= 3) produto.marca = parts[parts.length - 2] || '';
+      if (!produto.section && !produto.secao && parts.length >= 3) produto.section = parts[parts.length - 3] || '';
+    }
+
+    if (!slug) return Promise.resolve(produto);
+
+    return global.Tech7Prices.resolve({
+      slug: slug,
+      marca: produto.marca || produto.brand || '',
+      secao: produto.section || produto.secao || produto.categoria || ''
+    }).then(function (result) {
+      if (result && result.found && result.price > 0) {
+        produto.preco = result.price;
+        produto.price = result.price;
+      } else {
+        console.warn('[cartManager] produto sem preco mapeado em precos.json', produto);
+      }
+      return produto;
+    }).catch(function (err) {
+      console.warn('[cartManager] falha ao resolver preco em precos.json', err);
+      return produto;
+    });
+  }
+
   /* ------------------------------------------------------------------ */
   /* Persistência                                                        */
   /* ------------------------------------------------------------------ */
@@ -214,6 +249,8 @@
   var cartManager = {
     adicionar: function (produto) {
       if (!produto || !produto.id) { console.warn('[cartManager] adicionar: invalido', produto); return; }
+      return _resolveOfficialPrice(produto).then(function (produtoResolvido) {
+        produto = produtoResolvido || produto;
       var nextItems = _mutate(function (items) {
         var existing = null;
         for (var i = 0; i < items.length; i++) {
@@ -245,6 +282,7 @@
         return nextItems;
       }).catch(function () {
         return nextItems;
+      });
       });
     },
 

@@ -1,4 +1,6 @@
 (function() {
+  'use strict';
+
   function removeAvisoModal() {
     var modal = document.querySelector('.modal-theme.email-modal');
     if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
@@ -7,11 +9,12 @@
     document.documentElement.classList.remove('modal-open');
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', removeAvisoModal, { once: true });
-  } else {
-    removeAvisoModal();
+  function onReady(fn) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
+    else fn();
   }
+
+  onReady(removeAvisoModal);
   window.addEventListener('load', removeAvisoModal, { once: true });
 
   function loadScript(id, src, globalName) {
@@ -36,29 +39,20 @@
     });
   }
 
-  var cartReady = loadScript('cart-manager-loaded', '/cart-manager.js', 'CartManager')
-    .catch(function(err) { console.error('preco-loader: erro ao carregar cart-manager.js', err); });
+  function getPathParts(pathname) {
+    var parts = String(pathname || window.location.pathname || '').replace(/\/+$/, '').split('/').filter(Boolean);
+    if (parts[parts.length - 1] === 'index.html' || parts[parts.length - 1] === 'index.htm') parts.pop();
 
-  var path = window.location.pathname;
-  var parts = path.replace(/\/+$/, '').split('/').filter(Boolean);
+    if (parts.length === 2) {
+      return { secao: parts[0] || '', marca: '', slug: parts[1] || '' };
+    }
 
-  if (parts[parts.length - 1] === 'index.html' || parts[parts.length - 1] === 'index.htm') {
-    parts.pop();
+    return {
+      secao: parts.length >= 3 ? parts[parts.length - 3] : (parts[parts.length - 2] || ''),
+      marca: parts.length >= 3 ? parts[parts.length - 2] : '',
+      slug: parts[parts.length - 1] || ''
+    };
   }
-
-  var slug = parts[parts.length - 1] || '';
-  var marca = parts.length >= 3 ? parts[parts.length - 2] : '';
-  var secao = parts.length >= 3 ? parts[parts.length - 3] : (parts[parts.length - 2] || '');
-  var hasProductForm = !!document.querySelector('#form_comprar, [data-app="product.buy-form"], #bt_comprar, #button-buy');
-  var looksLikeProduct = parts.length >= 3 || (parts.length >= 2 && slug.indexOf('-') !== -1) || hasProductForm;
-
-  if (looksLikeProduct) {
-    cartReady.then(function() {
-      return loadScript('produto-comprar-loaded', '/produto-comprar.js');
-    }).catch(function(err) { console.error('preco-loader: erro ao carregar produto-comprar.js', err); });
-  }
-
-  if (!looksLikeProduct || !slug || !secao) return;
 
   function getNum(value) {
     if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
@@ -69,19 +63,50 @@
     return Number.isFinite(n) ? n : 0;
   }
 
-  function findJsonPrice(data) {
-    if (!data) return 0;
-    var preco;
+  function formatMoney(preco) {
+    return Number(getNum(preco)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
 
-    if (marca && data[secao] && data[secao][marca] && typeof data[secao][marca][slug] !== 'undefined') {
+  var priceDataPromise = null;
+
+  function loadPrices() {
+    if (!priceDataPromise) {
+      priceDataPromise = fetch('/precos.json?nocache=' + Date.now(), { cache: 'no-store' })
+        .then(function(res) {
+          if (!res.ok) throw new Error('http_' + res.status);
+          return res.json();
+        })
+        .catch(function(err) {
+          console.error('preco-loader: erro ao carregar precos.json', err);
+          return null;
+        });
+    }
+    return priceDataPromise;
+  }
+
+  function lookupPrice(data, input) {
+    input = input || {};
+    var secao = input.secao || input.section || '';
+    var marca = input.marca || input.brand || '';
+    var slug = input.slug || '';
+    var warnKey = [secao, marca, slug].filter(Boolean).join('/');
+
+    if (!data || !slug) return { found: false, price: 0, secao: secao, marca: marca, slug: slug };
+
+    var preco;
+    var foundSecao = secao;
+    var foundMarca = marca;
+
+    if (secao && marca && data[secao] && data[secao][marca] && typeof data[secao][marca][slug] !== 'undefined') {
       preco = data[secao][marca][slug];
     }
 
-    if (typeof preco === 'undefined' && data[secao]) {
+    if (typeof preco === 'undefined' && secao && data[secao]) {
       var marcas = Object.keys(data[secao]);
       for (var i = 0; i < marcas.length; i++) {
-        if (typeof data[secao][marcas[i]][slug] !== 'undefined') {
+        if (data[secao][marcas[i]] && typeof data[secao][marcas[i]][slug] !== 'undefined') {
           preco = data[secao][marcas[i]][slug];
+          foundMarca = marcas[i];
           break;
         }
       }
@@ -95,6 +120,8 @@
         for (var j = 0; j < groupMarcas.length; j++) {
           if (group[groupMarcas[j]] && typeof group[groupMarcas[j]][slug] !== 'undefined') {
             preco = group[groupMarcas[j]][slug];
+            foundSecao = secoes[s];
+            foundMarca = groupMarcas[j];
             break;
           }
         }
@@ -102,80 +129,76 @@
       }
     }
 
-    return getNum(preco);
+    var price = getNum(preco);
+    var found = typeof preco !== 'undefined' && price > 0;
+    if (!found) console.warn('preco-loader: produto sem preco mapeado em precos.json', warnKey || slug || input);
+
+    return { found: found, price: found ? price : 0, secao: foundSecao, marca: foundMarca, slug: slug };
   }
 
-  function updatePrice(preco) {
-    preco = getNum(preco);
-    if (preco <= 0) return;
+  function resolvePrice(input) {
+    if (!input || !input.slug) input = getPathParts();
+    return loadPrices().then(function(data) { return lookupPrice(data, input); });
+  }
+
+  function updateScopedText(selector, text) {
+    var nodes = document.querySelectorAll(selector);
+    for (var i = 0; i < nodes.length; i++) nodes[i].textContent = text;
+  }
+
+  function updatePrice(result) {
+    var preco = result && result.price ? getNum(result.price) : 0;
+    if (preco <= 0) return result;
 
     window.T7_PRODUCT_PRICE = preco;
-    var formatado = Number(preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    var formatado = formatMoney(preco);
+    var semMoeda = Number(preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    var elPrecoAtual = document.getElementById('preco_atual');
-    if (elPrecoAtual) {
-      if (elPrecoAtual.tagName === 'INPUT') elPrecoAtual.value = preco;
-      else elPrecoAtual.innerText = formatado;
-    }
+    var precoAtualEls = document.querySelectorAll('#product-priceBox #preco_atual, #form_comprar #preco_atual, input#preco_atual');
+    for (var i = 0; i < precoAtualEls.length; i++) precoAtualEls[i].value = String(preco);
 
-    var elsPriceOff = document.querySelectorAll('.price-off');
-    elsPriceOff.forEach(function(el) { el.innerHTML = formatado; });
+    updateScopedText('#product-priceBox #variacaoPreco, #form_comprar #variacaoPreco, #produto_preco #variacaoPreco', semMoeda);
+    updateScopedText('#product-priceBox .price-off, #form_comprar .price-off, .t7-buy-price', formatado);
 
-    var outrosEls = document.querySelectorAll('.current-price, .woocommerce-Price-amount');
-    outrosEls.forEach(function(el) { el.innerText = formatado; });
+    var buyButtons = document.querySelectorAll('.btn-comprar[data-preco]');
+    for (var b = 0; b < buyButtons.length; b++) buyButtons[b].setAttribute('data-preco', String(preco));
 
-    var elVariacao = document.getElementById('variacaoPreco');
-    if (elVariacao) {
-      elVariacao.innerText = Number(preco).toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    }
-
-    if (typeof dataLayer !== 'undefined') {
-      for (var i = 0; i < dataLayer.length; i++) {
-        if (dataLayer[i].priceSell) dataLayer[i].priceSell = String(preco);
-        if (dataLayer[i].price) dataLayer[i].price = String(preco);
-      }
-    }
-  }
-
-  function fetchJsonPrice() {
-    return fetch('/precos.json?nocache=' + Date.now(), { cache: 'no-store' })
-      .then(function(r) { return r.ok ? r.json() : null; })
-      .then(findJsonPrice)
-      .catch(function(err) {
-        console.error('preco-loader: erro ao carregar precos.json', err);
-        return 0;
-      });
-  }
-
-  function fetchApiPrice() {
-    return fetch('/api/products?limit=20&q=' + encodeURIComponent(slug), { cache: 'no-store' })
-      .then(function(r) { return r.ok ? r.json() : null; })
-      .then(function(data) {
-        var items = data && Array.isArray(data.items) ? data.items : [];
-        for (var i = 0; i < items.length; i++) {
-          if (items[i].slug === slug && items[i].price_cents > 0) {
-            return Number(items[i].price_cents) / 100;
+    if (typeof dataLayer !== 'undefined' && Array.isArray(dataLayer)) {
+      for (var d = 0; d < dataLayer.length; d++) {
+        if (dataLayer[d].priceSell) dataLayer[d].priceSell = String(preco);
+        if (dataLayer[d].price) dataLayer[d].price = String(preco);
+        if (Array.isArray(dataLayer[d].listSku)) {
+          for (var sku = 0; sku < dataLayer[d].listSku.length; sku++) {
+            if (dataLayer[d].listSku[sku].price) dataLayer[d].listSku[sku].price = preco;
+            if (dataLayer[d].listSku[sku].sellPrice) dataLayer[d].listSku[sku].sellPrice = preco;
           }
         }
-        return 0;
-      })
-      .catch(function() { return 0; });
+      }
+    }
+
+    document.dispatchEvent(new CustomEvent('tech7:price-loaded', { detail: result }));
+    return result;
   }
 
-  function getEmbeddedPrice() {
-    var html = document.documentElement ? document.documentElement.innerHTML : '';
-    var match = html.match(/"priceSell"\s*:\s*"([^"]+)"/) ||
-      html.match(/"priceSell"\s*:\s*([0-9]+(?:[.,][0-9]+)?)/) ||
-      html.match(/"price"\s*:\s*"([^"]+)"/) ||
-      html.match(/"price"\s*:\s*([0-9]+(?:[.,][0-9]+)?)/);
-    return match ? getNum(match[1]) : 0;
-  }
+  var currentProduct = getPathParts();
+  var hasProductForm = !!document.querySelector('#form_comprar, [data-app="product.buy-form"], #bt_comprar, #button-buy');
+  var looksLikeProduct = currentProduct.slug && (currentProduct.secao && currentProduct.marca || hasProductForm);
 
-  fetchJsonPrice()
-    .then(function(preco) { return preco > 0 ? preco : fetchApiPrice(); })
-    .then(function(preco) { return preco > 0 ? preco : getEmbeddedPrice(); })
-    .then(updatePrice);
+  window.Tech7Prices = window.Tech7Prices || {};
+  window.Tech7Prices.load = loadPrices;
+  window.Tech7Prices.resolve = resolvePrice;
+  window.Tech7Prices.apply = updatePrice;
+  window.Tech7Prices.parse = getNum;
+  window.Tech7Prices.format = formatMoney;
+  window.Tech7Prices.current = currentProduct;
+  window.Tech7Prices.ready = looksLikeProduct ? resolvePrice(currentProduct).then(updatePrice) : Promise.resolve(null);
+
+  var cartReady = loadScript('cart-manager-loaded', '/cart-manager.js', 'CartManager')
+    .catch(function(err) { console.error('preco-loader: erro ao carregar cart-manager.js', err); });
+
+  if (looksLikeProduct) {
+    cartReady.then(function() {
+      return loadScript('produto-comprar-loaded', '/produto-comprar.js');
+    }).catch(function(err) { console.error('preco-loader: erro ao carregar produto-comprar.js', err); });
+  }
 })();
