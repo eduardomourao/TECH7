@@ -12,33 +12,26 @@
   <link href="_assets/images.tcdn.com.br/files/996644/themes/46/css/style.min__e4660e26.css" rel="stylesheet">
   <link href="_custom/tech7-theme.css" rel="stylesheet">
   <style>
-    /* CSS Variables & Theme */
     :root {
-      --bar_top: #000000;
-      --bar_top_color: #ffffff;
-      --bg_body: #ffffff;
-      --color_primary: #ff6a00;
-      --color_second: #ff6a00;
-      --color_text: #0d0d0d;
-      --bg_button_primary: #ff6a00;
-      --bg_button_primary_hover: #e65f00;
-
-      --checkout-bg: var(--bg_body);
-      --checkout-surface: #ffffff;
-      --checkout-muted-surface: #f9fafb;
-      --checkout-border: #e5e7eb;
-      --checkout-text: var(--color_text);
-      --checkout-muted: #6b7280;
-      --checkout-accent: var(--color_primary);
-      --checkout-accent-hover: var(--bg_button_primary_hover);
-      --checkout-error: #ef4444;
-      --checkout-success: #22c55e;
+      --checkout-bg: #ffffff;
+      --checkout-card: #e7e5e3;
+      --checkout-card-dark: #111111;
+      --checkout-field: #8d8a87;
+      --checkout-field-text: #ffffff;
+      --checkout-text: #111111;
+      --checkout-muted: #4f4a45;
+      --checkout-line: rgba(17, 17, 17, .42);
+      --checkout-accent: #ff6a00;
+      --checkout-accent-hover: #e65f00;
       --checkout-danger: #dc2626;
-      --checkout-radius: 8px;
-      --checkout-shadow: 0 4px 20px rgba(17,17,17,0.06);
+      --checkout-success: #20b15a;
+      --checkout-radius-lg: 25px;
+      --checkout-radius-md: 18px;
+      --checkout-shadow: 0 22px 60px rgba(0, 0, 0, .10);
     }
 
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       background: var(--checkout-bg);
@@ -58,511 +51,321 @@
       white-space: nowrap;
       border: 0;
     }
+
     .t7-shell { min-height: 100vh; display: flex; flex-direction: column; }
     .t7-top {
-      background: #000;
+      background: #111;
       color: #fff;
+      box-shadow: 0 10px 30px rgba(0,0,0,.12);
     }
     .t7-topbar,
     .t7-header,
     .checkout-container,
     .t7-footer-inner {
-      width: min(1280px, calc(100% - 32px));
+      width: min(1264px, calc(100% - 48px));
       margin: 0 auto;
     }
     .t7-topbar {
-      min-height: 42px;
+      min-height: 30px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
       font-size: 12px;
       font-weight: 700;
+      color: rgba(255,255,255,.86);
     }
+    .t7-topbar a:hover { color: var(--checkout-accent); }
     .t7-header {
-      min-height: 136px;
+      min-height: 82px;
       display: grid;
-      grid-template-columns: 190px minmax(220px, 1fr) 260px;
+      grid-template-columns: 160px minmax(280px, 1fr) 230px;
       align-items: center;
-      gap: 32px;
+      gap: 28px;
     }
-    .t7-logo {
-      display: inline-flex;
-      align-items: center;
-      color: #ff6a00;
-    }
-    .t7-logo img { width: 92px; max-height: 58px; object-fit: contain; }
+    .t7-logo { display: inline-flex; align-items: center; width: max-content; }
+    .t7-logo img { width: auto; height: 52px; max-width: 150px; object-fit: contain; display: block; }
+    .t7-search-wrap { position: relative; }
     .t7-search {
-      height: 56px;
+      height: 48px;
       width: 100%;
       border: 0;
-      border-radius: 10px;
-      padding: 0 22px;
+      border-radius: 999px;
+      padding: 0 58px 0 22px;
       color: var(--checkout-text);
-      background: #fff;
+      background: #e3e1df;
       outline: 2px solid transparent;
-    }
-    .t7-search:focus { outline-color: rgba(255, 106, 0, .45); }
-    .t7-actions {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 22px;
       font-weight: 700;
     }
+    .t7-search::placeholder { color: #74706c; }
+    .t7-search:focus { outline-color: rgba(255, 106, 0, .45); background: #fff; }
+    .t7-search-icon {
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 3px solid #8d8a87;
+      pointer-events: none;
+    }
+    .t7-search-icon::after {
+      content: "";
+      position: absolute;
+      width: 11px;
+      height: 3px;
+      right: -8px;
+      bottom: -4px;
+      border-radius: 999px;
+      background: #8d8a87;
+      transform: rotate(45deg);
+    }
+    .t7-actions { display: flex; align-items: center; justify-content: flex-end; gap: 22px; font-weight: 800; }
+    .t7-actions a:hover { color: var(--checkout-accent); }
     .cart-badge {
       min-width: 24px;
       height: 24px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border-radius: 8px;
+      border-radius: 999px;
       padding: 0 7px;
       background: var(--checkout-accent);
       color: #fff;
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 900;
+      margin-left: 6px;
     }
-    .checkout-main {
-      flex: 1;
-      padding: 38px 0 64px;
+
+    .checkout-main { flex: 1; padding: 34px 0 76px; }
+    .checkout-breadcrumb { margin: 0 0 26px; color: #26211d; font-size: 13px; font-weight: 600; }
+    .checkout-breadcrumb strong { color: #000; font-weight: 900; }
+    h1 { margin: 0; font-family: "Space Grotesk", Inter, sans-serif; font-size: clamp(34px, 5vw, 56px); line-height: 1; letter-spacing: -.04em; }
+    .checkout-lead { max-width: 760px; margin: 12px 0 28px; color: var(--checkout-muted); line-height: 1.55; font-weight: 600; }
+
+    .empty-checkout {
+      display: none;
+      padding: 34px;
+      text-align: center;
+      border-radius: var(--checkout-radius-lg);
+      background: var(--checkout-card);
+      box-shadow: var(--checkout-shadow);
     }
-    h1 {
-      margin: 0 0 10px;
-      font-family: "Space Grotesk", Inter, sans-serif;
-      font-size: clamp(28px, 5vw, 42px);
-      line-height: 1.08;
-      letter-spacing: 0;
-    }
-    .checkout-lead {
-      margin: 0 0 26px;
-      color: var(--checkout-muted);
-      line-height: 1.55;
-    }
+    .empty-checkout.is-visible { display: block; }
+
     .stepper {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 24px;
+      gap: 12px;
+      margin: 0 0 22px;
+      max-width: 760px;
     }
     .step {
-      position: relative;
-      display: grid;
-      gap: 8px;
-      justify-items: center;
-      color: var(--checkout-muted);
-      font-size: 12px;
-      font-weight: 800;
-      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 999px;
+      background: #eceae8;
+      color: #4d4945;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 900;
     }
-    .step::before {
-      content: "";
-      position: absolute;
-      top: 18px;
-      left: calc(-50% + 22px);
-      width: calc(100% - 44px);
-      height: 3px;
-      background: var(--checkout-border);
-      z-index: 0;
-    }
-    .step:first-child::before { display: none; }
+    .step::before { display: none; }
     .step-circle {
-      position: relative;
-      z-index: 1;
-      width: 38px;
-      height: 38px;
+      width: 28px;
+      height: 28px;
       display: grid;
       place-items: center;
       border-radius: 50%;
-      background: var(--checkout-border);
-      color: var(--checkout-muted);
+      background: #fff;
+      color: #4d4945;
       font-weight: 900;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
+      flex: 0 0 auto;
     }
-    .step.is-active .step-circle {
-      background: var(--checkout-accent);
-      color: #fff;
-    }
-    .step.is-active { color: var(--checkout-text); }
-    .step.is-done::before,
-    .step.is-active::before { background: var(--checkout-accent); }
-    .step.is-done .step-circle {
-      background: var(--checkout-success);
-      color: #fff;
-    }
-    .checkout-layout {
-      display: grid;
-      gap: 18px;
-      align-items: start;
-    }
-    .checkout-panel,
+    .step.is-active { background: #1a1a1a; color: #fff; }
+    .step.is-active .step-circle { background: var(--checkout-accent); color: #fff; box-shadow: none; }
+    .step.is-done { background: rgba(255, 106, 0, .14); color: #111; }
+    .step.is-done .step-circle { background: var(--checkout-accent); color: #fff; box-shadow: none; }
+
+    .checkout-layout { display: grid; gap: 24px; align-items: start; }
+    .checkout-panel { display: grid; gap: 24px; }
+    .checkout-step,
+    .voucher-card,
     .summary-card {
-      border: 1px solid var(--checkout-border);
-      border-radius: var(--checkout-radius);
-      background: var(--checkout-surface);
-      box-shadow: var(--checkout-shadow);
+      border-radius: var(--checkout-radius-lg);
+      background: var(--checkout-card);
+      box-shadow: 0 18px 48px rgba(0,0,0,.08);
     }
-    .checkout-panel { padding: 20px; }
-    .checkout-step { display: none; }
-    .checkout-step.is-active { display: block; }
+    .checkout-step { display: block; padding: 22px; scroll-margin-top: 24px; }
+    .checkout-step.is-active { box-shadow: 0 18px 48px rgba(255,106,0,.16); }
     .checkout-step h2,
+    .voucher-card h2,
     .summary-card h2 {
       margin: 0 0 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--checkout-line);
+      color: #000;
       font-family: "Space Grotesk", Inter, sans-serif;
-      font-size: 24px;
-      line-height: 1.2;
+      font-size: clamp(22px, 2.2vw, 30px);
+      line-height: 1.1;
+      letter-spacing: -.03em;
     }
-    .form-grid {
-      display: grid;
-      gap: 14px;
-    }
+
+    .form-grid { display: grid; gap: 16px; }
+    .form-grid.two { grid-template-columns: minmax(0, 1fr); }
     .field { display: grid; gap: 7px; }
-    .field label {
-      font-size: 13px;
-      color: var(--checkout-text);
-      font-weight: 800;
-    }
-    .field input {
-      min-height: 48px;
-      width: 100%;
-      border: 1px solid var(--checkout-border);
-      border-radius: var(--checkout-radius);
-      padding: 0 13px;
-      background: #fff;
-      color: var(--checkout-text);
-      outline: 2px solid transparent;
-    }
-    .field input:focus {
-      border-color: var(--checkout-accent);
-      outline-color: rgba(255, 106, 0, .15);
-    }
-    .field input[aria-invalid="true"] {
-      border-color: var(--checkout-danger);
-    }
-    .error-msg {
-      min-height: 18px;
-      color: var(--checkout-danger);
-      font-size: 12px;
-      font-weight: 700;
-    }
-    .cep-row {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      align-items: end;
-    }
-    .inline-btn {
-      min-height: 48px;
-      border: 0;
-      border-radius: var(--checkout-radius);
-      background: var(--checkout-text);
-      color: #fff;
-      cursor: pointer;
-      font-weight: 800;
-    }
-    .inline-btn:hover,
-    .inline-btn:focus-visible {
-      background: var(--checkout-accent);
-      outline: 0;
-    }
-    .shipping-card,
-    .pix-card {
-      border: 1px solid var(--checkout-accent);
-      border-radius: var(--checkout-radius);
-      background: #fff9f5;
-      padding: 15px;
-    }
-    .shipping-card strong,
-    .pix-card strong {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 16px;
-    }
-    .shipping-card span,
-    .pix-card p {
-      color: var(--checkout-muted);
-      font-size: 13px;
-      line-height: 1.45;
-    }
-    .pix-placeholder {
-      width: min(240px, 100%);
-      aspect-ratio: 1;
-      margin: 18px auto;
-      display: grid;
-      place-items: center;
-      border: 2px dashed var(--checkout-border);
-      border-radius: var(--checkout-radius);
-      background: var(--checkout-muted-surface);
-      color: var(--checkout-muted);
-      text-align: center;
-      font-weight: 800;
-    }
-    .copy-pix {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
+    .field label { font-size: 13px; color: #161616; font-weight: 900; }
+    .field input,
+    .field select,
+    .voucher-select,
     .copy-pix input {
-      min-height: 48px;
-      border: 1px solid var(--checkout-border);
-      border-radius: var(--checkout-radius);
-      padding: 0 12px;
-      color: var(--checkout-muted);
-      background: #fff;
+      min-height: 55px;
+      width: 100%;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 18px;
+      background: var(--checkout-field);
+      color: var(--checkout-field-text);
+      outline: 2px solid transparent;
+      font-weight: 800;
     }
-    .checkout-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 20px;
+    .field input::placeholder,
+    .copy-pix input::placeholder { color: rgba(255,255,255,.82); }
+    .field input:focus,
+    .field select:focus,
+    .voucher-select:focus,
+    .copy-pix input:focus {
+      background: #111;
+      outline-color: var(--checkout-accent);
     }
-    .btn {
+    .field input[aria-invalid="true"] { outline-color: var(--checkout-danger); }
+    .error-msg { min-height: 16px; color: var(--checkout-danger); font-size: 12px; font-weight: 800; }
+    .cep-row { display: grid; grid-template-columns: 1fr; gap: 12px; align-items: end; }
+
+    .inline-btn,
+    .btn,
+    .summary-checkout-btn {
       min-height: 52px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border-radius: var(--checkout-radius);
-      padding: 0 18px;
       border: 0;
-      cursor: pointer;
-      font-weight: 900;
-      text-align: center;
-    }
-    .btn-primary {
-      background: var(--checkout-accent);
-      color: #fff;
-    }
-    .btn-primary:hover,
-    .btn-primary:focus-visible {
-      background: var(--checkout-accent-hover);
-      box-shadow: 0 4px 16px rgba(255, 106, 0, .35);
-      outline: 0;
-    }
-    .btn-secondary {
-      background: #fff;
-      color: var(--checkout-text);
-      border: 1px solid var(--checkout-border);
-    }
-    .btn-secondary:hover,
-    .btn-secondary:focus-visible {
-      border-color: var(--checkout-accent);
-      outline: 0;
-    }
-    .btn[disabled] {
-      cursor: not-allowed;
-      opacity: .55;
-      box-shadow: none;
-    }
-    .summary-card {
-      background: var(--checkout-muted-surface);
-      overflow: hidden;
-    }
-    .summary-toggle {
-      width: 100%;
-      min-height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      border: 0;
-      background: var(--checkout-muted-surface);
-      color: var(--checkout-text);
-      padding: 0 18px;
-      cursor: pointer;
-      font-weight: 900;
-    }
-    .summary-body {
-      display: none;
-      padding: 0 18px 18px;
-    }
-    .summary-body.is-open { display: block; }
-    .summary-list { display: grid; gap: 12px; margin-bottom: 16px; }
-    .summary-item {
-      display: grid;
-      grid-template-columns: 54px minmax(0, 1fr) auto;
-      gap: 10px;
-      align-items: center;
-    }
-    .summary-thumb {
-      width: 54px;
-      height: 54px;
-      border: 1px solid var(--checkout-border);
-      border-radius: var(--checkout-radius);
-      background: #fff;
-      overflow: hidden;
-    }
-    .summary-thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-    .summary-name {
-      font-size: 13px;
-      font-weight: 800;
-      line-height: 1.3;
-    }
-    .summary-qty {
-      color: var(--checkout-muted);
-      font-size: 12px;
-      margin-top: 2px;
-    }
-    .summary-price {
-      color: var(--checkout-accent);
-      font-weight: 900;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-    .summary-lines {
-      display: grid;
-      gap: 12px;
-      border-top: 1px solid var(--checkout-border);
-      padding-top: 14px;
-    }
-    .summary-line {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      color: var(--checkout-muted);
-      font-size: 14px;
-    }
-    .summary-total {
-      color: var(--checkout-text);
-      font-size: 20px;
-      font-weight: 900;
-    }
-    .summary-total strong { color: var(--checkout-accent); }
-    .empty-checkout {
-      display: none;
-      padding: 28px;
-      text-align: center;
-      border: 1px solid var(--checkout-border);
-      border-radius: var(--checkout-radius);
-      background: var(--checkout-muted-surface);
-    }
-    .empty-checkout.is-visible { display: block; }
-    .confirmation {
-      display: none;
-      padding: 42px 20px;
-      text-align: center;
-      border: 1px solid var(--checkout-border);
-      border-radius: var(--checkout-radius);
-      background: #fff;
-      box-shadow: var(--checkout-shadow);
-    }
-    .confirmation.is-visible { display: block; }
-    .checkmark {
-      width: 76px;
-      height: 76px;
-      margin: 0 auto 18px;
-      border-radius: 50%;
-      border: 4px solid var(--checkout-success);
-      display: grid;
-      place-items: center;
-      color: var(--checkout-success);
-      font-size: 38px;
-      font-weight: 900;
-      animation: pop 280ms ease-out;
-    }
-    @keyframes pop {
-      from { transform: scale(.82); opacity: .4; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    .confirmation h2 {
-      margin: 0 0 8px;
-      font-family: "Space Grotesk", Inter, sans-serif;
-      font-size: clamp(26px, 5vw, 34px);
-    }
-    .order-number {
-      color: var(--checkout-accent);
-      font-weight: 900;
-    }
-    .security-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 18px;
-    }
-    .security-badge {
-      min-height: 44px;
-      display: grid;
-      place-items: center;
-      border: 1px solid var(--checkout-border);
-      border-radius: var(--checkout-radius);
-      background: #fff;
-      color: var(--checkout-muted);
-      font-size: 12px;
-      font-weight: 900;
-      text-align: center;
-    }
-    .t7-footer {
-      margin-top: auto;
-      background: #0b0b0b;
-      color: #f7f7f7;
-    }
-    .t7-footer-inner {
-      display: grid;
-      gap: 10px;
-      padding: 28px 0;
-      color: #d1d5db;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    .t7-footer strong {
-      color: #fff;
-      font-family: "Space Grotesk", Inter, sans-serif;
-      font-size: 18px;
-    }
-    .footer-security {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-    .footer-security span {
-      border: 1px solid #374151;
       border-radius: 999px;
-      padding: 6px 10px;
-      color: #fff;
-      font-weight: 800;
-      font-size: 12px;
+      padding: 0 22px;
+      cursor: pointer;
+      font-weight: 900;
+      text-align: center;
+      transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
     }
+    .inline-btn { background: #111; color: #fff; }
+    .btn-primary,
+    .summary-checkout-btn { background: #000; color: #fff; width: 100%; }
+    .btn-secondary { background: #fff; color: #111; box-shadow: inset 0 0 0 1px rgba(0,0,0,.14); }
+    .inline-btn:hover,
+    .btn-primary:hover,
+    .summary-checkout-btn:hover { background: var(--checkout-accent); box-shadow: 0 12px 26px rgba(255,106,0,.26); transform: translateY(-1px); }
+    .btn-secondary:hover { color: var(--checkout-accent); box-shadow: inset 0 0 0 1px var(--checkout-accent); }
+    .btn[disabled] { cursor: not-allowed; opacity: .55; box-shadow: none; transform: none; }
+    .checkout-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+    .voucher-card { padding: 22px; }
+    .shipping-card,
+    .pix-card {
+      border-radius: var(--checkout-radius-md);
+      background: #f8f7f6;
+      border: 1px solid rgba(0,0,0,.08);
+      padding: 16px;
+    }
+    .shipping-card strong,
+    .pix-card strong { display: block; margin-bottom: 6px; font-size: 16px; color: #000; }
+    .shipping-card span,
+    .pix-card p { color: var(--checkout-muted); font-size: 13px; line-height: 1.45; font-weight: 600; }
+    .payment-options { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 16px; font-weight: 900; }
+    .payment-option { display: inline-flex; align-items: center; gap: 8px; }
+    .payment-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #111; background: #fff; }
+    .payment-option.is-selected .payment-dot { border-color: #000; background: #000; box-shadow: inset 0 0 0 3px #000, inset 0 0 0 5px var(--checkout-accent); }
+    .pix-placeholder {
+      width: min(220px, 100%);
+      aspect-ratio: 1;
+      margin: 16px auto;
+      display: grid;
+      place-items: center;
+      border: 2px dashed rgba(0,0,0,.2);
+      border-radius: 20px;
+      background: #fff;
+      color: var(--checkout-muted);
+      text-align: center;
+      font-weight: 900;
+      padding: 16px;
+    }
+    .copy-pix { display: grid; gap: 10px; }
+    .security-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+    .security-badge { min-height: 42px; display: grid; place-items: center; border-radius: 999px; background: #fff; color: #111; font-size: 12px; font-weight: 900; text-align: center; }
+
+    .summary-card { padding: 22px; position: relative; overflow: hidden; }
+    .summary-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 5px; background: linear-gradient(90deg, #000, var(--checkout-accent)); }
+    .summary-toggle { width: 100%; min-height: auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 0; background: transparent; color: var(--checkout-text); padding: 0; cursor: pointer; font-weight: 900; font-family: "Space Grotesk", Inter, sans-serif; font-size: 30px; }
+    .summary-body { display: none; padding: 18px 0 0; }
+    .summary-body.is-open { display: block; }
+    .summary-list { display: grid; gap: 18px; margin-bottom: 22px; }
+    .summary-item { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; gap: 14px; align-items: center; position: relative; }
+    .summary-thumb { width: 84px; height: 72px; border-radius: 18px; background: var(--checkout-field); overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+    .summary-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; background: #fff; }
+    .summary-name { font-size: 14px; font-weight: 900; line-height: 1.25; color: #000; }
+    .summary-qty { color: var(--checkout-muted); font-size: 12px; margin-top: 5px; font-weight: 700; }
+    .summary-price { color: #000; font-weight: 900; font-size: 14px; white-space: nowrap; }
+    .summary-lines { display: grid; gap: 14px; border-top: 1px solid var(--checkout-line); padding-top: 18px; }
+    .summary-line { display: flex; justify-content: space-between; gap: 16px; color: var(--checkout-muted); font-size: 15px; font-weight: 700; }
+    .summary-total { margin-top: 10px; padding-top: 14px; border-top: 1px solid var(--checkout-line); color: var(--checkout-text); font-size: 24px; font-weight: 900; }
+    .summary-total strong { color: #000; }
+    .summary-checkout-btn { margin-top: 18px; }
+
+    .confirmation { display: none; padding: 42px 20px; text-align: center; border-radius: var(--checkout-radius-lg); background: var(--checkout-card); box-shadow: var(--checkout-shadow); }
+    .confirmation.is-visible { display: block; }
+    .checkmark { width: 76px; height: 76px; margin: 0 auto 18px; border-radius: 50%; display: grid; place-items: center; background: var(--checkout-success); color: #fff; font-size: 38px; font-weight: 900; animation: pop 280ms ease-out; }
+    @keyframes pop { from { transform: scale(.82); opacity: .4; } to { transform: scale(1); opacity: 1; } }
+    .confirmation h2 { margin: 0 0 8px; font-family: "Space Grotesk", Inter, sans-serif; font-size: clamp(26px, 5vw, 34px); }
+    .order-number { color: var(--checkout-accent); font-weight: 900; }
+
+    .t7-footer { margin-top: auto; background: #000; color: #f7f7f7; }
+    .t7-footer-inner { min-height: 310px; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; gap: 42px; padding: 50px 0; color: #d1d5db; font-size: 14px; line-height: 1.6; }
+    .footer-logo { color: #fff; font-family: "Space Grotesk", Inter, sans-serif; font-size: clamp(36px, 5vw, 64px); font-weight: 900; letter-spacing: -.06em; }
+    .footer-title { color: #fff; display: block; font-weight: 900; margin-bottom: 12px; }
+    .footer-links, .footer-social { display: grid; gap: 8px; }
+    .footer-social-dots { display: flex; gap: 14px; margin-top: 14px; }
+    .footer-social-dots span { width: 44px; height: 44px; border-radius: 50%; background: #dedede; display: block; }
+    .footer-security { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    .footer-security span { border: 1px solid #374151; border-radius: 999px; padding: 6px 10px; color: #fff; font-weight: 800; font-size: 12px; }
 
     @media (min-width: 720px) {
       .form-grid.two { grid-template-columns: 1fr 1fr; }
       .cep-row { grid-template-columns: 1fr 150px; }
       .copy-pix { grid-template-columns: 1fr 130px; }
       .checkout-actions { justify-content: space-between; }
+      .checkout-actions .btn { width: auto; min-width: 190px; }
     }
     @media (min-width: 1024px) {
-      .checkout-layout {
-        grid-template-columns: minmax(0, 1fr) 400px;
-        gap: 24px;
-      }
-      .summary-card {
-        position: sticky;
-        top: 18px;
-      }
-      .summary-toggle {
-        cursor: default;
-        pointer-events: none;
-      }
-      .summary-body {
-        display: block;
-      }
+      .checkout-layout { grid-template-columns: minmax(0, 749px) minmax(350px, 470px); gap: 44px; }
+      .summary-card { position: sticky; top: 22px; }
+      .summary-toggle { pointer-events: none; }
+      .summary-body { display: block; }
     }
     @media (max-width: 760px) {
       .t7-topbar { display: none; }
-      .t7-header {
-        min-height: auto;
-        grid-template-columns: 1fr;
-        gap: 14px;
-        padding: 18px 0;
-      }
+      .t7-header { min-height: auto; grid-template-columns: 1fr; gap: 14px; padding: 16px 0; }
       .t7-actions { justify-content: space-between; }
-      .step span:last-child { display: none; }
-      .checkout-panel { padding: 16px; }
+      .checkout-main { padding-top: 24px; }
+      .checkout-container, .t7-header, .t7-footer-inner { width: min(100% - 28px, 1264px); }
+      .stepper { grid-template-columns: 1fr; }
+      .checkout-step, .voucher-card, .summary-card { padding: 18px; }
+      .summary-item { grid-template-columns: 70px minmax(0, 1fr); }
+      .summary-price { grid-column: 2; }
       .btn { width: 100%; }
-      .security-row { grid-template-columns: 1fr; }
+      .security-row, .t7-footer-inner { grid-template-columns: 1fr; }
+      .t7-footer-inner { min-height: auto; align-items: start; }
     }
   </style>
 </head>
@@ -570,19 +373,20 @@
   <div class="t7-shell">
     <header class="t7-top">
       <div class="t7-topbar">
-        <span>Ola, seja bem-vindo(a)!</span>
-        <a href="https://wa.me/5531973548107">Atendimento ao cliente: (31) 97354-8107 Whatsapp</a>
+        <span>Olá, seja bem-vindo(a)!</span>
+        <a href="https://wa.me/5531973548107">Atendimento ao cliente: (31) 97354-8107 WhatsApp</a>
         <a href="https://www2.correios.com.br/sistemas/rastreamento/ctrl/ctrlRastreamento.cfm?" target="_blank" rel="noopener noreferrer">Rastrear minha compra</a>
       </div>
-      <div class="t7-header" aria-label="Cabecalho principal">
-        <a class="t7-logo" href="index.html" aria-label="TECH 7 - pagina inicial">
+      <div class="t7-header" aria-label="Cabeçalho principal">
+        <a class="t7-logo" href="index.html" aria-label="TECH 7 - página inicial">
           <img src="logo.png" alt="TECH 7">
         </a>
-        <form action="loja/busca.php" method="get" role="search">
-          <label class="sr-only" for="busca-site">O que voce procura?</label>
-          <input class="t7-search" id="busca-site" name="palavra_busca" type="search" placeholder="O que voce procura?">
+        <form class="t7-search-wrap" action="loja/busca.php" method="get" role="search">
+          <label class="sr-only" for="busca-site">O que você procura?</label>
+          <input class="t7-search" id="busca-site" name="palavra_busca" type="search" placeholder="O que você procura?">
+          <span class="t7-search-icon" aria-hidden="true"></span>
         </form>
-        <nav class="t7-actions" aria-label="Acoes da loja">
+        <nav class="t7-actions" aria-label="Ações da loja">
           <a href="my-account/login">Minha conta</a>
           <a href="carrinho/">Carrinho <span class="cart-badge" data-cart-count>0</span></a>
         </nav>
@@ -591,127 +395,142 @@
 
     <main class="checkout-main">
       <div class="checkout-container">
+        <p class="checkout-breadcrumb">Início &gt;&gt; Carrinho &gt;&gt; <strong>Checkout</strong></p>
         <h1>Checkout</h1>
-        <p class="checkout-lead">Finalize seu pedido com identificacao, entrega por Uber e pagamento via PIX preparado para integracao com API.</p>
+        <p class="checkout-lead">Revise seus dados, escolha a entrega e finalize o pedido com uma experiência simples, segura e alinhada à TECH7.</p>
 
         <div class="empty-checkout" id="empty-checkout">
-          <h2>Seu carrinho esta vazio</h2>
+          <h2>Seu carrinho está vazio</h2>
           <p>Adicione produtos antes de finalizar a compra.</p>
-          <a class="btn btn-primary" href="loja/">Voltar a Loja</a>
+          <a class="btn btn-primary" href="loja/">Voltar à loja</a>
         </div>
 
         <div id="checkout-flow">
           <div class="stepper" aria-label="Etapas do checkout">
-            <div class="step is-active" data-step-indicator="1"><span class="step-circle">1</span><span>Identificacao</span></div>
+            <div class="step is-active" data-step-indicator="1"><span class="step-circle">1</span><span>Identificação</span></div>
             <div class="step" data-step-indicator="2"><span class="step-circle">2</span><span>Entrega</span></div>
             <div class="step" data-step-indicator="3"><span class="step-circle">3</span><span>Pagamento</span></div>
           </div>
 
           <div class="checkout-layout">
-            <section class="checkout-panel" aria-label="Formulario de checkout">
+            <section class="checkout-panel" aria-label="Formulário de checkout">
               <form id="checkout-form" novalidate>
                 <section class="checkout-step is-active" data-step="1">
-                  <h2>Identificacao</h2>
+                  <h2>Informações pessoais</h2>
                   <div class="form-grid">
                     <div class="field">
                       <label for="campo-nome">Nome completo</label>
-                      <input id="campo-nome" name="nome" autocomplete="name" required>
+                      <input id="campo-nome" name="nome" autocomplete="name" placeholder="Seu nome" required>
                       <div class="error-msg" id="erro-nome"></div>
                     </div>
-                    <div class="field">
-                      <label for="campo-email">E-mail</label>
-                      <input id="campo-email" name="email" type="email" autocomplete="email" required>
-                      <div class="error-msg" id="erro-email"></div>
-                    </div>
-                    <div class="field">
-                      <label for="campo-telefone">Telefone / WhatsApp</label>
-                      <input id="campo-telefone" name="telefone" inputmode="tel" autocomplete="tel" required>
-                      <div class="error-msg" id="erro-telefone"></div>
+                    <div class="form-grid two">
+                      <div class="field">
+                        <label for="campo-email">E-mail</label>
+                        <input id="campo-email" name="email" type="email" autocomplete="email" placeholder="E-mail" required>
+                        <div class="error-msg" id="erro-email"></div>
+                      </div>
+                      <div class="field">
+                        <label for="campo-telefone">Telefone / WhatsApp</label>
+                        <input id="campo-telefone" name="telefone" inputmode="tel" autocomplete="tel" placeholder="Telefone" required>
+                        <div class="error-msg" id="erro-telefone"></div>
+                      </div>
                     </div>
                   </div>
                   <div class="checkout-actions">
                     <a class="btn btn-secondary" href="carrinho/">Voltar ao carrinho</a>
-                    <button class="btn btn-primary" type="button" data-next>Proximo: Entrega</button>
+                    <button class="btn btn-primary" type="button" data-next>Próximo: entrega</button>
                   </div>
                 </section>
 
                 <section class="checkout-step" data-step="2">
-                  <h2>Entrega</h2>
+                  <h2>Endereço de entrega</h2>
                   <div class="form-grid">
-                    <div class="cep-row">
-                      <div class="field">
-                        <label for="campo-cep">CEP</label>
-                        <input id="campo-cep" name="cep" inputmode="numeric" autocomplete="postal-code" required>
-                        <div class="error-msg" id="erro-cep"></div>
-                      </div>
-                      <button class="inline-btn" id="btn-buscar-cep" type="button">Buscar</button>
-                    </div>
                     <div class="form-grid two">
                       <div class="field">
-                        <label for="campo-logradouro">Endereco</label>
-                        <input id="campo-logradouro" name="logradouro" autocomplete="address-line1" required>
+                        <label for="campo-logradouro">Endereço</label>
+                        <input id="campo-logradouro" name="logradouro" autocomplete="address-line1" placeholder="Endereço" required>
                         <div class="error-msg" id="erro-logradouro"></div>
                       </div>
                       <div class="field">
-                        <label for="campo-numero">Numero</label>
-                        <input id="campo-numero" name="numero" autocomplete="address-line2" required>
-                        <div class="error-msg" id="erro-numero"></div>
+                        <label for="campo-cep">CEP</label>
+                        <input id="campo-cep" name="cep" inputmode="numeric" autocomplete="postal-code" placeholder="CEP" required>
+                        <div class="error-msg" id="erro-cep"></div>
                       </div>
                     </div>
-                    <div class="form-grid two">
+                    <div class="cep-row">
                       <div class="field">
-                        <label for="campo-complemento">Complemento</label>
-                        <input id="campo-complemento" name="complemento" autocomplete="address-line3">
-                        <div class="error-msg" id="erro-complemento"></div>
+                        <label for="campo-numero">Número</label>
+                        <input id="campo-numero" name="numero" autocomplete="address-line2" placeholder="Número" required>
+                        <div class="error-msg" id="erro-numero"></div>
                       </div>
-                      <div class="field">
-                        <label for="campo-bairro">Bairro</label>
-                        <input id="campo-bairro" name="bairro" required>
-                        <div class="error-msg" id="erro-bairro"></div>
-                      </div>
+                      <button class="inline-btn" id="btn-buscar-cep" type="button">Buscar CEP</button>
                     </div>
                     <div class="form-grid two">
                       <div class="field">
                         <label for="campo-cidade">Cidade</label>
-                        <input id="campo-cidade" name="cidade" autocomplete="address-level2" required>
+                        <input id="campo-cidade" name="cidade" autocomplete="address-level2" placeholder="Cidade" required>
                         <div class="error-msg" id="erro-cidade"></div>
                       </div>
                       <div class="field">
                         <label for="campo-estado">Estado</label>
-                        <input id="campo-estado" name="estado" maxlength="2" autocomplete="address-level1" required>
+                        <input id="campo-estado" name="estado" maxlength="2" autocomplete="address-level1" placeholder="UF" required>
                         <div class="error-msg" id="erro-estado"></div>
+                      </div>
+                    </div>
+                    <div class="form-grid two">
+                      <div class="field">
+                        <label for="campo-bairro">Bairro</label>
+                        <input id="campo-bairro" name="bairro" placeholder="Bairro" required>
+                        <div class="error-msg" id="erro-bairro"></div>
+                      </div>
+                      <div class="field">
+                        <label for="campo-complemento">Complemento</label>
+                        <input id="campo-complemento" name="complemento" autocomplete="address-line3" placeholder="Complemento">
+                        <div class="error-msg" id="erro-complemento"></div>
                       </div>
                     </div>
                     <div class="shipping-card">
                       <strong>Entrega por Uber</strong>
-                      <span>Preco a combinar apos confirmacao do pedido. Nossa equipe entra em contato pelo WhatsApp informado.</span>
+                      <span>O valor da entrega será combinado após a confirmação do pedido. Nossa equipe entra em contato pelo WhatsApp informado.</span>
                     </div>
                   </div>
                   <div class="checkout-actions">
                     <button class="btn btn-secondary" type="button" data-prev>Voltar</button>
-                    <button class="btn btn-primary" type="button" data-next>Proximo: Pagamento</button>
+                    <button class="btn btn-primary" type="button" data-next>Próximo: pagamento</button>
                   </div>
                 </section>
 
+                <section class="voucher-card" aria-label="Cupom ou voucher">
+                  <h2>Voucher</h2>
+                  <select class="voucher-select" aria-label="Selecionar voucher">
+                    <option>Selecionar voucher</option>
+                    <option>Sem voucher no momento</option>
+                  </select>
+                </section>
+
                 <section class="checkout-step" data-step="3">
-                  <h2>Pagamento</h2>
+                  <h2>Método de pagamento</h2>
+                  <div class="payment-options" aria-label="Métodos de pagamento disponíveis">
+                    <span class="payment-option"><span class="payment-dot" aria-hidden="true"></span> Pagar na entrega</span>
+                    <span class="payment-option is-selected"><span class="payment-dot" aria-hidden="true"></span> PIX</span>
+                  </div>
                   <div class="pix-card">
                     <strong>PIX</strong>
-                    <p>Estrutura pronta para receber QR Code e copia-e-cola da API de pagamentos. Nesta versao, o fluxo simula a geracao para validar a experiencia.</p>
-                    <div class="pix-placeholder" id="pix-qrcode-container">QR Code PIX sera gerado aqui</div>
+                    <p>Após finalizar, o código PIX será gerado para pagamento. A separação do pedido começa assim que a confirmação for recebida.</p>
+                    <div class="pix-placeholder" id="pix-qrcode-container">QR Code PIX será gerado aqui</div>
                     <div class="copy-pix">
-                      <input id="pix-codigo" readonly placeholder="Codigo PIX sera exibido aqui" aria-label="Codigo PIX copia e cola">
+                      <input id="pix-codigo" readonly placeholder="Código PIX será exibido aqui" aria-label="Código PIX copia e cola">
                       <button class="inline-btn" id="btn-copiar-pix" type="button">Copiar</button>
                     </div>
                   </div>
-                  <div class="security-row" aria-label="Selos de seguranca">
-                    <div class="security-badge">Compra Segura</div>
-                    <div class="security-badge">SSL</div>
-                    <div class="security-badge">Dados Protegidos</div>
+                  <div class="security-row" aria-label="Selos de segurança">
+                    <div class="security-badge">Compra segura</div>
+                    <div class="security-badge">SSL ativo</div>
+                    <div class="security-badge">Dados protegidos</div>
                   </div>
                   <div class="checkout-actions">
                     <button class="btn btn-secondary" type="button" data-prev>Voltar</button>
-                    <button class="btn btn-primary" id="btn-gerar-pix" type="submit">Gerar PIX e Finalizar Pedido</button>
+                    <button class="btn btn-primary" id="btn-gerar-pix" type="submit">Gerar PIX e finalizar pedido</button>
                   </div>
                 </section>
               </form>
@@ -719,41 +538,50 @@
 
             <aside class="summary-card" aria-label="Resumo do pedido">
               <button class="summary-toggle" type="button" id="summary-toggle" aria-expanded="false" aria-controls="summary-body">
-                <span>Resumo do Pedido</span>
+                <span>Itens</span>
                 <span id="summary-toggle-total">R$ 0,00</span>
               </button>
               <div class="summary-body" id="summary-body">
                 <div class="summary-list" id="summary-list"></div>
                 <div class="summary-lines">
                   <div class="summary-line"><span>Subtotal</span><strong id="subtotal">R$ 0,00</strong></div>
-                  <div class="summary-line"><span>Frete Uber</span><strong>A combinar</strong></div>
+                  <div class="summary-line"><span>Desconto</span><strong>R$ 0,00</strong></div>
+                  <div class="summary-line"><span>Entrega</span><strong>A combinar</strong></div>
                   <div class="summary-line summary-total"><span>Total</span><strong id="total">R$ 0,00</strong></div>
                   <div class="summary-line"><span>Pagamento</span><strong id="payment-status">PIX</strong></div>
                 </div>
+                <button class="summary-checkout-btn" type="submit" form="checkout-form">Checkout</button>
               </div>
             </aside>
           </div>
         </div>
 
         <section class="confirmation" id="confirmation" aria-live="polite">
-          <div class="checkmark" aria-hidden="true">✓</div>
+          <div class="checkmark" aria-hidden="true">â</div>
           <h2>Pedido realizado com sucesso!</h2>
-          <p>Numero do pedido: <span class="order-number" id="numero-pedido">#00000</span></p>
-          <p>Assim que o pagamento PIX for confirmado, seu pedido sera separado e nossa equipe entrara em contato.</p>
-          <a class="btn btn-primary" href="loja/">Voltar a Loja</a>
+          <p>Número do pedido: <span class="order-number" id="numero-pedido">#00000</span></p>
+          <p>Assim que o pagamento PIX for confirmado, seu pedido será separado e nossa equipe entrará em contato.</p>
+          <a class="btn btn-primary" href="loja/">Voltar à loja</a>
         </section>
       </div>
     </main>
 
     <footer class="t7-footer">
       <div class="t7-footer-inner">
-        <strong>TECH 7</strong>
-        <span>Rua dos Caetes, 461 - Sala 206 Ed. Baalbeck - Centro, Belo Horizonte - MG, CEP: 30120-082</span>
-        <span>Atendimento: (31) 97354-8107 Whatsapp</span>
-        <div class="footer-security">
-          <span>Compra Segura</span>
-          <span>SSL</span>
-          <span>Dados Protegidos</span>
+        <div class="footer-logo">TECH7</div>
+        <div class="footer-links">
+          <span class="footer-title">Links importantes</span>
+          <a href="como-comprar/">Como comprar</a>
+          <a href="duvidas-trocas-e-devolucoes/">Trocas e devoluções</a>
+          <a href="privacidade/">Política de privacidade</a>
+          <a href="garantias-e-trocas/">Garantias</a>
+        </div>
+        <div class="footer-social">
+          <span class="footer-title">Atendimento</span>
+          <span>Rua dos Caetés, 461 - Sala 206 Ed. Baalbeck - Centro, Belo Horizonte - MG</span>
+          <span>WhatsApp: (31) 97354-8107</span>
+          <div class="footer-social-dots" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="footer-security"><span>Compra segura</span><span>SSL</span><span>Dados protegidos</span></div>
         </div>
       </div>
     </footer>
