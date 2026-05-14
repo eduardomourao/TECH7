@@ -266,14 +266,12 @@
       return;
     }
 
-    // Fallback: qualquer select dentro do form (preserva o label ao redor)
+    // Fallback: qualquer select dentro do form
     var selects = form.querySelectorAll('select[required]');
     if (selects.length > 0) {
       _variacaoHtml = '<div class="variacao-extraid">';
       for (var i = 0; i < selects.length; i++) {
-        var sl = selects[i];
-        var lbl = sl.closest('label');
-        _variacaoHtml += lbl ? lbl.outerHTML : sl.outerHTML;
+        _variacaoHtml += selects[i].outerHTML;
       }
       _variacaoHtml += '</div>';
     }
@@ -286,9 +284,6 @@
     container.addEventListener('change', function (e) {
       if (e.target.tagName === 'SELECT') {
         _variacaoSelecionada = getVariationLabel(e.target);
-        // Mostra feedback visual no select
-        e.target.style.outline = '2px solid #ff6a00';
-        e.target.style.borderRadius = '6px';
       }
     });
 

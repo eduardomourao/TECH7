@@ -52,11 +52,6 @@
   var hasProductForm = !!document.querySelector('#form_comprar, [data-app="product.buy-form"], #bt_comprar, #button-buy');
   var looksLikeProduct = parts.length >= 3 || (parts.length >= 2 && slug.indexOf('-') !== -1) || hasProductForm;
 
-  // Carrega filtro de categoria em páginas de listagem
-  if (!looksLikeProduct && document.querySelector('form.smart-filter')) {
-    loadScript('category-filter-loaded', '/_assets/tech7/category-filter.js');
-  }
-
   if (looksLikeProduct) {
     cartReady.then(function() {
       return loadScript('produto-comprar-loaded', '/produto-comprar.js');
