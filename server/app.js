@@ -43,6 +43,11 @@ export function createApp(options = {}) {
   app.use(express.json({ limit: "1mb" }));
 
   for (const prefix of apiPrefixes) {
+    app.use(prefix || "/", (_req, res, next) => {
+      res.set("Cache-Control", "no-store");
+      next();
+    });
+
     app.get(joinRoute(prefix, "/health"), async (_req, res) => {
       try {
         // Lightweight DB check (optional if DATABASE_URL isn't set yet).

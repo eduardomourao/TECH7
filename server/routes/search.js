@@ -1,66 +1,105 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import express from "express";
+import { pool } from "../lib/db.js";
 
 export const router = express.Router();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const SEARCH_INDEX_PATH = path.resolve(__dirname, "../../_assets/tech7/search-index.json");
-
-let indexPromise = null;
-
-function normalize(value) {
+function normalizeSegment(value) {
   return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "")
     .trim();
 }
 
-async function loadIndex() {
-  if (!indexPromise) {
-    indexPromise = fs
-      .readFile(SEARCH_INDEX_PATH, "utf8")
-      .then((raw) => JSON.parse(raw))
-      .then((json) => (Array.isArray(json?.items) ? json.items : []))
-      .catch(() => []);
-  }
-  return indexPromise;
+function productUrlFromDb(product) {
+  const section = normalizeSegment(product?.section);
+  const brand = normalizeSegment(product?.brand);
+  const slug = normalizeSegment(product?.slug);
+  const parts = [];
+
+  if (section) parts.push(section);
+  if (brand && brand !== "tech7" && brand !== "catalogo") parts.push(brand);
+  if (slug) parts.push(slug);
+
+  if (!parts.length) return "";
+  return `${parts.join("/")}/index.html`;
 }
 
 router.get("/", async (req, res) => {
-  const q = String(req.query.q || "").trim();
-  const brand = String(req.query.brand || req.query.marca || "").trim();
-  const category = String(req.query.category || req.query.categoria || "").trim();
+  const q = String(req.query.q || req.query.palavra_busca || "").trim();
+  const brand = String(req.query.brand || req.query.marca || req.query.filtrar_marca || "").trim();
+  const category = String(
+    req.query.category
+      || req.query.categoria
+      || req.query.filtrar_departamento
+      || req.query.departamento
+      || ""
+  ).trim();
   const limit = Math.max(1, Math.min(200, Number(req.query.limit || 48)));
-  const words = normalize(q).split(/\s+/).filter(Boolean);
+  const offset = Math.max(0, Number(req.query.offset || 0));
+  const words = q.split(/\s+/).filter(Boolean).slice(0, 10);
 
-  const items = await loadIndex();
-  const brandNorm = normalize(brand);
-  const categoryNorm = normalize(category);
+  const filters = ["active = true"];
+  const params = [];
 
-  const filtered = items
-    .filter((item) => {
-      if (brandNorm && normalize(item.brand) !== brandNorm) return false;
-      if (categoryNorm && normalize(item.category) !== categoryNorm) return false;
-      return true;
-    })
-    .filter((item) => {
-      if (!words.length) return true;
-      const haystack = normalize(
-        item.keywords ||
-          [item.title, item.description, item.brand, item.category, item.slug].join(" ")
-      );
-      return words.every((word) => haystack.includes(word));
-    });
+  if (brand) {
+    params.push(brand);
+    filters.push(`lower(brand) = lower($${params.length})`);
+  }
+
+  if (category) {
+    params.push(category);
+    filters.push(`lower(section) = lower($${params.length})`);
+  }
+
+  for (const word of words) {
+    params.push(`%${word}%`);
+    const idx = params.length;
+    filters.push(
+      `(name ilike $${idx} or brand ilike $${idx} or section ilike $${idx} or slug ilike $${idx})`
+    );
+  }
+
+  const whereSql = filters.join(" and ");
+  const countRes = await pool.query(
+    `select count(*)::int as total from products where ${whereSql}`,
+    params
+  );
+
+  params.push(limit, offset);
+  const rowsRes = await pool.query(
+    `
+      select id, slug, name, brand, section, price_cents, currency, image_url, updated_at
+      from products
+      where ${whereSql}
+      order by updated_at desc nulls last, created_at desc
+      limit $${params.length - 1} offset $${params.length}
+    `,
+    params
+  );
+
+  const items = rowsRes.rows.map((row) => ({
+    id: row.id,
+    slug: row.slug,
+    title: row.name,
+    name: row.name,
+    description: null,
+    brand: row.brand,
+    category: row.section,
+    section: row.section,
+    price_cents: Number(row.price_cents || 0),
+    image: row.image_url || "",
+    image_url: row.image_url || "",
+    url: productUrlFromDb(row),
+    updated_at: row.updated_at || null
+  }));
 
   res.json({
     q,
     brand: brand || null,
     category: category || null,
-    count: filtered.length,
-    items: filtered.slice(0, limit)
+    count: countRes.rows[0]?.total || 0,
+    limit,
+    offset,
+    items
   });
 });

@@ -67,6 +67,19 @@
     return Number(getNum(preco)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }
 
+  function normalizeProductId(value) {
+    return String(value || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
+  }
+
+  function buildProductId(input) {
+    input = input || {};
+    return normalizeProductId([
+      input.secao || input.section || '',
+      input.marca || input.brand || '',
+      input.slug || ''
+    ].join('-'));
+  }
+
   var priceDataPromise = null;
 
   function loadPrices() {
@@ -136,8 +149,100 @@
     return { found: found, price: found ? price : 0, secao: foundSecao, marca: foundMarca, slug: slug };
   }
 
+  function lookupPagePrice(input) {
+    input = input || {};
+    var slug = input.slug || '';
+    var layers = Array.isArray(window.dataLayer) ? window.dataLayer : [];
+
+    for (var i = 0; i < layers.length; i++) {
+      var item = layers[i] || {};
+      var pageSlug = '';
+
+      if (item.urlProduct) {
+        var parts = String(item.urlProduct).replace(/\/+$/, '').split('/').filter(Boolean);
+        pageSlug = parts[parts.length - 1] || '';
+      }
+
+      if (slug && pageSlug && pageSlug !== slug) continue;
+
+      var price = getNum(item.priceSell || item.price);
+      if (price > 0) {
+        return {
+          found: true,
+          price: price,
+          secao: input.secao || input.section || '',
+          marca: input.marca || input.brand || item.brand || '',
+          slug: slug || pageSlug
+        };
+      }
+    }
+
+    return { found: false, price: 0, secao: input.secao || input.section || '', marca: input.marca || input.brand || '', slug: slug };
+  }
+
+  function lookupInlinePagePrice(input) {
+    input = input || {};
+    var slug = input.slug || '';
+    var scripts = document.querySelectorAll('script:not([src])');
+
+    for (var i = 0; i < scripts.length; i++) {
+      var text = scripts[i].textContent || '';
+      if (slug && text.indexOf(slug) === -1) continue;
+
+      var match = text.match(/["']priceSell["']\s*:\s*["']?([^"',}]+)/) || text.match(/["']price["']\s*:\s*["']?([^"',}]+)/);
+      var price = match ? getNum(match[1]) : 0;
+      if (price > 0) {
+        return {
+          found: true,
+          price: price,
+          secao: input.secao || input.section || '',
+          marca: input.marca || input.brand || '',
+          slug: slug
+        };
+      }
+    }
+
+    return { found: false, price: 0, secao: input.secao || input.section || '', marca: input.marca || input.brand || '', slug: slug };
+  }
+
   function resolvePrice(input) {
     if (!input || !input.slug) input = getPathParts();
+
+    var productId = buildProductId(input);
+    if (productId) {
+      return fetch('/api/products/' + encodeURIComponent(productId), { cache: 'no-store' })
+        .then(function(res) {
+          if (!res.ok) throw new Error('http_' + res.status);
+          return res.json();
+        })
+        .then(function(product) {
+          var price = Number(product && product.price_cents) / 100;
+          if (Number.isFinite(price) && price > 0) {
+            return {
+              found: true,
+              price: price,
+              secao: product.section || input.secao || input.section || '',
+              marca: product.brand || input.marca || input.brand || '',
+              slug: product.slug || input.slug || ''
+            };
+          }
+          throw new Error('invalid_price');
+        })
+        .catch(function() {
+          var pagePrice = lookupPagePrice(input);
+          if (pagePrice.found) return pagePrice;
+          var inlinePagePrice = lookupInlinePagePrice(input);
+          if (inlinePagePrice.found) return inlinePagePrice;
+          return loadPrices().then(function(data) { return lookupPrice(data, input); });
+        });
+    }
+
+    var pagePrice = lookupPagePrice(input);
+    if (pagePrice.found) return Promise.resolve(pagePrice);
+
+    var inlinePagePrice = lookupInlinePagePrice(input);
+    if (inlinePagePrice.found) return Promise.resolve(inlinePagePrice);
+
     return loadPrices().then(function(data) { return lookupPrice(data, input); });
   }
 
@@ -180,6 +285,163 @@
     return result;
   }
 
+  function extractPathInfoFromHref(href) {
+    if (!href) return null;
+    try {
+      var url = new URL(href, window.location.origin);
+      var parsed = getPathParts(url.pathname);
+      if (!parsed || !parsed.slug || !parsed.marca || !parsed.secao) return null;
+      return {
+        secao: normalizeProductId(parsed.secao),
+        marca: normalizeProductId(parsed.marca),
+        slug: normalizeProductId(parsed.slug)
+      };
+    } catch (_err) {
+      return null;
+    }
+  }
+
+  function collectCatalogEntries(root) {
+    var scope = root && root.querySelectorAll ? root : document;
+    var links = scope.querySelectorAll('a.info-product[href]');
+    var byKey = new Map();
+
+    for (var i = 0; i < links.length; i++) {
+      var link = links[i];
+      var parsed = extractPathInfoFromHref(link.getAttribute('href'));
+      if (!parsed) continue;
+
+      var product = link.closest('.product');
+      if (!product) continue;
+
+      var priceNodes = product.querySelectorAll('.product-price .price-off');
+      if (!priceNodes.length) continue;
+
+      var key = [parsed.secao, parsed.marca, parsed.slug].join('|');
+      var found = byKey.get(key);
+      if (!found) {
+        found = {
+          secao: parsed.secao,
+          marca: parsed.marca,
+          slug: parsed.slug,
+          nodes: []
+        };
+        byKey.set(key, found);
+      }
+
+      for (var n = 0; n < priceNodes.length; n++) {
+        if (found.nodes.indexOf(priceNodes[n]) === -1) found.nodes.push(priceNodes[n]);
+      }
+    }
+
+    return Array.from(byKey.values());
+  }
+
+  function resolveCatalogPricesBatch(entries) {
+    return fetch('/api/products/resolve-prices', {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        items: entries.map(function(entry) {
+          return { section: entry.secao, brand: entry.marca, slug: entry.slug };
+        })
+      })
+    })
+      .then(function(res) {
+        if (!res.ok) throw new Error('http_' + res.status);
+        return res.json();
+      })
+      .then(function(payload) {
+        return Array.isArray(payload && payload.items) ? payload.items : [];
+      });
+  }
+
+  function updateCatalogPrices(root) {
+    var entries = collectCatalogEntries(root);
+    if (!entries.length) return Promise.resolve({ updated: 0, total: 0 });
+
+    var byKey = new Map();
+    for (var i = 0; i < entries.length; i++) {
+      byKey.set([entries[i].secao, entries[i].marca, entries[i].slug].join('|'), entries[i]);
+    }
+
+    return resolveCatalogPricesBatch(entries)
+      .then(function(items) {
+        var updated = 0;
+        for (var x = 0; x < items.length; x++) {
+          var item = items[x] || {};
+          if (!item.found) continue;
+          var price = Number(item.price_cents || 0) / 100;
+          if (!Number.isFinite(price) || price <= 0) continue;
+
+          var secao = normalizeProductId(item.section);
+          var marca = normalizeProductId(item.brand);
+          var slug = normalizeProductId(item.slug);
+          var key = [secao, marca, slug].join('|');
+          var match = byKey.get(key);
+          if (!match) continue;
+
+          var formatted = formatMoney(price);
+          for (var n = 0; n < match.nodes.length; n++) {
+            match.nodes[n].textContent = formatted;
+          }
+          updated += match.nodes.length;
+        }
+
+        return { updated: updated, total: entries.length };
+      })
+      .catch(function(err) {
+        // Approved fallback: keep last rendered card price when API fails.
+        console.warn('preco-loader: falha ao sincronizar precos de cards', err);
+        return { updated: 0, total: entries.length };
+      });
+  }
+
+  var catalogSyncTimer = null;
+  var catalogSyncObserver = null;
+  var catalogSyncRunning = false;
+
+  function scheduleCatalogPriceSync(root) {
+    if (catalogSyncTimer) window.clearTimeout(catalogSyncTimer);
+    catalogSyncTimer = window.setTimeout(function() {
+      if (catalogSyncRunning) return;
+      catalogSyncRunning = true;
+      updateCatalogPrices(root || document).finally(function() {
+        catalogSyncRunning = false;
+      });
+    }, 160);
+  }
+
+  function startCatalogPriceSync() {
+    scheduleCatalogPriceSync(document);
+    if (catalogSyncObserver || !document.body || typeof MutationObserver !== 'function') return;
+
+    catalogSyncObserver = new MutationObserver(function(mutations) {
+      var shouldSync = false;
+      for (var i = 0; i < mutations.length; i++) {
+        var mutation = mutations[i];
+        if (!mutation.addedNodes || !mutation.addedNodes.length) continue;
+        for (var n = 0; n < mutation.addedNodes.length; n++) {
+          var node = mutation.addedNodes[n];
+          if (!node || node.nodeType !== 1) continue;
+          if (node.matches && (node.matches('.product') || node.matches('a.info-product') || node.matches('.item.flex'))) {
+            shouldSync = true;
+            break;
+          }
+          if (node.querySelector && node.querySelector('a.info-product[href], .product')) {
+            shouldSync = true;
+            break;
+          }
+        }
+        if (shouldSync) break;
+      }
+      if (shouldSync) scheduleCatalogPriceSync(document);
+    });
+
+    catalogSyncObserver.observe(document.body, { childList: true, subtree: true });
+  }
+
   var currentProduct = getPathParts();
   var hasProductForm = !!document.querySelector('#form_comprar, [data-app="product.buy-form"], #bt_comprar, #button-buy');
   var looksLikeProduct = currentProduct.slug && (currentProduct.secao && currentProduct.marca || hasProductForm);
@@ -187,11 +449,16 @@
   window.Tech7Prices = window.Tech7Prices || {};
   window.Tech7Prices.load = loadPrices;
   window.Tech7Prices.resolve = resolvePrice;
+  window.Tech7Prices.resolveBatch = resolveCatalogPricesBatch;
   window.Tech7Prices.apply = updatePrice;
+  window.Tech7Prices.syncCatalog = scheduleCatalogPriceSync;
   window.Tech7Prices.parse = getNum;
   window.Tech7Prices.format = formatMoney;
   window.Tech7Prices.current = currentProduct;
   window.Tech7Prices.ready = looksLikeProduct ? resolvePrice(currentProduct).then(updatePrice) : Promise.resolve(null);
+
+  onReady(startCatalogPriceSync);
+  window.addEventListener('load', function() { scheduleCatalogPriceSync(document); }, { once: true });
 
   var cartReady = loadScript('cart-manager-loaded', '/cart-manager.js', 'CartManager')
     .catch(function(err) { console.error('preco-loader: erro ao carregar cart-manager.js', err); });

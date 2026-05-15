@@ -30,28 +30,41 @@
     return "../" + String(value || "index.html").replace(/^\/+/, "");
   }
 
-  function render(filtered, totalCount) {
+  function formatPriceFromCents(cents) {
+    var n = Number(cents || 0);
+    if (!Number.isFinite(n) || n <= 0) return "";
+    return (n / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
+
+  function render(items, totalCount) {
+    var filtered = Array.isArray(items) ? items : [];
     if (input) input.value = term;
     if (title) title.textContent = term ? 'Resultado para "' + term + '"' : "Produtos em destaque";
     if (count) count.textContent = Number(totalCount || filtered.length) + " produto(s) encontrado(s)";
 
     if (!filtered.length) {
       results.className = "empty";
-      results.innerHTML = "Nenhum produto encontrado. Tente buscar por marca, modelo ou tipo de peça.";
+      results.innerHTML = "Nenhum produto encontrado. Tente buscar por marca, modelo ou tipo de peca.";
       return;
     }
 
     results.className = "results-grid";
     results.innerHTML = filtered.map(function (item) {
+      var name = item.title || item.name || "";
+      var tag = item.brand || item.category || item.section || "TECH 7";
+      var price = formatPriceFromCents(item.price_cents);
+      var description = item.description || "Produto TECH 7 para reposicao de aparelho celular.";
+
       return '<a class="result-card" href="' + productUrl(item.url) + '">' +
-        '<div class="pic"><img src="' + assetUrl(item.image) + '" alt="' + escapeHtml(item.title) + '" loading="lazy"></div>' +
+        '<div class="pic"><img src="' + assetUrl(item.image || item.image_url) + '" alt="' + escapeHtml(name) + '" loading="lazy"></div>' +
         '<div class="info">' +
-        '<div class="tag">' + escapeHtml(item.brand || item.category || "TECH 7") + '</div>' +
-        '<h2 class="name">' + escapeHtml(item.title) + '</h2>' +
-        '<p class="desc">' + escapeHtml(item.description || "Produto TECH 7 para reposicao de aparelho celular.") + '</p>' +
-        '</div>' +
+        '<div class="tag">' + escapeHtml(tag) + "</div>" +
+        '<h2 class="name">' + escapeHtml(name) + "</h2>" +
+        '<p class="desc">' + escapeHtml(description) + "</p>" +
+        (price ? '<p class="desc" style="color:#ffcf8a;font-weight:800;">' + escapeHtml(price) + "</p>" : "") +
+        "</div>" +
         '<div class="cta">Ver produto</div>' +
-        '</a>';
+        "</a>";
     }).join("");
   }
 
@@ -71,6 +84,6 @@
       if (title) title.textContent = "Busca indisponivel";
       if (count) count.textContent = "";
       results.className = "empty";
-      results.innerHTML = "Nao foi possivel carregar os resultados de busca.";
+      results.innerHTML = "Nao foi possivel carregar os resultados da busca.";
     });
 })();
