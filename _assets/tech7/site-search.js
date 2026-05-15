@@ -1,6 +1,8 @@
 (function () {
   var params = new URLSearchParams(window.location.search);
   var term = (params.get("q") || params.get("palavra_busca") || "").trim();
+  var brand = (params.get("brand") || params.get("marca") || params.get("filtrar_marca") || "").trim();
+  var category = (params.get("category") || params.get("categoria") || params.get("filtrar_departamento") || params.get("departamento") || "").trim();
   var title = document.getElementById("searchTitle");
   var count = document.getElementById("searchCount");
   var input = document.getElementById("searchInput");
@@ -53,7 +55,13 @@
     }).join("");
   }
 
-  fetch("/api/search?q=" + encodeURIComponent(term) + "&limit=120", { cache: "no-store" })
+  var query = new URLSearchParams();
+  if (term) query.set("q", term);
+  if (brand) query.set("brand", brand);
+  if (category) query.set("category", category);
+  query.set("limit", "120");
+
+  fetch("/api/search?" + query.toString(), { cache: "no-store" })
     .then(function (response) {
       if (!response.ok) throw new Error("Busca indisponivel");
       return response.json();

@@ -73,8 +73,12 @@ export function createApp(options = {}) {
   if (serveStatic) {
     app.get("/loja/busca.php", (req, res) => {
       const term = String(req.query.palavra_busca || req.query.q || "").trim();
+      const brand = String(req.query.filtrar_marca || req.query.marca || "").trim();
+      const category = String(req.query.filtrar_departamento || req.query.departamento || req.query.filtrar_categoria || req.query.categoria || "").trim();
       const params = new URLSearchParams();
       if (term) params.set("q", term);
+      if (brand) params.set("brand", brand);
+      if (category) params.set("category", category);
       res.redirect(302, `/busca/index.html${params.toString() ? `?${params}` : ""}`);
     });
 
