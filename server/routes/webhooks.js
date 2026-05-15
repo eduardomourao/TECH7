@@ -116,6 +116,16 @@ function extractWooviCharge(payload) {
   return payload?.charge || payload?.pixQrCode || payload?.payment || payload?.data?.charge || payload?.data || {};
 }
 
+function normalizeWooviStatus(payload) {
+  const event = String(payload?.event || payload?.type || "").toUpperCase();
+  const charge = extractWooviCharge(payload);
+  const status = String(charge?.status || payload?.status || "").toUpperCase();
+  if (event.includes("CHARGE_COMPLETED") || status === "COMPLETED") return "COMPLETED";
+  if (event.includes("CHARGE_EXPIRED") || status === "EXPIRED") return "EXPIRED";
+  if (status === "ACTIVE") return "ACTIVE";
+  return null;
+}
+
 function extractWooviCorrelationId(payload) {
   const charge = extractWooviCharge(payload);
   return (
@@ -129,10 +139,11 @@ function extractWooviCorrelationId(payload) {
 }
 
 function isWooviCompleted(payload) {
-  const event = String(payload?.event || payload?.type || "").toUpperCase();
-  const charge = extractWooviCharge(payload);
-  const status = String(charge?.status || payload?.status || "").toUpperCase();
-  return event.includes("CHARGE_COMPLETED") || status === "COMPLETED";
+  return normalizeWooviStatus(payload) === "COMPLETED";
+}
+
+function isWooviExpired(payload) {
+  return normalizeWooviStatus(payload) === "EXPIRED";
 }
 
 router.get("/woovi", (_req, res) => {
@@ -176,16 +187,60 @@ router.post("/woovi", async (req, res) => {
     [String(dedupeKey), correlationID || null, authorization, raw, payload]
   );
 
-  if (correlationID && isWooviCompleted(payload)) {
-    await pool.query(`update orders set status = 'paid', updated_at = now() where id = $1`, [correlationID]);
-    await pool.query(
-      `
-        update payments
-        set status = 'COMPLETED', raw_json = $2
-        where provider = 'woovi' and provider_payment_id = $1
-      `,
-      [correlationID, payload]
-    );
+  try {
+    const wooviStatus = normalizeWooviStatus(payload);
+
+    if (correlationID) {
+      const paymentRes = await pool.query(
+        `
+          select order_id
+          from payments
+          where provider = 'woovi' and provider_payment_id = $1
+          order by created_at desc, id desc
+          limit 1
+        `,
+        [correlationID]
+      );
+
+      let orderId = paymentRes.rows[0]?.order_id || null;
+      if (!orderId) {
+        const orderFallback = await pool.query(
+          `select id, total_cents from orders where id = $1 limit 1`,
+          [correlationID]
+        );
+        if (orderFallback.rowCount) {
+          orderId = orderFallback.rows[0].id;
+          await pool.query(
+            `
+              insert into payments (provider, provider_payment_id, order_id, status, amount_cents, currency, raw_json)
+              values ('woovi', $1, $2, $3, $4, 'BRL', $5)
+              on conflict (provider, provider_payment_id)
+              do update set status = excluded.status, raw_json = excluded.raw_json
+            `,
+            [correlationID, orderId, wooviStatus || "ACTIVE", Number(orderFallback.rows[0].total_cents || 0), payload]
+          );
+        }
+      } else {
+        await pool.query(
+          `
+            update payments
+            set status = $2, raw_json = $3
+            where provider = 'woovi' and provider_payment_id = $1
+          `,
+          [correlationID, wooviStatus || "ACTIVE", payload]
+        );
+      }
+
+      if (orderId && isWooviCompleted(payload)) {
+        await pool.query(`update orders set status = 'paid', updated_at = now() where id = $1`, [orderId]);
+      } else if (orderId && isWooviExpired(payload)) {
+        await pool.query(`update orders set status = 'failed', updated_at = now() where id = $1 and status <> 'paid'`, [orderId]);
+      } else if (orderId && wooviStatus === "ACTIVE") {
+        await pool.query(`update orders set status = 'pending', updated_at = now() where id = $1 and status <> 'paid'`, [orderId]);
+      }
+    }
+  } catch {
+    // Keep 200 response after dedupe/persist to avoid unnecessary webhook retries.
   }
 
   res.status(200).json({ ok: true });

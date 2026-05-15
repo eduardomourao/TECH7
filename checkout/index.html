@@ -511,8 +511,7 @@
                 <section class="checkout-step" data-step="3">
                   <h2>Método de pagamento</h2>
                   <div class="payment-options" aria-label="Métodos de pagamento disponíveis">
-                    <span class="payment-option"><span class="payment-dot" aria-hidden="true"></span> Pagar na entrega</span>
-                    <span class="payment-option is-selected"><span class="payment-dot" aria-hidden="true"></span> PIX</span>
+                    <span class="payment-option is-selected"><span class="payment-dot" aria-hidden="true"></span> PIX Woovi</span>
                   </div>
                   <div class="pix-card">
                     <strong>PIX</strong>
@@ -530,6 +529,7 @@
                   </div>
                   <div class="checkout-actions">
                     <button class="btn btn-secondary" type="button" data-prev>Voltar</button>
+                    <button class="btn btn-secondary" id="btn-regenerar-pix" type="button" style="display:none;">Gerar novo PIX</button>
                     <button class="btn btn-primary" id="btn-gerar-pix" type="submit">Gerar PIX e finalizar pedido</button>
                   </div>
                 </section>
@@ -590,8 +590,12 @@
   <script>
     (function () {
       var STORAGE_KEY = 'carrinho';
+      var PIX_SESSION_KEY = 'tech7_checkout_pix_state_v1';
+      var POLL_INTERVAL_MS = 5000;
       var currentStep = 1;
       var orderSnapshot = null;
+      var pollTimer = null;
+      var pollInFlight = false;
       var fields = {
         nome: document.getElementById('campo-nome'),
         email: document.getElementById('campo-email'),
@@ -852,27 +856,357 @@
         });
       }
 
-      async function processarPIX(dadosPedido) {
+      function normalizePaymentStatus(value) {
+        var status = String(value || '').toUpperCase();
+        if (status === 'COMPLETED') return 'COMPLETED';
+        if (status === 'EXPIRED') return 'EXPIRED';
+        return 'ACTIVE';
+      }
+
+      function readPixSession() {
+        try {
+          var raw = sessionStorage.getItem(PIX_SESSION_KEY);
+          if (!raw) return null;
+          var parsed = JSON.parse(raw);
+          return parsed && typeof parsed === 'object' ? parsed : null;
+        } catch (_error) {
+          return null;
+        }
+      }
+
+      function writePixSession(data) {
+        try {
+          sessionStorage.setItem(PIX_SESSION_KEY, JSON.stringify(data || {}));
+        } catch (_error) {}
+      }
+
+      function clearPixSession() {
+        try {
+          sessionStorage.removeItem(PIX_SESSION_KEY);
+        } catch (_error) {}
+      }
+
+      function setPaymentStatusText(message) {
+        var el = document.getElementById('payment-status');
+        if (el) el.textContent = message || 'PIX';
+      }
+
+      function setPaymentState(state, meta) {
+        var info = meta || {};
+        var generateBtn = document.getElementById('btn-gerar-pix');
+        var regenerateBtn = document.getElementById('btn-regenerar-pix');
+        if (!generateBtn || !regenerateBtn) return;
+
+        if (state === 'gerando_pix') {
+          generateBtn.disabled = true;
+          generateBtn.textContent = 'Gerando PIX...';
+          regenerateBtn.style.display = 'none';
+          regenerateBtn.disabled = true;
+          setPaymentStatusText('Gerando PIX...');
+          return;
+        }
+
+        if (state === 'aguardando_pagamento') {
+          generateBtn.disabled = true;
+          generateBtn.textContent = 'PIX gerado';
+          regenerateBtn.style.display = 'none';
+          regenerateBtn.disabled = true;
+          setPaymentStatusText('PIX aguardando confirmacao - Pedido ' + (info.orderId || '-'));
+          return;
+        }
+
+        if (state === 'pago') {
+          generateBtn.disabled = true;
+          generateBtn.textContent = 'Pagamento confirmado';
+          regenerateBtn.style.display = 'none';
+          regenerateBtn.disabled = true;
+          setPaymentStatusText('Pagamento confirmado - Pedido ' + (info.orderId || '-'));
+          return;
+        }
+
+        if (state === 'expirado') {
+          generateBtn.disabled = true;
+          generateBtn.textContent = 'PIX expirado';
+          regenerateBtn.style.display = '';
+          regenerateBtn.disabled = false;
+          setPaymentStatusText('PIX expirado - gere um novo PIX');
+          return;
+        }
+
+        generateBtn.disabled = false;
+        generateBtn.textContent = 'Gerar PIX e finalizar pedido';
+        regenerateBtn.style.display = info.canRegenerate ? '' : 'none';
+        regenerateBtn.disabled = !info.canRegenerate;
+        setPaymentStatusText(info.message || 'Falha ao gerar PIX');
+      }
+
+      function renderPixPayload(payload) {
+        var pixCode = document.getElementById('pix-codigo');
+        var qrContainer = document.getElementById('pix-qrcode-container');
+        if (!pixCode || !qrContainer) return;
+        pixCode.value = payload && payload.codigoPix ? payload.codigoPix : '';
+        qrContainer.innerHTML = '';
+        if (payload && payload.qrCodeUrl) {
+          var img = document.createElement('img');
+          img.src = payload.qrCodeUrl;
+          img.alt = 'QR Code PIX';
+          img.style.maxWidth = '100%';
+          img.style.height = 'auto';
+          qrContainer.appendChild(img);
+          return;
+        }
+        qrContainer.textContent = payload && payload.codigoPix
+          ? 'PIX gerado. Use o codigo copia e cola.'
+          : 'QR Code PIX sera gerado aqui';
+      }
+
+      function humanizePaymentError(error) {
+        var code = (error && error.message ? String(error.message) : '').trim();
+        if (!code) return 'Falha na geracao do PIX';
+        if (code === 'order_already_paid') return 'Este pedido ja foi pago.';
+        if (code === 'order_not_eligible' || code === 'order_not_pending') return 'Pedido nao elegivel para pagamento.';
+        if (code === 'order_not_found') return 'Pedido nao encontrado.';
+        if (code === 'invalid_orderId') return 'Pedido invalido para pagamento.';
+        return code;
+      }
+
+      function currentCustomerPayload() {
+        return {
+          nome: fields.nome.value.trim(),
+          email: fields.email.value.trim(),
+          telefone: fields.telefone.value.trim()
+        };
+      }
+
+      function savePixSnapshot(orderId, payload, status) {
+        writePixSession({
+          orderId: orderId,
+          codigoPix: payload && payload.codigoPix ? payload.codigoPix : '',
+          qrCodeUrl: payload && payload.qrCodeUrl ? payload.qrCodeUrl : '',
+          expiresIn: payload && payload.expiresIn ? payload.expiresIn : null,
+          expiresDate: payload && payload.expiresDate ? payload.expiresDate : null,
+          status: status || 'aguardando_pagamento',
+          updatedAt: new Date().toISOString()
+        });
+      }
+
+      function stopStatusPolling() {
+        if (pollTimer) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+        }
+        pollInFlight = false;
+      }
+
+      async function fetchPixStatus(orderId) {
+        return apiJson('/api/payments/woovi/' + encodeURIComponent(orderId) + '/status');
+      }
+
+      function handleStatusPayload(statusData) {
+        if (!statusData || !statusData.orderId) return;
+        var paymentStatus = normalizePaymentStatus(statusData.paymentStatus);
+        var statusPayload = {
+          codigoPix: statusData.brCode || '',
+          qrCodeUrl: statusData.qrCodeImage || '',
+          expiresDate: statusData.expiresDate || null
+        };
+
+        if (statusPayload.codigoPix || statusPayload.qrCodeUrl) {
+          renderPixPayload(statusPayload);
+          savePixSnapshot(statusData.orderId, statusPayload, 'aguardando_pagamento');
+        }
+
+        if (statusData.orderStatus === 'paid' || paymentStatus === 'COMPLETED') {
+          stopStatusPolling();
+          setPaymentState('pago', { orderId: statusData.orderId });
+          savePixSnapshot(statusData.orderId, statusPayload, 'pago');
+          mostrarConfirmacao(statusData.orderId);
+          return;
+        }
+
+        if (statusData.orderStatus === 'failed' || paymentStatus === 'EXPIRED') {
+          stopStatusPolling();
+          setPaymentState('expirado', { orderId: statusData.orderId });
+          savePixSnapshot(statusData.orderId, statusPayload, 'expirado');
+          return;
+        }
+
+        setPaymentState('aguardando_pagamento', { orderId: statusData.orderId });
+      }
+
+      async function pollOrderStatus(orderId) {
+        if (!orderId || pollInFlight) return;
+        pollInFlight = true;
+        try {
+          var statusData = await fetchPixStatus(orderId);
+          handleStatusPayload(statusData);
+        } catch (_error) {
+          // keep polling on transient failures
+        } finally {
+          pollInFlight = false;
+        }
+      }
+
+      function startStatusPolling(orderId) {
+        stopStatusPolling();
+        pollOrderStatus(orderId);
+        pollTimer = setInterval(function () {
+          pollOrderStatus(orderId);
+        }, POLL_INTERVAL_MS);
+      }
+
+      async function ensureOrderId(dadosPedido) {
+        var saved = readPixSession();
+        if (saved && saved.orderId) {
+          try {
+            var currentStatus = await fetchPixStatus(saved.orderId);
+            if (currentStatus.orderStatus === 'paid' || normalizePaymentStatus(currentStatus.paymentStatus) === 'COMPLETED') {
+              handleStatusPayload(currentStatus);
+              throw new Error('order_already_paid');
+            }
+            if (currentStatus.orderStatus === 'pending' || currentStatus.orderStatus === 'failed') {
+              return saved.orderId;
+            }
+          } catch (error) {
+            if (error && error.message === 'order_already_paid') throw error;
+          }
+        }
         var order = await criarPedidoServidor(dadosPedido);
+        return order.id;
+      }
+
+      async function generateWooviPix(orderId, customer, regenerate) {
         var payment = await apiJson('/api/payments/woovi', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
-            orderId: order.id,
-            customer: dadosPedido.cliente
+            orderId: orderId,
+            customer: customer,
+            regenerate: !!regenerate
           })
         });
 
         return {
-          codigoPix: payment.brCode,
-          qrCodeUrl: payment.qrCodeImage,
-          expiresIn: payment.expiresIn,
-          pedido: order.id,
-          paymentLinkUrl: payment.paymentLinkUrl
+          orderId: payment.orderId || orderId,
+          status: payment.status || 'ACTIVE',
+          codigoPix: payment.brCode || '',
+          qrCodeUrl: payment.qrCodeImage || '',
+          expiresIn: payment.expiresIn || null,
+          expiresDate: payment.expiresDate || null
         };
       }
 
+      async function startPixFlow(regenerate) {
+        var isRegeneration = !!regenerate;
+        var orderId = null;
+        try {
+          setPaymentState('gerando_pix');
+          goToStep(3);
+
+          if (isRegeneration) {
+            var savedSession = readPixSession();
+            orderId = savedSession && savedSession.orderId ? String(savedSession.orderId) : '';
+            if (!orderId) throw new Error('order_not_found');
+          } else {
+            orderSnapshot = montarDadosPedido();
+            orderId = await ensureOrderId(orderSnapshot);
+          }
+
+          var generated = await generateWooviPix(orderId, currentCustomerPayload(), isRegeneration);
+          var paymentPayload = {
+            codigoPix: generated.codigoPix || '',
+            qrCodeUrl: generated.qrCodeUrl || '',
+            expiresIn: generated.expiresIn || null,
+            expiresDate: generated.expiresDate || null
+          };
+          renderPixPayload(paymentPayload);
+
+          var normalizedStatus = normalizePaymentStatus(generated.status);
+          if (normalizedStatus === 'COMPLETED') {
+            setPaymentState('pago', { orderId: generated.orderId });
+            savePixSnapshot(generated.orderId, paymentPayload, 'pago');
+            mostrarConfirmacao(generated.orderId);
+            return;
+          }
+
+          if (normalizedStatus === 'EXPIRED') {
+            setPaymentState('expirado', { orderId: generated.orderId });
+            savePixSnapshot(generated.orderId, paymentPayload, 'expirado');
+            return;
+          }
+
+          setPaymentState('aguardando_pagamento', { orderId: generated.orderId });
+          savePixSnapshot(generated.orderId, paymentPayload, 'aguardando_pagamento');
+          startStatusPolling(generated.orderId);
+        } catch (error) {
+          stopStatusPolling();
+          var sessionAfterError = readPixSession();
+          var canRegenerate = !!(orderId || (sessionAfterError && sessionAfterError.orderId));
+          if (orderId) {
+            writePixSession({
+              orderId: orderId,
+              codigoPix: sessionAfterError && sessionAfterError.codigoPix ? sessionAfterError.codigoPix : '',
+              qrCodeUrl: sessionAfterError && sessionAfterError.qrCodeUrl ? sessionAfterError.qrCodeUrl : '',
+              expiresIn: sessionAfterError && sessionAfterError.expiresIn ? sessionAfterError.expiresIn : null,
+              expiresDate: sessionAfterError && sessionAfterError.expiresDate ? sessionAfterError.expiresDate : null,
+              status: 'erro',
+              updatedAt: new Date().toISOString()
+            });
+          }
+          setPaymentState('erro', {
+            canRegenerate: canRegenerate,
+            message: humanizePaymentError(error)
+          });
+          var qrContainer = document.getElementById('pix-qrcode-container');
+          if (qrContainer) qrContainer.textContent = humanizePaymentError(error);
+        }
+      }
+
+      async function restorePixSession() {
+        var saved = readPixSession();
+        if (!saved || !saved.orderId) return;
+
+        goToStep(3);
+        renderPixPayload({
+          codigoPix: saved.codigoPix || '',
+          qrCodeUrl: saved.qrCodeUrl || '',
+          expiresIn: saved.expiresIn || null,
+          expiresDate: saved.expiresDate || null
+        });
+
+        if (saved.status === 'pago') {
+          setPaymentState('pago', { orderId: saved.orderId });
+          mostrarConfirmacao(saved.orderId);
+          return;
+        }
+
+        if (saved.status === 'expirado') {
+          setPaymentState('expirado', { orderId: saved.orderId });
+          return;
+        }
+
+        if (saved.status === 'erro') {
+          setPaymentState('erro', {
+            canRegenerate: true,
+            message: 'Falha ao gerar PIX'
+          });
+          return;
+        }
+
+        setPaymentState('aguardando_pagamento', { orderId: saved.orderId });
+        startStatusPolling(saved.orderId);
+
+        try {
+          var statusNow = await fetchPixStatus(saved.orderId);
+          handleStatusPayload(statusNow);
+        } catch (_error) {
+          // keep state from session and continue polling
+        }
+      }
+
       function mostrarConfirmacao(numeroPedido) {
+        stopStatusPolling();
+        clearPixSession();
         document.getElementById('checkout-flow').style.display = 'none';
         document.getElementById('numero-pedido').textContent = numeroPedido;
         document.getElementById('confirmation').classList.add('is-visible');
@@ -921,48 +1255,21 @@
           this.textContent = 'Selecione e copie';
         }
       });
+      document.getElementById('btn-regenerar-pix').addEventListener('click', function () {
+        startPixFlow(true);
+      });
       document.getElementById('checkout-form').addEventListener('submit', async function (event) {
         event.preventDefault();
         if (!validateStep(1) || !validateStep(2)) {
           goToStep(!validateStep(1) ? 1 : 2);
           return;
         }
-        var button = document.getElementById('btn-gerar-pix');
-        button.disabled = true;
-        button.textContent = 'Gerando PIX...';
-        orderSnapshot = montarDadosPedido();
-        var pixGerado = false;
-        try {
-          var result = await processarPIX(orderSnapshot);
-          pixGerado = true;
-          document.getElementById('pix-codigo').value = result.codigoPix;
-          var qrContainer = document.getElementById('pix-qrcode-container');
-          qrContainer.innerHTML = '';
-          if (result.qrCodeUrl) {
-            var img = document.createElement('img');
-            img.src = result.qrCodeUrl;
-            img.alt = 'QR Code PIX';
-            img.style.maxWidth = '100%';
-            img.style.height = 'auto';
-            qrContainer.appendChild(img);
-          } else {
-            qrContainer.textContent = 'PIX gerado. Use o codigo copia e cola.';
-          }
-          document.getElementById('payment-status').textContent = 'PIX aguardando confirmacao - Pedido ' + result.pedido;
-          button.textContent = 'PIX gerado';
-        } catch (error) {
-          document.getElementById('payment-status').textContent = 'Falha ao gerar PIX';
-          document.getElementById('pix-qrcode-container').textContent = error.message || 'Nao foi possivel gerar o PIX.';
-        } finally {
-          if (!pixGerado) {
-            button.disabled = false;
-            button.textContent = 'Gerar PIX e finalizar pedido';
-          }
-        }
+        await startPixFlow(false);
       });
 
       renderSummary();
       goToStep(1);
+      restorePixSession().catch(function () {});
     })();
   </script>
 </body>

@@ -112,8 +112,97 @@ function buildWooviCustomer(input = {}) {
   return customer;
 }
 
+function normalizeWooviStatus(value) {
+  const status = String(value || "").toUpperCase();
+  if (status === "COMPLETED") return "COMPLETED";
+  if (status === "EXPIRED") return "EXPIRED";
+  return "ACTIVE";
+}
+
+function extractWooviEnvelope(payload = {}) {
+  const charge = payload?.charge || payload?.pixQrCode || payload?.payment || payload?.data?.charge || payload?.data || {};
+  const pix = charge?.paymentMethods?.pix || payload?.paymentMethods?.pix || {};
+  const brCode = payload?.brCode || charge?.brCode || pix?.brCode || "";
+  const qrCodeImage = charge?.qrCodeImage || pix?.qrCodeImage || payload?.qrCodeImage || "";
+  const correlationID = String(
+    charge?.correlationID ||
+    charge?.correlationId ||
+    payload?.correlationID ||
+    payload?.correlationId ||
+    ""
+  ).trim();
+  const status = normalizeWooviStatus(charge?.status || payload?.status);
+  const expiresInRaw = charge?.expiresIn ?? payload?.expiresIn;
+  const expiresIn = Number.isFinite(Number(expiresInRaw)) ? Number(expiresInRaw) : null;
+  return {
+    correlationID,
+    status,
+    brCode,
+    qrCodeImage,
+    paymentLinkUrl: charge?.paymentLinkUrl || payload?.paymentLinkUrl || null,
+    expiresIn,
+    expiresDate: charge?.expiresDate || payload?.expiresDate || null
+  };
+}
+
+function wooviResponseFromPaymentRow(orderId, row, fallbackExpiresIn) {
+  const raw = row?.raw_json && typeof row.raw_json === "object" ? row.raw_json : {};
+  const envelope = extractWooviEnvelope(raw);
+  return {
+    orderId,
+    provider: "woovi",
+    correlationID: String(row?.provider_payment_id || envelope.correlationID || ""),
+    status: normalizeWooviStatus(row?.status || envelope.status),
+    brCode: envelope.brCode || "",
+    qrCodeImage: envelope.qrCodeImage || "",
+    paymentLinkUrl: envelope.paymentLinkUrl || null,
+    expiresIn: envelope.expiresIn || Number(fallbackExpiresIn || 0) || null,
+    expiresDate: envelope.expiresDate || null
+  };
+}
+
+function newWooviCorrelationId(orderId, regenerate) {
+  if (!regenerate) return orderId;
+  return `${orderId}-${Date.now().toString(36)}`;
+}
+
+async function findReusableActiveWooviPayment(orderId) {
+  const rowRes = await pool.query(
+    `
+      select provider_payment_id, status, raw_json
+      from payments
+      where provider = 'woovi' and order_id = $1 and status = 'ACTIVE'
+      order by created_at desc, id desc
+      limit 1
+    `,
+    [orderId]
+  );
+  if (!rowRes.rowCount) return null;
+  const candidate = rowRes.rows[0];
+  const mapped = wooviResponseFromPaymentRow(orderId, candidate);
+  if (!mapped.brCode && !mapped.qrCodeImage) return null;
+  return mapped;
+}
+
+async function findLatestWooviPayment(orderId) {
+  const rowRes = await pool.query(
+    `
+      select provider_payment_id, status, raw_json
+      from payments
+      where provider = 'woovi' and order_id = $1
+      order by created_at desc, id desc
+      limit 1
+    `,
+    [orderId]
+  );
+  if (!rowRes.rowCount) return null;
+  return rowRes.rows[0];
+}
+
 router.post("/woovi", async (req, res) => {
-  const { orderId, customer } = req.body || {};
+  res.set("Cache-Control", "no-store");
+  const { orderId, customer, regenerate } = req.body || {};
+  const shouldRegenerate = !!regenerate;
   if (!orderId || typeof orderId !== "string") return res.status(400).json({ error: "invalid_orderId" });
 
   const orderRes = await pool.query(
@@ -122,9 +211,17 @@ router.post("/woovi", async (req, res) => {
   );
   if (orderRes.rowCount === 0) return res.status(404).json({ error: "order_not_found" });
   const order = orderRes.rows[0];
-  if (order.status !== "pending") return res.status(409).json({ error: "order_not_pending" });
+  if (order.status === "paid") return res.status(409).json({ error: "order_already_paid" });
+  if (order.status !== "pending" && !(shouldRegenerate && order.status === "failed")) {
+    return res.status(409).json({ error: "order_not_eligible" });
+  }
   if ((order.currency || "BRL") !== "BRL") return res.status(400).json({ error: "unsupported_currency" });
   if (Number(order.total_cents) <= 0) return res.status(400).json({ error: "invalid_order_total" });
+
+  if (!shouldRegenerate) {
+    const active = await findReusableActiveWooviPayment(orderId);
+    if (active) return res.json(active);
+  }
 
   const itemsRes = await pool.query(
     `
@@ -138,8 +235,9 @@ router.post("/woovi", async (req, res) => {
   );
 
   const wooviCustomer = buildWooviCustomer(customer);
+  const correlationID = newWooviCorrelationId(orderId, shouldRegenerate);
   const payload = {
-    correlationID: orderId,
+    correlationID,
     value: Number(order.total_cents),
     comment: `Pedido TECH 7 ${orderId}`,
     expiresIn: Number(process.env.WOOVI_PIX_EXPIRES_IN || 1800),
@@ -162,11 +260,9 @@ router.post("/woovi", async (req, res) => {
     body: JSON.stringify(payload)
   });
 
-  const charge = result.charge || {};
-  const pix = charge.paymentMethods?.pix || {};
-  const brCode = result.brCode || charge.brCode || pix.brCode || "";
-  const qrCodeImage = charge.qrCodeImage || pix.qrCodeImage || "";
-  const providerPaymentId = String(charge.correlationID || result.correlationID || orderId);
+  const envelope = extractWooviEnvelope(result);
+  const providerPaymentId = String(envelope.correlationID || correlationID || orderId);
+  const paymentStatus = normalizeWooviStatus(envelope.status);
 
   await pool.query(
     `
@@ -175,19 +271,62 @@ router.post("/woovi", async (req, res) => {
       on conflict (provider, provider_payment_id)
       do update set status = excluded.status, amount_cents = excluded.amount_cents, raw_json = excluded.raw_json
     `,
-    [providerPaymentId, orderId, charge.status || "ACTIVE", Number(order.total_cents), result]
+    [providerPaymentId, orderId, paymentStatus, Number(order.total_cents), result]
   );
+
+  await pool.query(`update orders set status = 'pending', updated_at = now() where id = $1 and status <> 'paid'`, [orderId]);
 
   res.json({
     orderId,
     provider: "woovi",
     correlationID: providerPaymentId,
-    status: charge.status || "ACTIVE",
-    brCode,
-    qrCodeImage,
-    paymentLinkUrl: charge.paymentLinkUrl || null,
-    expiresIn: charge.expiresIn || payload.expiresIn,
-    expiresDate: charge.expiresDate || null
+    status: paymentStatus,
+    brCode: envelope.brCode || "",
+    qrCodeImage: envelope.qrCodeImage || "",
+    paymentLinkUrl: envelope.paymentLinkUrl || null,
+    expiresIn: envelope.expiresIn || payload.expiresIn,
+    expiresDate: envelope.expiresDate || null
+  });
+});
+
+router.get("/woovi/:orderId/status", async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const orderId = String(req.params.orderId || "").trim();
+  if (!orderId) return res.status(400).json({ error: "invalid_orderId" });
+
+  const orderRes = await pool.query(
+    `select id, status from orders where id = $1 limit 1`,
+    [orderId]
+  );
+  if (!orderRes.rowCount) return res.status(404).json({ error: "order_not_found" });
+
+  const orderStatus = String(orderRes.rows[0].status || "pending");
+  const latest = await findLatestWooviPayment(orderId);
+  if (!latest) {
+    return res.json({
+      orderId,
+      orderStatus,
+      paymentStatus: null,
+      correlationID: null,
+      brCode: "",
+      qrCodeImage: "",
+      expiresDate: null,
+      canRegenerate: orderStatus !== "paid" && orderStatus === "failed"
+    });
+  }
+
+  const mapped = wooviResponseFromPaymentRow(orderId, latest, process.env.WOOVI_PIX_EXPIRES_IN || 1800);
+  const canRegenerate = orderStatus !== "paid" && (mapped.status === "EXPIRED" || orderStatus === "failed");
+
+  res.json({
+    orderId,
+    orderStatus,
+    paymentStatus: mapped.status,
+    correlationID: mapped.correlationID || null,
+    brCode: mapped.brCode || "",
+    qrCodeImage: mapped.qrCodeImage || "",
+    expiresDate: mapped.expiresDate || null,
+    canRegenerate
   });
 });
 
