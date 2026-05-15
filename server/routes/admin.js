@@ -6,6 +6,27 @@ export const router = express.Router();
 const sessions = new Map();
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8;
 
+function normalizeSegment(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "")
+    .trim();
+}
+
+function productUrlFromRow(row) {
+  const section = normalizeSegment(row?.section);
+  const brand = normalizeSegment(row?.brand);
+  const slug = normalizeSegment(row?.slug);
+  const parts = [];
+
+  if (section) parts.push(section);
+  if (brand && brand !== "tech7" && brand !== "catalogo") parts.push(brand);
+  if (slug) parts.push(slug);
+
+  if (!parts.length) return "";
+  return `${parts.join("/")}/index.html`;
+}
+
 function adminAuth(req, res, next) {
   const header = String(req.headers.authorization || "");
   if (!header.startsWith("Bearer ")) return res.status(401).json({ error: "missing_session" });
@@ -81,7 +102,8 @@ router.get("/products", adminAuth, async (req, res) => {
       category: r.section,
       stock: 0,
       active: !!r.active,
-      price: Number((Number(r.price_cents || 0) / 100).toFixed(2))
+      price: Number((Number(r.price_cents || 0) / 100).toFixed(2)),
+      url: productUrlFromRow(r)
     }))
   });
 });
@@ -141,7 +163,8 @@ router.put("/products/:id", adminAuth, async (req, res) => {
     brand: p.brand,
     category: p.section,
     active: !!p.active,
-    price: Number((Number(p.price_cents || 0) / 100).toFixed(2))
+    price: Number((Number(p.price_cents || 0) / 100).toFixed(2)),
+    url: productUrlFromRow(p)
   });
 });
 

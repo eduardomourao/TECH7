@@ -207,26 +207,35 @@
 
   function resolvePrice(input) {
     if (!input || !input.slug) input = getPathParts();
-
-    var productId = buildProductId(input);
-    if (productId) {
-      return fetch('/api/products/' + encodeURIComponent(productId), { cache: 'no-store' })
+    var section = normalizeProductId(input.secao || input.section || '');
+    var brand = normalizeProductId(input.marca || input.brand || '');
+    var slug = normalizeProductId(input.slug || '');
+    if (slug) {
+      return fetch('/api/products/resolve-prices', {
+        method: 'POST',
+        cache: 'no-store',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          items: [{ section: section, brand: brand, slug: slug }]
+        })
+      })
         .then(function(res) {
           if (!res.ok) throw new Error('http_' + res.status);
           return res.json();
         })
-        .then(function(product) {
-          var price = Number(product && product.price_cents) / 100;
-          if (Number.isFinite(price) && price > 0) {
-            return {
-              found: true,
-              price: price,
-              secao: product.section || input.secao || input.section || '',
-              marca: product.brand || input.marca || input.brand || '',
-              slug: product.slug || input.slug || ''
-            };
-          }
-          throw new Error('invalid_price');
+        .then(function(payload) {
+          var list = Array.isArray(payload && payload.items) ? payload.items : [];
+          var item = list[0] || {};
+          if (!item.found) throw new Error('not_found');
+          var price = Number(item.price_cents || 0) / 100;
+          if (!Number.isFinite(price) || price <= 0) throw new Error('invalid_price');
+          return {
+            found: true,
+            price: price,
+            secao: item.section || section,
+            marca: item.brand || brand,
+            slug: item.slug || slug
+          };
         })
         .catch(function() {
           var pagePrice = lookupPagePrice(input);
@@ -290,7 +299,7 @@
     try {
       var url = new URL(href, window.location.origin);
       var parsed = getPathParts(url.pathname);
-      if (!parsed || !parsed.slug || !parsed.marca || !parsed.secao) return null;
+      if (!parsed || !parsed.slug) return null;
       return {
         secao: normalizeProductId(parsed.secao),
         marca: normalizeProductId(parsed.marca),
@@ -369,6 +378,7 @@
     return resolveCatalogPricesBatch(entries)
       .then(function(items) {
         var updated = 0;
+        var requested = entries.map(function(entry) { return [entry.secao, entry.marca, entry.slug].join('|'); });
         for (var x = 0; x < items.length; x++) {
           var item = items[x] || {};
           if (!item.found) continue;
@@ -380,6 +390,15 @@
           var slug = normalizeProductId(item.slug);
           var key = [secao, marca, slug].join('|');
           var match = byKey.get(key);
+          if (!match && requested[x]) match = byKey.get(requested[x]);
+          if (!match && slug) {
+            for (var m = 0; m < entries.length; m++) {
+              if (entries[m].slug === slug) {
+                match = entries[m];
+                break;
+              }
+            }
+          }
           if (!match) continue;
 
           var formatted = formatMoney(price);

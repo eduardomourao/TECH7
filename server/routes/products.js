@@ -45,43 +45,52 @@ router.post("/resolve-prices", async (req, res) => {
     return { section, brand, slug };
   });
 
-  const keys = new Map();
-  for (const entry of normalized) {
-    if (!entry.slug) continue;
-    const key = `${entry.section}|${entry.brand}|${entry.slug}`;
-    keys.set(key, entry);
-  }
-
-  const candidates = Array.from(keys.values());
-  if (!candidates.length) return res.json({ items: normalized.map(() => ({ found: false })) });
-
-  const params = [];
-  const clauses = [];
-  for (const item of candidates) {
-    params.push(item.section, item.brand, item.slug);
-    const idx = params.length;
-    clauses.push(`(lower(section) = lower($${idx - 2}) and lower(brand) = lower($${idx - 1}) and lower(slug) = lower($${idx}))`);
-  }
+  const slugs = Array.from(
+    new Set(
+      normalized
+        .map((entry) => entry.slug)
+        .filter(Boolean)
+    )
+  );
+  if (!slugs.length) return res.json({ items: normalized.map(() => ({ found: false })) });
 
   const { rows } = await pool.query(
     `
       select id, slug, name, brand, section, price_cents, currency, image_url, active, updated_at
       from products
       where active = true
-        and (${clauses.join(" or ")})
+        and lower(slug) = any($1::text[])
+      order by updated_at desc nulls last, created_at desc
     `,
-    params
+    [slugs]
   );
 
-  const byKey = new Map();
+  const bySlug = new Map();
   for (const row of rows) {
-    const key = `${normalizeSegment(row.section)}|${normalizeSegment(row.brand)}|${normalizeSegment(row.slug)}`;
-    byKey.set(key, row);
+    const slug = normalizeSegment(row.slug);
+    const bucket = bySlug.get(slug) || [];
+    bucket.push(row);
+    bySlug.set(slug, bucket);
   }
 
   const items = normalized.map((item) => {
-    const key = `${item.section}|${item.brand}|${item.slug}`;
-    const found = byKey.get(key);
+    const options = bySlug.get(item.slug) || [];
+    let found = null;
+    let bestScore = -1;
+    for (const candidate of options) {
+      const section = normalizeSegment(candidate.section);
+      const brand = normalizeSegment(candidate.brand);
+      let score = 0;
+      if (item.section && section === item.section) score += 4;
+      if (item.brand && brand === item.brand) score += 2;
+      if (!item.section) score += 1;
+      if (!item.brand) score += 1;
+      if (score > bestScore) {
+        bestScore = score;
+        found = candidate;
+      }
+    }
+
     if (!found) {
       return {
         id: "",

@@ -163,7 +163,7 @@
             '<button class="btn btn-sm ' + (p.active ? 'btn-success' : 'btn-outline') + '" data-toggle-active data-id="' + esc(p.id) + '" data-active="' + p.active + '">' +
             (p.active ? 'Ativo' : 'Inativo') + '</button>' +
           '</td>' +
-          '<td><button class="btn btn-sm btn-outline" data-view-product data-id="' + esc(p.id) + '">Ver</button></td>' +
+          '<td><button class="btn btn-sm btn-outline" data-view-product data-id="' + esc(p.id) + '" data-url="' + esc(p.url || '') + '">Ver</button></td>' +
           '</tr>';
       }
 
@@ -228,7 +228,13 @@
     // View product
     document.querySelectorAll('[data-view-product]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        window.open('/produtos/' + btn.dataset.id, '_blank');
+        const url = String(btn.dataset.url || '').trim();
+        if (!url) {
+          toast('Produto sem URL de vitrine', 'error');
+          return;
+        }
+        const target = url.startsWith('/') ? url : ('/' + url);
+        window.open(target, '_blank');
       });
     });
 
