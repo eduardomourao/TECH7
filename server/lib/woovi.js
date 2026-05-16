@@ -12,7 +12,7 @@ function wooviBaseUrl() {
 
 function authHeader() {
   const appId = requireEnv("WOOVI_APP_ID");
-  return appId.toLowerCase().startsWith("bearer ") ? appId : `Bearer ${appId}`;
+  return appId.toLowerCase().startsWith("bearer ") ? appId : appId;
 }
 
 export async function wooviFetch(path, opts = {}) {
@@ -24,7 +24,7 @@ export async function wooviFetch(path, opts = {}) {
       ...opts,
       signal: controller.signal,
       headers: {
-        authorization: authHeader(),
+        Authorization: authHeader(),
         "content-type": "application/json",
         ...(opts.headers || {})
       }
