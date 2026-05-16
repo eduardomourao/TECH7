@@ -27,6 +27,25 @@
     return Number(getNum(value)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }
 
+  function ensureVariationStyles() {
+    if (document.getElementById('t7-product-variation-styles')) return;
+    var style = document.createElement('style');
+    style.id = 't7-product-variation-styles';
+    style.textContent = [
+      '#t7-variacao-container{margin:4px 0 2px!important}',
+      '#t7-variacao-container .texto_variacao h2{margin:0 0 10px!important;color:#111!important;font-size:13px!important;font-weight:800!important;line-height:1.35!important}',
+      '#t7-variacao-container .texto_variacao span{display:none!important}',
+      '#t7-variacao-container .lista_cor_variacao{display:flex!important;width:auto!important;max-width:100%!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;gap:10px!important;flex-wrap:wrap!important;align-items:center!important;list-style:none!important}',
+      '#t7-variacao-container .lista_cor_variacao li{position:relative!important;display:inline-flex!important;width:48px!important;height:48px!important;min-width:48px!important;max-width:48px!important;margin:0!important;padding:4px!important;border:2px solid #e5e7eb!important;border-radius:12px!important;background:#fff!important;box-shadow:0 3px 12px rgba(17,17,17,.08)!important;cursor:pointer!important;transition:border-color 160ms ease,box-shadow 160ms ease,transform 160ms ease,opacity 160ms ease!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}',
+      '#t7-variacao-container .lista_cor_variacao li:hover,#t7-variacao-container .lista_cor_variacao li:focus-visible,#t7-variacao-container .lista_cor_variacao li.t7-variant-selected{border-color:#ff6a00!important;box-shadow:0 0 0 4px rgba(255,106,0,.16),0 8px 22px rgba(255,106,0,.16)!important;transform:translateY(-1px)!important;outline:0!important}',
+      '#t7-variacao-container .lista_cor_variacao li.sem_estoque{opacity:.48!important}',
+      '#t7-variacao-container .lista_cor_variacao li.sem_estoque:after{content:""!important;position:absolute!important;left:6px!important;right:6px!important;top:50%!important;height:2px!important;background:rgba(239,68,68,.82)!important;transform:rotate(-35deg)!important;pointer-events:none!important}',
+      '#t7-variacao-container .lista_cor_variacao img{display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;border:1px solid rgba(17,17,17,.08)!important;border-radius:8px!important;object-fit:cover!important}',
+      '@media (max-width:767px){#t7-variacao-container .lista_cor_variacao li{width:44px!important;height:44px!important;min-width:44px!important;max-width:44px!important}}'
+    ].join('\n');
+    document.head.appendChild(style);
+  }
+
   /* ================================================================ */
   /* ExtraÃ§Ã£o de dados do produto (0 Tray)                             */
   /* ================================================================ */
@@ -201,6 +220,79 @@
     if (hiddenVariant && variantId) hiddenVariant.value = variantId;
   }
 
+  function optionColorName(option) {
+    if (!option) return '';
+    var explicitValue = option.getAttribute('data-variant-value');
+    if (explicitValue) return normalizeText(explicitValue);
+
+    var img = option.querySelector('img');
+    if (img) {
+      return normalizeText(img.getAttribute('alt') || img.getAttribute('title'));
+    }
+
+    return normalizeText(option.textContent);
+  }
+
+  function colorFromName(name) {
+    var key = normalizeText(name).toLowerCase();
+    var map = {
+      azul: '#2563eb',
+      branco: '#ffffff',
+      dourado: '#d4af37',
+      gold: '#d4af37',
+      grafite: '#3f3f46',
+      lilas: '#a78bfa',
+      'lilás': '#a78bfa',
+      prata: '#c0c0c0',
+      preto: '#050505',
+      rosa: '#f9a8d4',
+      rose: '#f4a6b8',
+      vermelho: '#dc2626',
+      verde: '#16a34a'
+    };
+    return map[key] || '';
+  }
+
+  function normalizeColorVariationUi(container) {
+    if (!container) return;
+
+    container.classList.add('t7-variation-ui');
+
+    var title = container.querySelector('.texto_variacao h2');
+    if (title) {
+      var current = container.querySelector('.t7-variant-selected');
+      var selectedName = optionColorName(current) || _variacaoSelecionada.replace(/^.*:\s*/, '');
+      title.textContent = 'Cores disponiveis' + (selectedName ? ' ( ' + selectedName + ' )' : '');
+    }
+
+    var list = container.querySelector('.lista_cor_variacao');
+    if (!list) return;
+
+    list.setAttribute('role', 'listbox');
+    list.setAttribute('aria-label', 'Cores disponiveis');
+
+    var items = list.querySelectorAll('li');
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var name = optionColorName(item);
+      var img = item.querySelector('img');
+      var fallbackColor = colorFromName(name);
+
+      item.setAttribute('role', 'option');
+      item.setAttribute('tabindex', '0');
+      item.setAttribute('aria-label', name || 'Cor');
+      item.setAttribute('title', name || 'Cor');
+
+      if (img) {
+        img.setAttribute('alt', name || 'Cor');
+        img.setAttribute('title', name || 'Cor');
+        if (fallbackColor) img.style.backgroundColor = fallbackColor;
+      } else if (fallbackColor) {
+        item.style.backgroundColor = fallbackColor;
+      }
+    }
+  }
+
   function extrairVariacao() {
     var form = document.getElementById('form_comprar');
     if (!form) return;
@@ -237,6 +329,16 @@
       if (!option || !container.contains(option)) return;
       e.preventDefault();
       selectVariationOption(option);
+      normalizeColorVariationUi(container);
+    });
+
+    container.addEventListener('keydown', function (e) {
+      var option = e.target.closest('[data-variant-value], .lista_cor_variacao li');
+      if (!option || !container.contains(option)) return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      selectVariationOption(option);
+      normalizeColorVariationUi(container);
     });
 
     // Marca a primeira opÃ§Ã£o selecionada se houver apenas uma
@@ -250,6 +352,7 @@
 
     var options = container.querySelectorAll('[data-variant-value], .lista_cor_variacao li');
     if (!_variacaoSelecionada && options.length === 1) selectVariationOption(options[0]);
+    normalizeColorVariationUi(container);
   }
 
   function temVariacao() {
@@ -486,6 +589,8 @@
   /* ================================================================ */
 
   function init() {
+    ensureVariationStyles();
+
     // Carrega CSS do carrinho (cart-manager.js jÃ¡ foi carregado por preco-loader.js)
     if (!document.getElementById('cart-css-loaded')) {
       var c = document.createElement('link');
