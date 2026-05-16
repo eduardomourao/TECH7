@@ -312,7 +312,7 @@
 
   function collectCatalogEntries(root) {
     var scope = root && root.querySelectorAll ? root : document;
-    var links = scope.querySelectorAll('a.info-product[href]');
+    var links = scope.querySelectorAll('a.info-product[href], a.t7-carousel-link[href]');
     var byKey = new Map();
 
     for (var i = 0; i < links.length; i++) {
@@ -320,10 +320,9 @@
       var parsed = extractPathInfoFromHref(link.getAttribute('href'));
       if (!parsed) continue;
 
-      var product = link.closest('.product');
-      if (!product) continue;
+      var product = link.closest('.product') || link.querySelector('.t7-carousel-card') || link.closest('.swiper-slide') || link;
 
-      var priceNodes = product.querySelectorAll('.product-price .price-off');
+      var priceNodes = product.querySelectorAll('.product-price .price-off, .t7-carousel-price');
       if (!priceNodes.length) continue;
 
       var key = [parsed.secao, parsed.marca, parsed.slug].join('|');
@@ -444,11 +443,11 @@
         for (var n = 0; n < mutation.addedNodes.length; n++) {
           var node = mutation.addedNodes[n];
           if (!node || node.nodeType !== 1) continue;
-          if (node.matches && (node.matches('.product') || node.matches('a.info-product') || node.matches('.item.flex'))) {
+          if (node.matches && (node.matches('.product') || node.matches('a.info-product') || node.matches('.item.flex') || node.matches('.t7-carousel-card') || node.matches('a.t7-carousel-link'))) {
             shouldSync = true;
             break;
           }
-          if (node.querySelector && node.querySelector('a.info-product[href], .product')) {
+          if (node.querySelector && node.querySelector('a.info-product[href], .product, a.t7-carousel-link[href], .t7-carousel-card')) {
             shouldSync = true;
             break;
           }

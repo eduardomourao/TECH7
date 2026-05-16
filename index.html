@@ -1029,25 +1029,9 @@ a[href*="app-central"] {
     if (!section || !swiperEl || swiperEl.getAttribute("data-t7-ready") === "ready") return;
     swiperEl.setAttribute("data-t7-ready", "ready");
     var slides = Array.prototype.slice.call(swiperEl.querySelectorAll(".swiper-slide"));
-    var priceByHref = {
-      "display-e-lcd/apple/tela-display-lcd-iphone-16-jk-troca-ci/index.html": "R$ 1.350,00",
-      "display-e-lcd/apple/tela-display-lcd-iphone-16-plus-jk-troca-ci/index.html": "R$ 475,00",
-      "display-e-lcd/apple/tela-display-lcd-iphone-16-pro-max-jk-troca-ci/index.html": "R$ 48,00",
-      "display/samsung/tela-display-lcd-samsung-s23-s911-oled-com-aro/index.html": "R$ 1.050,00",
-      "display/samsung/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro/index.html": "R$ 48,00",
-      "display/samsung/tela-display-lcd-samsung-s23-ultra-5g-s918-oled-com-aro/index.html": "R$ 475,00",
-      "display/samsung/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro/index.html": "R$ 48,00",
-      "display-e-lcd/samsung/tela-display-lcd-samsung-s23-5g-s911-original-retirada-sem-aro/index.html": "R$ 1.050,00",
-      "display-e-lcd/samsung/tela-display-lcd-samsung-s24-plus-s926-sem-aro-original-nacional/index.html": "R$ 1.050,00",
-      "display-e-lcd/samsung/tela-display-lcd-samsung-s24-fe-s721-sem-aro-original-nacional/index.html": "R$ 48,00"
-    };
-
     function enrichSlide(slide) {
       var link = slide.querySelector("a[href]");
-      var priceEl = slide.querySelector(".t7-carousel-price");
       if (link) {
-        var href = link.getAttribute("href");
-        if (priceEl && href && priceByHref[href]) priceEl.textContent = priceByHref[href];
         if (!link.getAttribute("aria-label")) {
           var title = slide.querySelector(".t7-carousel-title");
           if (title) link.setAttribute("aria-label", "Ver produto " + title.textContent.trim());
