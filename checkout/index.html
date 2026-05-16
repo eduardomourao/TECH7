@@ -13,14 +13,14 @@
   <link href="_custom/tech7-theme.css" rel="stylesheet">
   <style>
     :root {
-      --checkout-bg: #ffffff;
-      --checkout-card: #e7e5e3;
+      --checkout-bg: #fffaf5;
+      --checkout-card: #f3eee9;
       --checkout-card-dark: #111111;
-      --checkout-field: #8d8a87;
-      --checkout-field-text: #ffffff;
+      --checkout-field: #ffffff;
+      --checkout-field-text: #111111;
       --checkout-text: #111111;
-      --checkout-muted: #4f4a45;
-      --checkout-line: rgba(17, 17, 17, .42);
+      --checkout-muted: #5f554d;
+      --checkout-line: rgba(17, 17, 17, .14);
       --checkout-accent: #ff6a00;
       --checkout-accent-hover: #e65f00;
       --checkout-danger: #dc2626;
@@ -233,13 +233,14 @@
       font-weight: 800;
     }
     .field input::placeholder,
-    .copy-pix input::placeholder { color: rgba(255,255,255,.82); }
+    .copy-pix input::placeholder { color: #8b8178; }
     .field input:focus,
     .field select:focus,
     .voucher-select:focus,
     .copy-pix input:focus {
-      background: #111;
+      background: #fff;
       outline-color: var(--checkout-accent);
+      box-shadow: 0 0 0 4px rgba(255, 106, 0, .12);
     }
     .field input[aria-invalid="true"] { outline-color: var(--checkout-danger); }
     .error-msg { min-height: 16px; color: var(--checkout-danger); font-size: 12px; font-weight: 800; }
@@ -275,7 +276,7 @@
     .shipping-card,
     .pix-card {
       border-radius: var(--checkout-radius-md);
-      background: #f8f7f6;
+      background: #fff;
       border: 1px solid rgba(0,0,0,.08);
       padding: 16px;
     }
@@ -287,6 +288,43 @@
     .payment-option { display: inline-flex; align-items: center; gap: 8px; }
     .payment-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #111; background: #fff; }
     .payment-option.is-selected .payment-dot { border-color: #000; background: #000; box-shadow: inset 0 0 0 3px #000, inset 0 0 0 5px var(--checkout-accent); }
+    .delivery-options { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 18px; }
+    .delivery-option {
+      position: relative;
+      display: grid;
+      gap: 5px;
+      min-height: 92px;
+      padding: 18px 18px 18px 52px;
+      border: 2px solid rgba(17, 17, 17, .12);
+      border-radius: var(--checkout-radius-md);
+      background: #fff;
+      color: var(--checkout-text);
+      cursor: pointer;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+    .delivery-option:hover,
+    .delivery-option:focus-within {
+      border-color: rgba(255, 106, 0, .72);
+      box-shadow: 0 16px 34px rgba(255, 106, 0, .14);
+      transform: translateY(-1px);
+    }
+    .delivery-option input {
+      position: absolute;
+      left: 18px;
+      top: 22px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--checkout-accent);
+    }
+    .delivery-option-title { font-weight: 900; color: #000; }
+    .delivery-option-desc { color: var(--checkout-muted); font-size: 13px; font-weight: 700; line-height: 1.4; }
+    .delivery-option.is-selected {
+      border-color: var(--checkout-accent);
+      box-shadow: 0 18px 42px rgba(255, 106, 0, .16);
+    }
+    .delivery-address { display: grid; gap: 16px; }
+    .delivery-address[hidden],
+    .shipping-card[hidden] { display: none !important; }
     .pix-placeholder {
       width: min(220px, 100%);
       aspect-ratio: 1;
@@ -344,6 +382,7 @@
       .form-grid.two { grid-template-columns: 1fr 1fr; }
       .cep-row { grid-template-columns: 1fr 150px; }
       .copy-pix { grid-template-columns: 1fr 130px; }
+      .delivery-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .checkout-actions { justify-content: space-between; }
       .checkout-actions .btn { width: auto; min-width: 190px; }
     }
@@ -445,6 +484,19 @@
                 <section class="checkout-step" data-step="2">
                   <h2>Endereço de entrega</h2>
                   <div class="form-grid">
+                    <div class="delivery-options" role="radiogroup" aria-label="Forma de recebimento">
+                      <label class="delivery-option is-selected" data-delivery-option="shipping">
+                        <input type="radio" name="delivery-mode" value="shipping" checked>
+                        <span class="delivery-option-title">Entrega por Uber</span>
+                        <span class="delivery-option-desc">Informe o endereco para combinarmos o envio pelo WhatsApp.</span>
+                      </label>
+                      <label class="delivery-option" data-delivery-option="pickup">
+                        <input type="radio" name="delivery-mode" value="pickup">
+                        <span class="delivery-option-title">Retirada na loja</span>
+                        <span class="delivery-option-desc">Retire na TECH 7 sem preencher dados de entrega.</span>
+                      </label>
+                    </div>
+                    <div class="delivery-address" id="delivery-address-fields">
                     <div class="form-grid two">
                       <div class="field">
                         <label for="campo-logradouro">Endereço</label>
@@ -489,9 +541,14 @@
                         <div class="error-msg" id="erro-complemento"></div>
                       </div>
                     </div>
-                    <div class="shipping-card">
+                    </div>
+                    <div class="shipping-card" id="shipping-info-card">
                       <strong>Entrega por Uber</strong>
                       <span>O valor da entrega será combinado após a confirmação do pedido. Nossa equipe entra em contato pelo WhatsApp informado.</span>
+                    </div>
+                    <div class="shipping-card" id="pickup-info-card" hidden>
+                      <strong>Retirada na loja</strong>
+                      <span>Rua dos Caetes, 461 - Sala 206 Ed. Baalbeck - Centro, Belo Horizonte - MG. Nossa equipe confirma o horario pelo WhatsApp.</span>
                     </div>
                   </div>
                   <div class="checkout-actions">
@@ -546,7 +603,7 @@
                 <div class="summary-lines">
                   <div class="summary-line"><span>Subtotal</span><strong id="subtotal">R$ 0,00</strong></div>
                   <div class="summary-line"><span>Desconto</span><strong>R$ 0,00</strong></div>
-                  <div class="summary-line"><span>Entrega</span><strong>A combinar</strong></div>
+                  <div class="summary-line"><span>Entrega</span><strong id="delivery-summary">A combinar</strong></div>
                   <div class="summary-line summary-total"><span>Total</span><strong id="total">R$ 0,00</strong></div>
                   <div class="summary-line"><span>Pagamento</span><strong id="payment-status">PIX</strong></div>
                 </div>
@@ -596,6 +653,7 @@
       var orderSnapshot = null;
       var pollTimer = null;
       var pollInFlight = false;
+      var deliveryMode = 'shipping';
       var fields = {
         nome: document.getElementById('campo-nome'),
         email: document.getElementById('campo-email'),
@@ -608,6 +666,7 @@
         cidade: document.getElementById('campo-cidade'),
         estado: document.getElementById('campo-estado')
       };
+      var addressFieldNames = ['cep', 'logradouro', 'numero', 'bairro', 'cidade', 'estado', 'complemento'];
 
       function formatCurrency(value) {
         return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -681,6 +740,51 @@
         return valid;
       }
 
+      function clearAddressErrors() {
+        addressFieldNames.forEach(function (fieldName) {
+          setError(fieldName, '');
+        });
+      }
+
+      function setAddressFieldsEnabled(enabled) {
+        addressFieldNames.forEach(function (fieldName) {
+          var field = fields[fieldName];
+          if (!field) return;
+          field.disabled = !enabled;
+          if (fieldName !== 'complemento') {
+            field.required = enabled;
+          }
+        });
+      }
+
+      function setDeliveryMode(mode) {
+        deliveryMode = mode === 'pickup' ? 'pickup' : 'shipping';
+        var isPickup = deliveryMode === 'pickup';
+        var addressBlock = document.getElementById('delivery-address-fields');
+        var shippingInfo = document.getElementById('shipping-info-card');
+        var pickupInfo = document.getElementById('pickup-info-card');
+        var deliverySummary = document.getElementById('delivery-summary');
+
+        document.querySelectorAll('[data-delivery-option]').forEach(function (option) {
+          var selected = option.getAttribute('data-delivery-option') === deliveryMode;
+          option.classList.toggle('is-selected', selected);
+          option.setAttribute('aria-checked', String(selected));
+          var radio = option.querySelector('input[type="radio"]');
+          if (radio) radio.checked = selected;
+        });
+
+        if (addressBlock) {
+          addressBlock.hidden = isPickup;
+          addressBlock.setAttribute('aria-hidden', String(isPickup));
+        }
+        if (shippingInfo) shippingInfo.hidden = isPickup;
+        if (pickupInfo) pickupInfo.hidden = !isPickup;
+        if (deliverySummary) deliverySummary.textContent = isPickup ? 'Retirada na loja' : 'A combinar';
+
+        setAddressFieldsEnabled(!isPickup);
+        if (isPickup) clearAddressErrors();
+      }
+
       function validateStep(step) {
         var valid = true;
         if (step === 1) {
@@ -697,6 +801,10 @@
           }
         }
         if (step === 2) {
+          if (deliveryMode === 'pickup') {
+            clearAddressErrors();
+            return true;
+          }
           ['cep', 'logradouro', 'numero', 'bairro', 'cidade', 'estado'].forEach(function (fieldName) {
             valid = requireField(fieldName, 'Campo obrigatorio.') && valid;
           });
@@ -785,6 +893,7 @@
       function montarDadosPedido() {
         var itens = readCart();
         var subtotal = cartTotal(itens);
+        var isPickup = deliveryMode === 'pickup';
         return {
           itens: itens,
           subtotal: subtotal,
@@ -795,7 +904,17 @@
             email: fields.email.value.trim(),
             telefone: fields.telefone.value.trim()
           },
-          entrega: {
+          entrega: isPickup ? {
+            cep: '',
+            logradouro: 'Retirada na loja',
+            numero: '',
+            complemento: 'TECH 7 - Rua dos Caetes, 461 - Sala 206 Ed. Baalbeck',
+            bairro: 'Centro',
+            cidade: 'Belo Horizonte',
+            estado: 'MG',
+            metodo: 'retirada',
+            prazo: 'a combinar'
+          } : {
             cep: fields.cep.value.trim(),
             logradouro: fields.logradouro.value.trim(),
             numero: fields.numero.value.trim(),
@@ -1224,6 +1343,11 @@
         fields.estado.value = fields.estado.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
       });
       document.getElementById('btn-buscar-cep').addEventListener('click', buscarCep);
+      document.querySelectorAll('input[name="delivery-mode"]').forEach(function (input) {
+        input.addEventListener('change', function () {
+          setDeliveryMode(input.value);
+        });
+      });
 
       document.querySelectorAll('[data-next]').forEach(function (button) {
         button.addEventListener('click', function () {
@@ -1268,6 +1392,7 @@
       });
 
       renderSummary();
+      setDeliveryMode(deliveryMode);
       goToStep(1);
       restorePixSession().catch(function () {});
     })();
