@@ -3,118 +3,626 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin â€” TECH 7</title>
+  <title>Admin - TECH 7</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface-2: #1f1f2e;
+      --surface-3: #2a2a3a;
+      --line: #1f1f2e;
+      --line-strong: #2a2a3a;
+      --text: #f5f5f7;
+      --muted: #9ca3af;
+      --dim: #6b7280;
+      --blue: #3b82f6;
+      --blue-strong: #2563eb;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --purple: #8b5cf6;
+      --orange: #f97316;
+      --radius: 8px;
+      --shadow: 0 24px 80px rgba(0, 0, 0, .35);
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Inter, system-ui, sans-serif; background: #111; color: #e5e5e5; min-height: 100vh; }
-    .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-    .login-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 14px; padding: 40px; width: 100%; max-width: 400px; }
-    .login-card h1 { font-size: 22px; margin-bottom: 8px; color: #fff; }
-    .login-card p { color: #888; font-size: 14px; margin-bottom: 24px; }
-    .login-card input { width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid #333; background: #222; color: #fff; font-size: 14px; margin-bottom: 16px; }
-    .login-card input:focus { outline: none; border-color: #ff6a00; }
-    .login-card button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #ff6a00; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; }
-    .login-card button:hover { background: #e65f00; }
-    .login-card .error { color: #ef4444; font-size: 13px; margin-top: 8px; display: none; }
+    html { font-size: 16px; }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 74% 0%, rgba(37, 99, 235, .13), transparent 34rem),
+        var(--bg);
+      color: var(--text);
+      font-family: "Fira Sans", Inter, system-ui, sans-serif;
+      line-height: 1.5;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: default; }
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid rgba(59, 130, 246, .9);
+      outline-offset: 2px;
+    }
 
-    .app-screen { display: none; }
-    .topbar { background: #1a1a1a; border-bottom: 1px solid #2a2a2a; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
-    .topbar h1 { font-size: 18px; color: #fff; }
-    .topbar .logout { background: none; border: 1px solid #333; color: #999; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-    .topbar .logout:hover { border-color: #ff6a00; color: #fff; }
-    .tabs { background: #1a1a1a; border-bottom: 1px solid #2a2a2a; display: flex; gap: 0; padding: 0 24px; }
-    .tabs button { padding: 12px 20px; background: none; border: none; color: #888; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
-    .tabs button:hover { color: #fff; }
-    .tabs button.active { color: #ff6a00; border-bottom-color: #ff6a00; }
-    .tab-content { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
+    .login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .login-card {
+      width: min(100%, 420px);
+      padding: 32px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(18, 18, 26, .98), rgba(18, 18, 26, .9));
+      box-shadow: var(--shadow);
+    }
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: #fff;
+      font-family: "Fira Code", monospace;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+    .login-card h1 { font-size: 24px; line-height: 1.15; letter-spacing: 0; }
+    .login-card p { margin-top: 4px; color: var(--muted); font-size: 14px; }
+    .field-stack { display: grid; gap: 14px; }
+    .field-stack label { display: grid; gap: 7px; color: var(--muted); font-size: 13px; font-weight: 600; }
+    .login-card input,
+    input[type="text"], input[type="number"], input[type="password"], select {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 9px 11px;
+      font-size: 14px;
+    }
+    .login-card input::placeholder { color: var(--dim); }
+    .login-card .error {
+      display: none;
+      margin-top: 12px;
+      color: #fecaca;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .app-screen { display: none; min-height: 100vh; }
+    .admin-shell { min-height: 100vh; }
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 264px;
+      border-right: 1px solid var(--line);
+      background: rgba(18, 18, 26, .98);
+      z-index: 40;
+    }
+    .sidebar-inner { display: flex; flex-direction: column; min-height: 100%; }
+    .sidebar-head {
+      padding: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+    .brand-title { font-size: 20px; font-weight: 800; letter-spacing: 0; }
+    .brand-kicker {
+      margin-top: 2px;
+      color: var(--dim);
+      font-family: "Fira Code", monospace;
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .nav-list {
+      display: grid;
+      gap: 6px;
+      padding: 16px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      transition: color .18s ease, background-color .18s ease, border-color .18s ease;
+    }
+    .nav-item:hover { background: var(--surface-2); color: var(--text); }
+    .nav-item.active {
+      color: var(--blue);
+      background: rgba(37, 99, 235, .1);
+      border-color: rgba(37, 99, 235, .22);
+    }
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      color: currentColor;
+      flex: 0 0 auto;
+    }
+    .sidebar-foot {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid var(--line);
+    }
+    .admin-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+    }
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: #fff;
+      font-family: "Fira Code", monospace;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .admin-user strong { display: block; font-size: 14px; }
+    .admin-user span { display: block; color: var(--dim); font-size: 12px; }
+
+    .main-area { min-height: 100vh; padding-left: 264px; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      min-height: 65px;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(18, 18, 26, .94);
+      backdrop-filter: blur(14px);
+    }
+    .system-state { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 14px; }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 0 6px rgba(34, 197, 94, .1);
+    }
+    .topbar-meta { color: var(--dim); font-family: "Fira Code", monospace; font-size: 12px; }
+    .content { width: 100%; max-width: 1320px; margin: 0 auto; padding: 28px 24px 40px; }
+    .page-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+    .page-heading h1 { font-size: clamp(26px, 3vw, 34px); line-height: 1.15; letter-spacing: 0; }
+    .page-heading p { margin-top: 8px; color: var(--muted); }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .metric-card {
+      min-height: 132px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      transition: border-color .18s ease, transform .18s ease;
+    }
+    .metric-card:hover { border-color: rgba(37, 99, 235, .32); transform: translateY(-1px); }
+    .metric-icon {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      margin-bottom: 12px;
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      color: var(--blue);
+    }
+    .metric-icon svg { width: 18px; height: 18px; }
+    .metric-value { display: block; color: var(--text); font-size: 26px; font-weight: 800; line-height: 1; }
+    .metric-label { display: block; margin-top: 8px; color: var(--muted); font-size: 12px; }
+
+    .tab-content { display: none; }
     .tab-content.active { display: block; }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-title h2 { font-size: 18px; letter-spacing: 0; }
+    .panel-title p { margin-top: 3px; color: var(--dim); font-size: 13px; }
+    .panel-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .panel-body { padding: 20px; }
+    .dashboard-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr); gap: 18px; margin-bottom: 18px; }
+    .mini-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .mini-card, .node-card, .alert-card, .scenario-card { border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--surface-2); }
+    .mini-card { padding: 15px; }
+    .mini-card .label { color: var(--muted); font-size: 12px; }
+    .mini-card .value { display: block; margin-top: 5px; color: var(--text); font-size: 22px; font-weight: 800; }
+    .mini-card .hint { display: block; margin-top: 4px; color: var(--dim); font-size: 12px; }
+    .node-list, .alert-list, .scenario-list { display: grid; gap: 12px; }
+    .node-card, .alert-card, .scenario-card { padding: 16px; }
+    .node-head, .alert-head, .scenario-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .node-card h3, .scenario-card h3 { color: var(--text); font-size: 15px; }
+    .node-card p, .scenario-card p, .alert-card p { color: var(--muted); font-size: 13px; }
+    .progress-row { display: grid; gap: 7px; margin-top: 12px; }
+    .progress-meta { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 12px; }
+    .progress-track { height: 8px; overflow: hidden; border-radius: 999px; background: var(--surface-3); }
+    .progress-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--purple)); }
+    .progress-fill.green { background: linear-gradient(90deg, #10b981, #22c55e); }
+    .progress-fill.yellow { background: linear-gradient(90deg, #f59e0b, #f97316); }
+    .status-pill { display: inline-flex; align-items: center; gap: 7px; min-height: 24px; padding: 3px 8px; border-radius: 999px; color: var(--muted); font-size: 12px; }
+    .status-pill::before { content: ""; width: 7px; height: 7px; border-radius: 999px; background: var(--blue); }
+    .status-pill.success::before { background: var(--green); }
+    .status-pill.warning::before { background: var(--yellow); }
+    .status-pill.error::before { background: var(--red); }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .toolbar-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .toolbar input, .toolbar select { max-width: 240px; }
+    .chart-bars { display: grid; gap: 12px; }
+    .chart-row { display: grid; grid-template-columns: minmax(120px, 180px) 1fr auto; gap: 12px; align-items: center; color: var(--muted); font-size: 13px; }
+    .price-engine { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, .8fr); gap: 18px; }
+    .control-stack { display: grid; gap: 18px; }
+    .range-field label { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; color: var(--muted); font-size: 13px; font-weight: 600; }
+    input[type="range"] { width: 100%; accent-color: var(--blue); }
+    .result-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border-radius: var(--radius); background: var(--surface-2); color: var(--muted); font-size: 13px; }
+    .result-row strong { color: var(--text); font-size: 16px; }
+    .result-row.primary { border: 1px solid rgba(59, 130, 246, .24); background: rgba(37, 99, 235, .1); }
+    .result-row.primary strong { color: var(--blue); font-size: 28px; }
 
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #222; white-space: nowrap; }
-    th { color: #888; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
-    td { color: #ccc; }
-    tr:hover td { background: #1a1a1a; }
+    .table-wrap { width: 100%; overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; min-width: 860px; font-size: 13px; }
+    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    th {
+      color: var(--dim);
+      background: #0f0f16;
+      font-family: "Fira Code", monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    td { color: #d1d5db; }
+    tr:hover td { background: rgba(31, 31, 46, .62); }
+    tr:last-child td { border-bottom: 0; }
+    td strong { color: var(--text); font-weight: 700; }
+    .mono-muted { color: var(--dim); font-family: "Fira Code", monospace; font-size: 11px; }
 
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
-    .badge-pending { background: #3b3b00; color: #ffd700; }
-    .badge-paid { background: #003b1f; color: #22c55e; }
-    .badge-cancelled { background: #3b0000; color: #ef4444; }
-    .badge-failed { background: #3b0000; color: #ef4444; }
-    .badge-refunded { background: #2a1a3b; color: #a855f7; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 9px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-pending { border-color: rgba(245, 158, 11, .22); background: rgba(245, 158, 11, .1); color: #fbbf24; }
+    .badge-paid { border-color: rgba(34, 197, 94, .22); background: rgba(34, 197, 94, .1); color: #4ade80; }
+    .badge-cancelled, .badge-failed { border-color: rgba(239, 68, 68, .24); background: rgba(239, 68, 68, .1); color: #f87171; }
+    .badge-refunded { border-color: rgba(139, 92, 246, .24); background: rgba(139, 92, 246, .1); color: #a78bfa; }
 
-    .btn { padding: 6px 14px; border-radius: 6px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; }
-    .btn-sm { padding: 4px 10px; font-size: 11px; }
-    .btn-primary { background: #ff6a00; color: #fff; }
-    .btn-primary:hover { background: #e65f00; }
-    .btn-outline { background: none; border: 1px solid #333; color: #ccc; }
-    .btn-outline:hover { border-color: #ff6a00; color: #fff; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 8px 14px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background-color .18s ease, border-color .18s ease, color .18s ease, opacity .18s ease;
+    }
+    .btn-sm { min-height: 32px; padding: 6px 10px; font-size: 12px; }
+    .btn-primary { background: var(--blue-strong); color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-outline { border-color: var(--line-strong); background: transparent; color: #d1d5db; }
+    .btn-outline:hover { border-color: rgba(59, 130, 246, .55); color: #fff; background: rgba(59, 130, 246, .08); }
     .btn-danger { background: #dc2626; color: #fff; }
     .btn-danger:hover { background: #b91c1c; }
-    .btn-success { background: #16a34a; color: #fff; }
+    .btn-success { border-color: rgba(34, 197, 94, .22); background: rgba(34, 197, 94, .12); color: #4ade80; }
+    .logout { min-height: 34px; }
 
-    input[type="text"], input[type="number"], select { padding: 6px 10px; border-radius: 6px; border: 1px solid #333; background: #222; color: #fff; font-size: 13px; width: 100%; max-width: 160px; }
-    input:focus, select:focus { outline: none; border-color: #ff6a00; }
+    .inline-edit { display: flex; gap: 8px; align-items: center; }
+    .inline-edit input { max-width: 92px; min-height: 34px; font-family: "Fira Code", monospace; }
 
-    .inline-edit { display: flex; gap: 6px; align-items: center; }
-    .inline-edit input { max-width: 80px; }
-    .inline-edit button { padding: 4px 8px; font-size: 11px; }
+    .order-detail {
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .order-detail h2 {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      font-size: 18px;
+    }
+    .order-detail .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      padding: 20px;
+    }
+    .order-detail .field {
+      min-height: 72px;
+      padding: 13px;
+      border-radius: var(--radius);
+      background: #0f0f16;
+    }
+    .order-detail .field label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--dim);
+      font-size: 11px;
+      font-family: "Fira Code", monospace;
+      text-transform: uppercase;
+    }
+    .order-detail .field span { color: var(--text); font-size: 14px; overflow-wrap: anywhere; }
+    .order-detail .status-select {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px 20px;
+      flex-wrap: wrap;
+    }
+    .order-detail .status-select label { color: var(--muted); font-size: 13px; }
+    .order-detail .status-select select { max-width: 180px; }
 
-    .order-detail { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 24px; margin-bottom: 20px; }
-    .order-detail h2 { font-size: 16px; color: #fff; margin-bottom: 16px; }
-    .order-detail .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .order-detail .field label { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 2px; }
-    .order-detail .field span { font-size: 14px; color: #fff; }
-    .order-detail .status-select { display: flex; gap: 8px; align-items: center; margin-top: 16px; }
-    .order-detail .status-select select { max-width: 160px; }
+    .loading, .empty-state, .error-state {
+      padding: 44px 20px;
+      text-align: center;
+      color: var(--dim);
+    }
+    .error-state { color: #f87171; }
+    .pagination {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 18px;
+    }
+    .pagination button {
+      min-width: 38px;
+      min-height: 34px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: transparent;
+      color: #d1d5db;
+      font-size: 13px;
+    }
+    .pagination button:hover:not(:disabled) { border-color: rgba(59, 130, 246, .55); color: #fff; }
+    .pagination button:disabled { opacity: .45; }
+    .pagination span { color: var(--muted); font-size: 13px; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      margin-bottom: 16px;
+      border: 0;
+      background: transparent;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .back-btn:hover { color: #60a5fa; }
 
-    .toast { position: fixed; top: 18px; right: 18px; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; color: #fff; z-index: 9999; transform: translateY(-10px); opacity: 0; transition: all .25s; pointer-events: none; }
+    .toast {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 9999;
+      max-width: min(420px, calc(100vw - 36px));
+      padding: 12px 16px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      transform: translateY(-10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform .22s ease, opacity .22s ease;
+    }
     .toast.show { transform: translateY(0); opacity: 1; }
-    .toast-success { background: #16a34a; }
-    .toast-error { background: #dc2626; }
+    .toast-success { border-color: rgba(34, 197, 94, .25); background: #166534; }
+    .toast-error { border-color: rgba(239, 68, 68, .25); background: #991b1b; }
 
-    .loading { text-align: center; padding: 40px; color: #666; }
-    .pagination { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 20px; }
-    .pagination button { padding: 6px 12px; border-radius: 6px; border: 1px solid #333; background: none; color: #ccc; cursor: pointer; font-size: 13px; }
-    .pagination button:hover { border-color: #ff6a00; }
-    .pagination button:disabled { opacity: .4; cursor: default; }
-    .pagination span { font-size: 13px; color: #888; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
 
-    .back-btn { background: none; border: none; color: #ff6a00; cursor: pointer; font-size: 13px; margin-bottom: 16px; display: inline-block; }
-    .back-btn:hover { text-decoration: underline; }
+    @media (max-width: 1024px) {
+      .sidebar { position: static; width: 100%; border-right: 0; border-bottom: 1px solid var(--line); }
+      .sidebar-inner { min-height: auto; }
+      .sidebar-head { padding: 18px 20px; }
+      .nav-list { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 12px; }
+      .sidebar-foot { display: none; }
+      .main-area { padding-left: 0; }
+      .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .dashboard-grid, .price-engine { grid-template-columns: 1fr; }
+      .mini-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
 
-    @media (max-width: 768px) {
-      .tabs { padding: 0 12px; overflow-x: auto; }
-      .tab-content { padding: 12px; }
-      .order-detail .grid { grid-template-columns: 1fr; }
+    @media (max-width: 640px) {
+      .login-card { padding: 24px; }
+      .topbar { align-items: flex-start; flex-direction: column; padding: 14px 16px; }
+      .content { padding: 22px 14px 32px; }
+      .page-heading { display: block; }
+      .metric-grid { grid-template-columns: 1fr; }
+      .mini-grid { grid-template-columns: 1fr; }
+      .chart-row { grid-template-columns: 1fr; gap: 6px; }
+      .panel-head { align-items: flex-start; flex-direction: column; }
+      .panel-actions { width: 100%; }
+      .panel-actions .btn { flex: 1 1 auto; }
+      .panel-body { padding: 14px; }
+      .order-detail .grid { grid-template-columns: 1fr; padding: 14px; }
+      .nav-list { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
-      <h1>ðŸ” Admin TECH 7</h1>
-      <p>Digite usuario e senha de administrador</p>
-      <input type="text" id="usernameInput" placeholder="Usuario" autocomplete="off">
-      <input type="password" id="passwordInput" placeholder="Senha" autocomplete="off">
-      <button id="loginBtn">Entrar</button>
+      <div class="login-brand">
+        <div class="brand-mark" aria-hidden="true">T7</div>
+        <div>
+          <h1>Admin TECH 7</h1>
+          <p>Console operacional da loja</p>
+        </div>
+      </div>
+      <div class="field-stack">
+        <label for="usernameInput">Usuario
+          <input type="text" id="usernameInput" placeholder="admin" autocomplete="username">
+        </label>
+        <label for="passwordInput">Senha
+          <input type="password" id="passwordInput" placeholder="Senha de administrador" autocomplete="current-password">
+        </label>
+        <button class="btn btn-primary" id="loginBtn">Entrar</button>
+      </div>
       <div class="error" id="loginError">Credenciais invalidas</div>
     </div>
   </div>
 
   <div class="app-screen" id="appScreen">
-    <div class="topbar">
-      <h1>âš™ï¸ Admin â€” TECH 7</h1>
-      <button class="logout" id="logoutBtn">Sair</button>
+    <div class="admin-shell">
+      <aside class="sidebar" aria-label="Navegacao administrativa">
+        <div class="sidebar-inner">
+          <div class="sidebar-head">
+            <div class="brand-title">TECH 7</div>
+            <div class="brand-kicker">Backend Command</div>
+          </div>
+          <nav class="nav-list">
+            <button class="nav-item active" data-tab="dashboard">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+              Dashboard
+            </button>
+            <button class="nav-item" data-tab="products">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+              Produtos
+            </button>
+            <button class="nav-item" data-tab="orders">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
+              Pedidos
+            </button>
+            <button class="nav-item" data-tab="pricing">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Price Engine
+            </button>
+            <button class="nav-item" data-tab="reports">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+              Relatorios
+            </button>
+          </nav>
+          <div class="sidebar-foot">
+            <div class="admin-user">
+              <div class="avatar" aria-hidden="true">GA</div>
+              <div>
+                <strong>Global Admin</strong>
+                <span>Full Access</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <div class="main-area">
+        <header class="topbar">
+          <div class="system-state">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            <span>Sistema operacional</span>
+          </div>
+          <div class="topbar-meta">TECH7 / ADMIN / LIVE</div>
+          <button class="btn btn-outline btn-sm logout" id="logoutBtn">Sair</button>
+        </header>
+
+        <main class="content">
+          <section class="page-heading" aria-labelledby="adminTitle">
+            <div>
+              <h1 id="adminTitle">Backend Admin Dashboard</h1>
+              <p id="adminSubtitle">Gerencie catalogo, precos, estoque e ciclo de pedidos da TECH 7.</p>
+            </div>
+            <div class="panel-actions">
+              <button class="btn btn-outline btn-sm" id="refreshBtn">Atualizar</button>
+              <button class="btn btn-primary btn-sm" id="exportBtn">Exportar CSV</button>
+            </div>
+          </section>
+
+          <section class="metric-grid" aria-label="Indicadores do painel">
+            <div class="metric-card">
+              <div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg></div>
+              <span class="metric-value" id="metricProducts">--</span>
+              <span class="metric-label">Produtos monitorados</span>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="m17 5-5-3-5 3"/><path d="m17 19-5 3-5-3"/></svg></div>
+              <span class="metric-value" id="metricPageProducts">--</span>
+              <span class="metric-label">Itens analisados</span>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg></div>
+              <span class="metric-value" id="metricOrders">--</span>
+              <span class="metric-label">Pedidos no backend</span>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <span class="metric-value" id="metricStatus">Online</span>
+              <span class="metric-label">Status da sessao</span>
+            </div>
+          </section>
+
+          <div class="tab-content active" id="tab-dashboard"></div>
+          <div class="tab-content" id="tab-products"></div>
+          <div class="tab-content" id="tab-orders"></div>
+          <div class="tab-content" id="tab-pricing"></div>
+          <div class="tab-content" id="tab-reports"></div>
+        </main>
+      </div>
     </div>
-    <div class="tabs">
-      <button class="active" data-tab="products">Produtos</button>
-      <button data-tab="orders">Pedidos</button>
-    </div>
-    <div class="tab-content active" id="tab-products"></div>
-    <div class="tab-content" id="tab-orders"></div>
   </div>
 
   <div class="toast" id="toast"></div>
