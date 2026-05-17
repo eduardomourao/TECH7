@@ -2,7 +2,18 @@
 (function () {
   'use strict';
 
-  const API = '/api/admin';
+  const DEFAULT_API_ORIGIN = 'https://tech-7.vercel.app';
+
+  function resolveApiBase() {
+    const override = String(window.TECH7_ADMIN_API_BASE || '').trim();
+    if (override) return override.replace(/\/+$/, '');
+
+    const host = String(window.location.hostname || '').toLowerCase();
+    if (host.endsWith('github.io')) return DEFAULT_API_ORIGIN + '/api/admin';
+    return '/api/admin';
+  }
+
+  const API = resolveApiBase();
   const TOAST = document.getElementById('toast');
   const state = {
     tab: 'dashboard',
