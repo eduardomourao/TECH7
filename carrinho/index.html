@@ -509,6 +509,7 @@
     </footer>
   </div>
 
+  <script src="cart-manager.js"></script>
   <script>
     (function () {
       var STORAGE_KEY = 'carrinho';
@@ -543,6 +544,9 @@
       }
 
       function readCart() {
+        if (window.CartManager && typeof window.CartManager.obter === 'function') {
+          return window.CartManager.obter().map(normalizeItem);
+        }
         try {
           var raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
           return Array.isArray(raw) ? raw.map(normalizeItem) : [];
@@ -553,6 +557,10 @@
 
       function saveCart(items) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        localStorage.setItem('t7_cart_local_changed_at', String(Date.now()));
+        try {
+          document.dispatchEvent(new CustomEvent('carrinhoAtualizado', { detail: { items: items }, bubbles: true }));
+        } catch (_error) {}
       }
 
       function cartTotal(items) {
@@ -613,8 +621,16 @@
       function mutateItem(index, updater) {
         var items = readCart();
         if (!items[index]) return;
+        var itemId = items[index].id;
         updater(items[index], items);
         var next = items.filter(function (item) { return item.qty > 0; });
+        if (window.CartManager && typeof window.CartManager.atualizar === 'function') {
+          var nextItem = next.filter(function (item) { return item.id === itemId; })[0];
+          if (nextItem) window.CartManager.atualizar(itemId, nextItem.qty);
+          else if (typeof window.CartManager.remover === 'function') window.CartManager.remover(itemId);
+          renderCart();
+          return;
+        }
         saveCart(next);
         renderCart();
       }

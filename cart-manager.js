@@ -9,6 +9,8 @@
 
   var LS_KEY = 'carrinho';
   var CART_ID_KEY = 't7_cart_id';
+  var LOCAL_CHANGED_KEY = 't7_cart_local_changed_at';
+  var LOCAL_CHANGE_WINDOW_MS = 5 * 60 * 1000;
 
   /* ------------------------------------------------------------------ */
   /* Utilitários                                                         */
@@ -91,6 +93,19 @@
     try { localStorage.setItem(LS_KEY, JSON.stringify(items)); } catch (e) {}
   }
 
+  function _markLocalChanged() {
+    try { localStorage.setItem(LOCAL_CHANGED_KEY, String(Date.now())); } catch (e) {}
+  }
+
+  function _hasRecentLocalChange() {
+    try {
+      var value = parseInt(localStorage.getItem(LOCAL_CHANGED_KEY) || '0', 10) || 0;
+      return value > 0 && Date.now() - value < LOCAL_CHANGE_WINDOW_MS;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function _getCartId() {
     try { return localStorage.getItem(CART_ID_KEY) || ''; } catch (e) { return ''; }
   }
@@ -147,6 +162,10 @@
   function _syncFromServerCart(cart, preserveLocalWhenServerEmpty) {
     if (!cart || !Array.isArray(cart.items)) return [];
     var local = _load();
+    if (preserveLocalWhenServerEmpty && _hasRecentLocalChange()) {
+      _dispatch(local);
+      return local;
+    }
     if (preserveLocalWhenServerEmpty && cart.items.length === 0 && local.length > 0) {
       _dispatch(local);
       return local;
@@ -237,6 +256,7 @@
   function _mutate(updater) {
     var items = _load();
     var next  = updater(items);
+    _markLocalChanged();
     _save(next);
     _dispatch(next);
     return next;
