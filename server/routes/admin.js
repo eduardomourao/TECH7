@@ -68,12 +68,27 @@ router.get("/products", adminAuth, async (req, res) => {
   const limit = Math.max(1, Math.min(200, Number(req.query.limit || 20)));
   const offset = Math.max(0, Number(req.query.offset || 0));
   const q = String(req.query.q || "").trim();
+  const brand = String(req.query.brand || "").trim();
+  const category = String(req.query.category || "").trim();
+  const active = String(req.query.active || "").trim();
 
   const params = [];
   const filters = ["1=1"];
   if (q) {
     params.push(`%${q}%`);
     filters.push(`(name ilike $${params.length} or brand ilike $${params.length} or section ilike $${params.length} or slug ilike $${params.length})`);
+  }
+  if (brand) {
+    params.push(brand);
+    filters.push(`coalesce(brand, '') = $${params.length}`);
+  }
+  if (category) {
+    params.push(category);
+    filters.push(`coalesce(section, '') = $${params.length}`);
+  }
+  if (active === "true" || active === "false") {
+    params.push(active === "true");
+    filters.push(`active = $${params.length}`);
   }
 
   const countRes = await pool.query(`select count(*)::int as total from products where ${filters.join(" and ")}`, params);
@@ -197,8 +212,17 @@ router.post("/prices/bulk", adminAuth, async (req, res) => {
 router.get("/orders", adminAuth, async (req, res) => {
   const limit = Math.max(1, Math.min(200, Number(req.query.limit || 20)));
   const offset = Math.max(0, Number(req.query.offset || 0));
+  const status = String(req.query.status || "").trim();
 
-  const countRes = await pool.query(`select count(*)::int as total from orders`);
+  const params = [];
+  const filters = ["1=1"];
+  if (status) {
+    params.push(status);
+    filters.push(`o.status = $${params.length}`);
+  }
+
+  const countRes = await pool.query(`select count(*)::int as total from orders o where ${filters.join(" and ")}`, params);
+  params.push(limit, offset);
   const { rows } = await pool.query(
     `
       select o.id, o.status, o.total_cents, o.created_at,
@@ -207,10 +231,11 @@ router.get("/orders", adminAuth, async (req, res) => {
       left join lateral (
         select provider from payments where order_id = o.id order by created_at desc limit 1
       ) p on true
+      where ${filters.join(" and ")}
       order by o.created_at desc
-      limit $1 offset $2
+      limit $${params.length - 1} offset $${params.length}
     `,
-    [limit, offset]
+    params
   );
   res.json({
     total: countRes.rows[0]?.total || 0,
@@ -224,6 +249,143 @@ router.get("/orders", adminAuth, async (req, res) => {
       status: o.status,
       payment_provider: o.payment_provider || "-",
       created_at: o.created_at
+    }))
+  });
+});
+
+router.get("/metrics", adminAuth, async (_req, res) => {
+  const [
+    productsSummary,
+    ordersSummary,
+    brandRows,
+    categoryRows,
+    statusRows,
+    paymentRows,
+    topProductRows,
+    recentOrders
+  ] = await Promise.all([
+    pool.query(`
+      select
+        count(*)::int as total,
+        count(*) filter (where active = true)::int as active,
+        count(*) filter (where active = false)::int as inactive,
+        count(*) filter (where coalesce(price_cents, 0) = 0)::int as zero_price,
+        coalesce(round(avg(nullif(price_cents, 0))), 0)::int as avg_price_cents,
+        coalesce(min(nullif(price_cents, 0)), 0)::int as min_price_cents,
+        coalesce(max(price_cents), 0)::int as max_price_cents
+      from products
+    `),
+    pool.query(`
+      select
+        count(*)::int as total,
+        coalesce(sum(total_cents), 0)::bigint as revenue_cents,
+        coalesce(avg(nullif(total_cents, 0)), 0)::int as avg_ticket_cents,
+        count(*) filter (where status = 'pending')::int as pending,
+        count(*) filter (where status = 'paid')::int as paid,
+        count(*) filter (where status in ('cancelled', 'failed', 'refunded'))::int as problem,
+        count(*) filter (where created_at >= current_date)::int as today,
+        coalesce(sum(total_cents) filter (where created_at >= current_date), 0)::bigint as today_revenue_cents,
+        count(*) filter (where created_at >= now() - interval '7 days')::int as last_7_days,
+        coalesce(sum(total_cents) filter (where created_at >= now() - interval '7 days'), 0)::bigint as last_7_days_revenue_cents
+      from orders
+    `),
+    pool.query(`
+      select coalesce(nullif(brand, ''), 'Sem marca') as label, count(*)::int as value
+      from products
+      group by 1
+      order by value desc, label asc
+      limit 10
+    `),
+    pool.query(`
+      select coalesce(nullif(section, ''), 'Sem categoria') as label, count(*)::int as value
+      from products
+      group by 1
+      order by value desc, label asc
+      limit 10
+    `),
+    pool.query(`
+      select status as label, count(*)::int as value, coalesce(sum(total_cents), 0)::bigint as revenue_cents
+      from orders
+      group by status
+      order by value desc, label asc
+    `),
+    pool.query(`
+      select coalesce(nullif(provider, ''), 'Sem provedor') as label, count(*)::int as value, coalesce(sum(amount_cents), 0)::bigint as revenue_cents
+      from payments
+      group by 1
+      order by value desc, label asc
+      limit 8
+    `),
+    pool.query(`
+      select p.id, p.name, p.brand, coalesce(sum(oi.qty), 0)::int as qty, coalesce(sum(oi.line_total_cents), 0)::bigint as revenue_cents
+      from order_items oi
+      join products p on p.id = oi.product_id
+      group by p.id, p.name, p.brand
+      order by revenue_cents desc, qty desc
+      limit 8
+    `),
+    pool.query(`
+      select o.id, o.status, o.total_cents, o.created_at,
+             p.provider as payment_provider
+      from orders o
+      left join lateral (
+        select provider from payments where order_id = o.id order by created_at desc limit 1
+      ) p on true
+      order by o.created_at desc
+      limit 8
+    `)
+  ]);
+
+  const product = productsSummary.rows[0] || {};
+  const order = ordersSummary.rows[0] || {};
+  res.json({
+    generated_at: new Date().toISOString(),
+    products: {
+      total: Number(product.total || 0),
+      active: Number(product.active || 0),
+      inactive: Number(product.inactive || 0),
+      zero_price: Number(product.zero_price || 0),
+      avg_price: Number((Number(product.avg_price_cents || 0) / 100).toFixed(2)),
+      min_price: Number((Number(product.min_price_cents || 0) / 100).toFixed(2)),
+      max_price: Number((Number(product.max_price_cents || 0) / 100).toFixed(2)),
+      by_brand: brandRows.rows.map((r) => ({ label: r.label, value: Number(r.value || 0) })),
+      by_category: categoryRows.rows.map((r) => ({ label: r.label, value: Number(r.value || 0) }))
+    },
+    orders: {
+      total: Number(order.total || 0),
+      revenue: Number((Number(order.revenue_cents || 0) / 100).toFixed(2)),
+      avg_ticket: Number((Number(order.avg_ticket_cents || 0) / 100).toFixed(2)),
+      pending: Number(order.pending || 0),
+      paid: Number(order.paid || 0),
+      problem: Number(order.problem || 0),
+      today: Number(order.today || 0),
+      today_revenue: Number((Number(order.today_revenue_cents || 0) / 100).toFixed(2)),
+      last_7_days: Number(order.last_7_days || 0),
+      last_7_days_revenue: Number((Number(order.last_7_days_revenue_cents || 0) / 100).toFixed(2)),
+      by_status: statusRows.rows.map((r) => ({
+        label: r.label,
+        value: Number(r.value || 0),
+        revenue: Number((Number(r.revenue_cents || 0) / 100).toFixed(2))
+      })),
+      by_payment_provider: paymentRows.rows.map((r) => ({
+        label: r.label,
+        value: Number(r.value || 0),
+        revenue: Number((Number(r.revenue_cents || 0) / 100).toFixed(2))
+      })),
+      recent: recentOrders.rows.map((o) => ({
+        id: o.id,
+        status: o.status,
+        total: Number((Number(o.total_cents || 0) / 100).toFixed(2)),
+        payment_provider: o.payment_provider || "-",
+        created_at: o.created_at
+      }))
+    },
+    top_products: topProductRows.rows.map((p) => ({
+      id: p.id,
+      name: p.name,
+      brand: p.brand,
+      qty: Number(p.qty || 0),
+      revenue: Number((Number(p.revenue_cents || 0) / 100).toFixed(2))
     }))
   });
 });

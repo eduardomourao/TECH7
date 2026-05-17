@@ -26,6 +26,33 @@ function registerApi(app, prefix) {
   app.use(joinRoute(prefix, "/webhooks"), express.raw({ type: "*/*", limit: "2mb" }));
 }
 
+const DEFAULT_CORS_ORIGINS = [
+  "https://tech-7.vercel.app",
+  "https://stiflerwfl1-oss.github.io",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000"
+];
+
+function allowedCorsOrigins() {
+  return String(process.env.CORS_ORIGINS || DEFAULT_CORS_ORIGINS.join(","))
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+}
+
+function applyApiCors(req, res, next) {
+  const origin = String(req.headers.origin || "").replace(/\/+$/, "");
+  if (origin && allowedCorsOrigins().includes(origin)) {
+    res.set("Access-Control-Allow-Origin", origin);
+    res.set("Vary", "Origin");
+    res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.set("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS");
+  }
+
+  if (req.method === "OPTIONS") return res.status(204).end();
+  return next();
+}
+
 export function createApp(options = {}) {
   const {
     serveStatic = true,
@@ -39,6 +66,10 @@ export function createApp(options = {}) {
 
   // Webhooks need raw body; keep it scoped to webhook routes.
   for (const prefix of apiPrefixes) registerApi(app, prefix);
+
+  for (const prefix of apiPrefixes) {
+    app.use(prefix || "/", applyApiCors);
+  }
 
   app.use(express.json({ limit: "1mb" }));
 
