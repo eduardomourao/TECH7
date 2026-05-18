@@ -1,9 +1,38 @@
 (function() {
   'use strict';
 
-  function removeAvisoModal() {
-    var modal = document.querySelector('.modal-theme.email-modal');
-    if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+  function removeNode(node) {
+    if (node && node.parentNode) node.parentNode.removeChild(node);
+  }
+
+  function closestOrSelf(node, selector) {
+    if (!node || node.nodeType !== 1) return null;
+    if (node.matches && node.matches(selector)) return node;
+    return node.closest ? node.closest(selector) : null;
+  }
+
+  function hideUnavailableFeatures() {
+    var selectors = [
+      '.modal-theme.email-modal',
+      '.footer .newsletter',
+      '.header .account',
+      '.nav-mobile .header-nav a.account',
+      '.nav-mobile .header-nav a.sair',
+      '.nav-mobile .header-nav a.icon[href*="central-do-cliente"]',
+      'a[href*="/my-account"]',
+      'a[href*="/cadastro"]',
+      'a[href*="/central-do-cliente"]',
+      'a[href*="/loja/logout.php"]'
+    ];
+
+    selectors.forEach(function(selector) {
+      document.querySelectorAll(selector).forEach(removeNode);
+    });
+
+    document.querySelectorAll('form[action*="/mvc/store/newsletter/"]').forEach(function(form) {
+      removeNode(closestOrSelf(form, '.newsletter, .email-modal') || form);
+    });
+
     if (!document.body) return;
     document.body.classList.remove('modal-open');
     document.documentElement.classList.remove('modal-open');
@@ -14,8 +43,18 @@
     else fn();
   }
 
-  onReady(removeAvisoModal);
-  window.addEventListener('load', removeAvisoModal, { once: true });
+  onReady(hideUnavailableFeatures);
+  window.addEventListener('load', hideUnavailableFeatures, { once: true });
+  setTimeout(hideUnavailableFeatures, 250);
+  setTimeout(hideUnavailableFeatures, 1200);
+
+  if (window.MutationObserver) {
+    onReady(function() {
+      var observer = new MutationObserver(function() { hideUnavailableFeatures(); });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+      setTimeout(function() { observer.disconnect(); }, 5000);
+    });
+  }
 
   function loadScript(id, src, globalName) {
     return new Promise(function(resolve, reject) {
