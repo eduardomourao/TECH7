@@ -25,7 +25,7 @@ function productUrlFromDb(product) {
 }
 
 router.get("/", async (req, res) => {
-  const q = String(req.query.q || req.query.palavra_busca || "").trim();
+  const q = String(req.query.q || req.query.palavra_busca || req.query.t || "").trim();
   const brand = String(req.query.brand || req.query.marca || req.query.filtrar_marca || "").trim();
   const category = String(
     req.query.category

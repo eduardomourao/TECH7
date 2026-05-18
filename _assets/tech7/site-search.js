@@ -1,6 +1,6 @@
 (function () {
   var params = new URLSearchParams(window.location.search);
-  var term = (params.get("q") || params.get("palavra_busca") || "").trim();
+  var term = (params.get("q") || params.get("palavra_busca") || params.get("t") || "").trim();
   var brand = (params.get("brand") || params.get("marca") || params.get("filtrar_marca") || "").trim();
   var category = (params.get("category") || params.get("categoria") || params.get("filtrar_departamento") || params.get("departamento") || "").trim();
   var title = document.getElementById("searchTitle");
@@ -68,6 +68,19 @@
     }).join("");
   }
 
+  function renderEmptySearch() {
+    if (input) input.value = "";
+    if (title) title.textContent = "Produtos em destaque";
+    if (count) count.textContent = "";
+    results.className = "empty";
+    results.innerHTML = "Digite um termo para buscar produtos TECH 7.";
+  }
+
+  if (!term && !brand && !category) {
+    renderEmptySearch();
+    return;
+  }
+
   var query = new URLSearchParams();
   if (term) query.set("q", term);
   if (brand) query.set("brand", brand);
@@ -79,7 +92,13 @@
       if (!response.ok) throw new Error("Busca indisponivel");
       return response.json();
     })
-    .then(function (data) { render(data.items || [], data.count || 0); })
+    .then(function (data) {
+      if (term && Number(data.count || 0) === 0) {
+        window.location.replace("/sem-resultados-na-busca/");
+        return;
+      }
+      render(data.items || [], data.count || 0);
+    })
     .catch(function () {
       if (title) title.textContent = "Busca indisponivel";
       if (count) count.textContent = "";
