@@ -118,6 +118,10 @@ export function createApp(options = {}) {
       res.redirect(302, `/busca/index.html${params.toString() ? `?${params}` : ""}`);
     });
 
+    app.get(["/loja", "/loja/"], (_req, res) => {
+      res.redirect(302, "/");
+    });
+
     // Serve static site.
     app.use(express.static(STATIC_DIR, { extensions: ["html"] }));
 
