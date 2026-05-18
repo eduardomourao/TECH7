@@ -26,6 +26,9 @@ document.head.appendChild(script);
         return dataLayer.map(elem => elem[key]).filter(valor => { valor != "undefined"; return valor; }).pop();
     };
 
+    const getPageCategory = () => String(GTM_get('pageCategory') || "");
+    const getPageCategoryLower = () => getPageCategory().toLowerCase();
+
     const mapCartProducts = (cartProducts) => {
         if (!cartProducts || cartProducts.length < 1) return [];
 
@@ -101,7 +104,7 @@ document.head.appendChild(script);
         gtagEvent(eventTypes.PAGE_VIEW)
 
         // Store events
-        switch (GTM_get('pageCategory').toLowerCase()) {
+        switch (getPageCategoryLower()) {
             case "produto":
                 gtagEvent(eventTypes.VIEW_ITEM, {
                     ecomm_pagetype: ecommPageTypes.PRODUCT,
@@ -131,7 +134,7 @@ document.head.appendChild(script);
         }
 
         // EasyCheckout events
-        if ("EasyCheckout" === GTM_get('pageCategory').substr(0, 12)) {
+        if ("EasyCheckout" === getPageCategory().substr(0, 12)) {
             setTimeout(function () {
                 let oldPush = dataLayer.push;
                 let lastPageCategory = "";
@@ -140,10 +143,10 @@ document.head.appendChild(script);
                     var x = [].slice.call(arguments, 0);
                     var result = oldPush.apply(dataLayer, x);
 
-                    switch (GTM_get('pageCategory').toLowerCase()) {
+                    switch (getPageCategoryLower()) {
                         case "easycheckout_orderplaced":
-                            if (lastPageCategory != GTM_get('pageCategory').toLowerCase()) {
-                                lastPageCategory = GTM_get('pageCategory').toLowerCase();
+                            if (lastPageCategory != getPageCategoryLower()) {
+                                lastPageCategory = getPageCategoryLower();
                                 gtagEvent(eventTypes.PURCHASE, {
                                     country: 'BR',
                                     currency: 'BRL',
