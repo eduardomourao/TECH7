@@ -11,6 +11,146 @@
       "source": "/loja/",
       "destination": "/",
       "permanent": false
+    },
+    {
+      "source": "/bateria",
+      "destination": "/baterias-celular/",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/",
+      "destination": "/baterias-celular/",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular",
+      "destination": "/baterias-celular/",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/",
+      "destination": "/baterias-celular/",
+      "permanent": false
+    },
+    {
+      "source": "/baterias",
+      "destination": "/baterias-celular/",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/",
+      "destination": "/baterias-celular/",
+      "permanent": false
+    },
+    {
+      "source": "/display",
+      "destination": "/tela-display-lcd/",
+      "permanent": false
+    },
+    {
+      "source": "/display/",
+      "destination": "/tela-display-lcd/",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd",
+      "destination": "/tela-display-lcd/",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/",
+      "destination": "/tela-display-lcd/",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd",
+      "destination": "/tela-display-lcd/",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/",
+      "destination": "/tela-display-lcd/",
+      "permanent": false
+    },
+    {
+      "source": "/telas",
+      "destination": "/tela-display-lcd/",
+      "permanent": false
+    },
+    {
+      "source": "/telas/",
+      "destination": "/tela-display-lcd/",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd",
+      "destination": "/tela-display-lcd/",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/",
+      "destination": "/tela-display-lcd/",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor",
+      "destination": "/touch-e-visor/",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/",
+      "destination": "/touch-e-visor/",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores",
+      "destination": "/touch-e-visor/",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/",
+      "destination": "/touch-e-visor/",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores",
+      "destination": "/touch-e-visor/",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/",
+      "destination": "/touch-e-visor/",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes",
+      "destination": "/pecas-e-componentes/",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/",
+      "destination": "/pecas-e-componentes/",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas",
+      "destination": "/tampas-e-carcacas/",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/",
+      "destination": "/tampas-e-carcacas/",
+      "permanent": false
+    },
+    {
+      "source": "/maquinas-ferramentas",
+      "destination": "/maquinas-e-ferramentas/",
+      "permanent": false
+    },
+    {
+      "source": "/maquinas-ferramentas/",
+      "destination": "/maquinas-e-ferramentas/",
+      "permanent": false
     }
   ],
   "rewrites": [

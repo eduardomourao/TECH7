@@ -17,9 +17,31 @@ const STATIC_DIR = process.env.STATIC_DIR
   ? path.resolve(process.env.STATIC_DIR)
   : path.resolve(__dirname, "..");
 
+const CATEGORY_ROUTE_REDIRECTS = new Map([
+  ["/bateria", "/baterias-celular/"],
+  ["/bateria-celular", "/baterias-celular/"],
+  ["/baterias", "/baterias-celular/"],
+  ["/display", "/tela-display-lcd/"],
+  ["/display-e-lcd", "/tela-display-lcd/"],
+  ["/display-lcd", "/tela-display-lcd/"],
+  ["/telas", "/tela-display-lcd/"],
+  ["/telas-display-lcd", "/tela-display-lcd/"],
+  ["/touch-visor", "/touch-e-visor/"],
+  ["/touchs-e-visores", "/touch-e-visor/"],
+  ["/touchs-visores", "/touch-e-visor/"],
+  ["/pecas-componentes", "/pecas-e-componentes/"],
+  ["/tampas-carcacas", "/tampas-e-carcacas/"],
+  ["/maquinas-ferramentas", "/maquinas-e-ferramentas/"]
+]);
+
 function joinRoute(prefix, route) {
   const cleanPrefix = prefix === "/" ? "" : String(prefix || "").replace(/\/+$/, "");
   return `${cleanPrefix}${route}`;
+}
+
+function normalizeRedirectPath(requestPath) {
+  const normalized = String(requestPath || "/").replace(/\/+$/, "") || "/";
+  return CATEGORY_ROUTE_REDIRECTS.get(normalized.toLowerCase()) || null;
 }
 
 function registerApi(app, prefix) {
@@ -120,6 +142,12 @@ export function createApp(options = {}) {
 
     app.get(["/loja", "/loja/"], (_req, res) => {
       res.redirect(302, "/");
+    });
+
+    app.get(Array.from(CATEGORY_ROUTE_REDIRECTS.keys()).flatMap((route) => [route, `${route}/`]), (req, res) => {
+      const destination = normalizeRedirectPath(req.path);
+      if (!destination) return res.status(404).send("Not found");
+      res.redirect(302, destination);
     });
 
     // Serve static site.
