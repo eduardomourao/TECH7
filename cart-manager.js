@@ -117,6 +117,40 @@
     } catch (e) {}
   }
 
+  function _sanitizeCartId(value) {
+    var id = String(value || '').trim();
+    return /^[a-z0-9_-]{4,120}$/i.test(id) ? id : '';
+  }
+
+  function _getCartIdFromUrl() {
+    try {
+      var params = new URLSearchParams(global.location.search || '');
+      return _sanitizeCartId(params.get('cart') || params.get('cart_id') || '');
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function _removeCartIdFromUrl() {
+    try {
+      if (!global.history || !global.location) return;
+      var url = new URL(global.location.href);
+      if (!url.searchParams.has('cart') && !url.searchParams.has('cart_id')) return;
+      url.searchParams.delete('cart');
+      url.searchParams.delete('cart_id');
+      global.history.replaceState(global.history.state, document.title, url.pathname + url.search + url.hash);
+    } catch (e) {}
+  }
+
+  function _adoptCartIdFromUrl() {
+    var cartId = _getCartIdFromUrl();
+    if (!cartId) return '';
+    _setCartId(cartId);
+    try { localStorage.removeItem(LOCAL_CHANGED_KEY); } catch (e) {}
+    _removeCartIdFromUrl();
+    return cartId;
+  }
+
   function _productUrlFromServer(item) {
     if (!item || !item.slug) return '';
     var parts = [];
@@ -190,13 +224,14 @@
     return next;
   }
 
-  function _ensureServerCart() {
+  function _ensureServerCart(options) {
+    var forceServer = !!(options && options.forceServer);
     var cid = _getCartId();
     if (cid) {
       return _fetchJson('/api/cart/' + encodeURIComponent(cid), { cache: 'no-store' })
         .then(function (cart) {
           _setCartId(cart.id);
-          _syncFromServerCart(cart, true);
+          _syncFromServerCart(cart, !forceServer);
           return cart;
         })
         .catch(function () {
@@ -581,11 +616,12 @@
 
   function init() {
     _migrate();
+    var importedCartId = _adoptCartIdFromUrl();
     var initial = _load();
     var initialCount = initial.reduce(function (s, it) { return s + it.quantidade; }, 0);
     _updateBadges(initialCount);
     _attachDropdown();
-    _ensureServerCart().catch(function () {});
+    _ensureServerCart({ forceServer: !!importedCartId }).catch(function () {});
   }
 
   // Dispara em páginas carregadas via fetch/ajax também

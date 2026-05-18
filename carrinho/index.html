@@ -348,6 +348,40 @@
       opacity: .55;
       box-shadow: none;
     }
+    .share-cart-btn {
+      width: 100%;
+      min-height: 46px;
+      margin-top: 10px;
+      border: 1px solid var(--cart-border);
+      border-radius: var(--cart-radius);
+      background: #fff;
+      color: var(--cart-text);
+      cursor: pointer;
+      font-weight: 800;
+      transition: border-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
+    }
+    .share-cart-btn:hover,
+    .share-cart-btn:focus-visible {
+      border-color: var(--cart-accent);
+      color: var(--cart-accent);
+      box-shadow: 0 4px 16px rgba(255, 106, 0, .16);
+      outline: 0;
+    }
+    .share-cart-btn:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+      box-shadow: none;
+    }
+    .cart-share-note {
+      min-height: 18px;
+      margin-top: 8px;
+      color: var(--cart-muted);
+      font-size: 12px;
+      text-align: center;
+      font-weight: 700;
+    }
+    .cart-share-note.is-success { color: var(--cart-accent); }
+    .cart-share-note.is-error { color: #b42318; }
     .secure-note {
       margin-top: 14px;
       color: var(--cart-muted);
@@ -494,6 +528,8 @@
             </div>
             <div class="frete-note">Frete por Uber com preco a combinar. O valor final sera confirmado no atendimento antes da entrega.</div>
             <button class="checkout-btn" id="checkout-btn" type="button" disabled>Finalizar Compra</button>
+            <button class="share-cart-btn" id="share-cart-btn" type="button" disabled>Copiar link do carrinho</button>
+            <div class="cart-share-note" id="cart-share-note" aria-live="polite"></div>
             <div class="secure-note">Compra 100% segura | PIX preparado no checkout</div>
           </aside>
         </section>
@@ -519,6 +555,8 @@
       var subtotalEl = document.getElementById('subtotal');
       var totalEl = document.getElementById('total');
       var checkoutBtn = document.getElementById('checkout-btn');
+      var shareCartBtn = document.getElementById('share-cart-btn');
+      var shareCartNote = document.getElementById('cart-share-note');
       var countBadges = document.querySelectorAll('[data-cart-count]');
 
       function formatCurrency(value) {
@@ -576,6 +614,7 @@
         subtotalEl.textContent = formatCurrency(total);
         totalEl.textContent = formatCurrency(total);
         checkoutBtn.disabled = items.length === 0;
+        shareCartBtn.disabled = items.length === 0;
         countBadges.forEach(function (badge) { badge.textContent = String(quantity); });
       }
 
@@ -665,6 +704,86 @@
         if (!readCart().length) return;
         window.location.href = 'checkout/';
       });
+
+      function setShareNote(message, type) {
+        shareCartNote.textContent = message || '';
+        shareCartNote.classList.toggle('is-success', type === 'success');
+        shareCartNote.classList.toggle('is-error', type === 'error');
+      }
+
+      function buildShareUrl(cartId) {
+        var url = new URL('/carrinho/', window.location.origin);
+        url.searchParams.set('cart', cartId);
+        return url.toString();
+      }
+
+      function legacyCopyText(text) {
+        return new Promise(function (resolve, reject) {
+          var textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.setAttribute('readonly', '');
+          textarea.style.position = 'fixed';
+          textarea.style.left = '-9999px';
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+            document.execCommand('copy') ? resolve() : reject(new Error('copy_failed'));
+          } catch (error) {
+            reject(error);
+          } finally {
+            document.body.removeChild(textarea);
+          }
+        });
+      }
+
+      function copyText(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return Promise.race([
+            navigator.clipboard.writeText(text),
+            new Promise(function (_resolve, reject) {
+              setTimeout(function () { reject(new Error('clipboard_timeout')); }, 1200);
+            })
+          ]).catch(function () {
+            return legacyCopyText(text);
+          });
+        }
+        return legacyCopyText(text);
+      }
+
+      function getCartIdForShare() {
+        if (window.CartManager && typeof window.CartManager.obterCarrinhoId === 'function') {
+          var currentId = window.CartManager.obterCarrinhoId();
+          if (currentId) return Promise.resolve(currentId);
+        }
+        if (window.CartManager && typeof window.CartManager.sincronizarServidor === 'function') {
+          return window.CartManager.sincronizarServidor().then(function (cart) {
+            return cart && cart.id ? cart.id : '';
+          });
+        }
+        return Promise.resolve(localStorage.getItem('t7_cart_id') || '');
+      }
+
+      shareCartBtn.addEventListener('click', function () {
+        if (!readCart().length) return;
+        shareCartBtn.disabled = true;
+        setShareNote('Preparando link...', '');
+        getCartIdForShare()
+          .then(function (cartId) {
+            if (!cartId) throw new Error('cart_id_missing');
+            return copyText(buildShareUrl(cartId));
+          })
+          .then(function () {
+            setShareNote('Link do carrinho copiado.', 'success');
+          })
+          .catch(function () {
+            setShareNote('Nao foi possivel copiar o link. Tente novamente.', 'error');
+          })
+          .finally(function () {
+            shareCartBtn.disabled = readCart().length === 0;
+          });
+      });
+
+      document.addEventListener('carrinhoAtualizado', renderCart);
 
       renderCart();
     })();
