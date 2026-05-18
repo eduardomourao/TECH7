@@ -143,8 +143,8 @@
     }
 
     var price = getNum(preco);
-    var found = typeof preco !== 'undefined' && price > 0;
-    if (!found) console.warn('preco-loader: produto sem preco mapeado em precos.json', warnKey || slug || input);
+    var found = typeof preco !== 'undefined' && price >= 2;
+    if (!found) console.warn('preco-loader: produto sem preco valido em precos.json', warnKey || slug || input);
 
     return { found: found, price: found ? price : 0, secao: foundSecao, marca: foundMarca, slug: slug };
   }
@@ -166,7 +166,7 @@
       if (slug && pageSlug && pageSlug !== slug) continue;
 
       var price = getNum(item.priceSell || item.price);
-      if (price > 0) {
+      if (price >= 2) {
         return {
           found: true,
           price: price,
@@ -191,7 +191,7 @@
 
       var match = text.match(/["']priceSell["']\s*:\s*["']?([^"',}]+)/) || text.match(/["']price["']\s*:\s*["']?([^"',}]+)/);
       var price = match ? getNum(match[1]) : 0;
-      if (price > 0) {
+      if (price >= 2) {
         return {
           found: true,
           price: price,
@@ -211,39 +211,41 @@
     var brand = normalizeProductId(input.marca || input.brand || '');
     var slug = normalizeProductId(input.slug || '');
     if (slug) {
-      return fetch('/api/products/resolve-prices', {
-        method: 'POST',
-        cache: 'no-store',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          items: [{ section: section, brand: brand, slug: slug }]
+      return loadPrices().then(function(data) {
+        var jsonPrice = lookupPrice(data, { secao: section, marca: brand, slug: slug });
+        if (jsonPrice.found) return jsonPrice;
+        return fetch('/api/products/resolve-prices', {
+          method: 'POST',
+          cache: 'no-store',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            items: [{ section: section, brand: brand, slug: slug }]
+          })
         })
-      })
-        .then(function(res) {
-          if (!res.ok) throw new Error('http_' + res.status);
-          return res.json();
-        })
-        .then(function(payload) {
-          var list = Array.isArray(payload && payload.items) ? payload.items : [];
-          var item = list[0] || {};
-          if (!item.found) throw new Error('not_found');
-          var price = Number(item.price_cents || 0) / 100;
-          if (!Number.isFinite(price) || price <= 0) throw new Error('invalid_price');
-          return {
-            found: true,
-            price: price,
-            secao: item.section || section,
-            marca: item.brand || brand,
-            slug: item.slug || slug
-          };
-        })
-        .catch(function() {
-          var pagePrice = lookupPagePrice(input);
-          if (pagePrice.found) return pagePrice;
-          var inlinePagePrice = lookupInlinePagePrice(input);
-          if (inlinePagePrice.found) return inlinePagePrice;
-          return loadPrices().then(function(data) { return lookupPrice(data, input); });
-        });
+          .then(function(res) {
+            if (!res.ok) throw new Error('http_' + res.status);
+            return res.json();
+          })
+          .then(function(payload) {
+            var list = Array.isArray(payload && payload.items) ? payload.items : [];
+            var item = list[0] || {};
+            if (!item.found) throw new Error('not_found');
+            var price = Number(item.price_cents || 0) / 100;
+            if (!Number.isFinite(price) || price < 2) throw new Error('invalid_price');
+            return {
+              found: true,
+              price: price,
+              secao: item.section || section,
+              marca: item.brand || brand,
+              slug: item.slug || slug
+            };
+          })
+          .catch(function() {
+            return jsonPrice;
+          });
+      }).catch(function() {
+          return { found: false, price: 0, secao: section, marca: brand, slug: slug };
+      });
     }
 
     var pagePrice = lookupPagePrice(input);
@@ -262,7 +264,10 @@
 
   function updatePrice(result) {
     var preco = result && result.price ? getNum(result.price) : 0;
-    if (preco <= 0) return result;
+    if (preco < 2) {
+      updateScopedText('.t7-buy-price', 'Preco sob consulta');
+      return result;
+    }
 
     window.T7_PRODUCT_PRICE = preco;
     var formatado = formatMoney(preco);
@@ -380,9 +385,7 @@
         var requested = entries.map(function(entry) { return [entry.secao, entry.marca, entry.slug].join('|'); });
         for (var x = 0; x < items.length; x++) {
           var item = items[x] || {};
-          if (!item.found) continue;
           var price = Number(item.price_cents || 0) / 100;
-          if (!Number.isFinite(price) || price <= 0) continue;
 
           var secao = normalizeProductId(item.section);
           var marca = normalizeProductId(item.brand);
@@ -400,7 +403,7 @@
           }
           if (!match) continue;
 
-          var formatted = formatMoney(price);
+          var formatted = item.found && Number.isFinite(price) && price >= 2 ? formatMoney(price) : 'Preco sob consulta';
           for (var n = 0; n < match.nodes.length; n++) {
             match.nodes[n].textContent = formatted;
           }

@@ -113,7 +113,7 @@
 
     if (window.Tech7Prices && typeof window.Tech7Prices.resolve === 'function') {
       return window.Tech7Prices.resolve(productPath).then(function (result) {
-        return result && result.found && result.price > 0 ? result.price : null;
+        return result && result.found && result.price >= 2 ? result.price : null;
       });
     }
 
@@ -150,8 +150,8 @@
       }
 
       var n = getNum(preco);
-      if (n <= 0) console.warn('produto-comprar: produto sem preco mapeado em precos.json', productPath);
-      return n > 0 ? n : null;
+      if (n < 2) console.warn('produto-comprar: produto sem preco valido em precos.json', productPath);
+      return n >= 2 ? n : null;
     }).catch(function (err) {
       console.warn('produto-comprar: nao foi possivel carregar precos.json', err);
       return null;
@@ -401,7 +401,7 @@
     var price = document.createElement('div');
     price.className = 't7-buy-price';
     price.style.cssText = 'font-size:30px;line-height:1.15;font-weight:900;color:#ff6a00;letter-spacing:-.02em;';
-    price.textContent = dados.preco > 0 ? formatMoney(dados.preco) : 'Preco sob consulta';
+    price.textContent = dados.preco >= 2 ? formatMoney(dados.preco) : 'Preco sob consulta';
     container.appendChild(price);
 
     // VariaÃ§Ãµes
@@ -438,11 +438,23 @@
       'padding:12px 32px;font-size:16px;font-weight:700;cursor:pointer;',
       'transition:background .2s,transform .15s;font-family:inherit;'
     ].join('');
+    if (dados.preco < 2) {
+      btn.disabled = true;
+      btn.textContent = 'Preco sob consulta';
+      btn.setAttribute('aria-disabled', 'true');
+      btn.style.opacity = '.68';
+      btn.style.cursor = 'not-allowed';
+    }
     btn.addEventListener('mouseenter', function () { this.style.background = '#e65f00'; });
     btn.addEventListener('mouseleave', function () { this.style.background = '#ff6a00'; });
 
     btn.addEventListener('click', function (e) {
       e.preventDefault();
+
+      if (dados.preco < 2) {
+        feedbackErro(btn, 'Preco sob consulta');
+        return;
+      }
 
       // Validar variaÃ§Ã£o se necessÃ¡rio
       if (_variacaoHtml && !_variacaoSelecionada) {
@@ -484,6 +496,10 @@
     var api = window.CartManager || window.cartManager;
     if (!api) {
       feedbackErro(btn, 'Carrinho indisponivel');
+      return;
+    }
+    if (getNum(produto.preco) < 2) {
+      feedbackErro(btn, 'Preco sob consulta');
       return;
     }
 

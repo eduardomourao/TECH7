@@ -32,7 +32,7 @@
 
   function formatPriceFromCents(cents) {
     var n = Number(cents || 0);
-    if (!Number.isFinite(n) || n <= 0) return "";
+    if (!Number.isFinite(n) || n < 200) return "";
     return (n / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   }
 

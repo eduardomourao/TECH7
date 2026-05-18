@@ -1,6 +1,7 @@
 import express from "express";
 import crypto from "node:crypto";
 import { pool } from "../lib/db.js";
+import { applyCatalogPrices, isValidPriceCents } from "../lib/prices.js";
 
 export const router = express.Router();
 const sessions = new Map();
@@ -105,11 +106,12 @@ router.get("/products", adminAuth, async (req, res) => {
     params
   );
 
+  const pricedRows = await applyCatalogPrices(rows);
   res.json({
     total: countRes.rows[0]?.total || 0,
     limit,
     offset,
-    items: rows.map((r) => ({
+    items: pricedRows.map((r) => ({
       id: r.id,
       slug: r.slug,
       name: r.name,
@@ -118,6 +120,8 @@ router.get("/products", adminAuth, async (req, res) => {
       stock: 0,
       active: !!r.active,
       price: Number((Number(r.price_cents || 0) / 100).toFixed(2)),
+      price_available: !!r.price_available,
+      price_status: r.price_status || "consult",
       url: productUrlFromRow(r)
     }))
   });
@@ -255,7 +259,7 @@ router.get("/orders", adminAuth, async (req, res) => {
 
 router.get("/metrics", adminAuth, async (_req, res) => {
   const [
-    productsSummary,
+    productsRows,
     ordersSummary,
     brandRows,
     categoryRows,
@@ -264,17 +268,7 @@ router.get("/metrics", adminAuth, async (_req, res) => {
     topProductRows,
     recentOrders
   ] = await Promise.all([
-    pool.query(`
-      select
-        count(*)::int as total,
-        count(*) filter (where active = true)::int as active,
-        count(*) filter (where active = false)::int as inactive,
-        count(*) filter (where coalesce(price_cents, 0) = 0)::int as zero_price,
-        coalesce(round(avg(nullif(price_cents, 0))), 0)::int as avg_price_cents,
-        coalesce(min(nullif(price_cents, 0)), 0)::int as min_price_cents,
-        coalesce(max(price_cents), 0)::int as max_price_cents
-      from products
-    `),
+    pool.query(`select id, slug, name, brand, section, price_cents, active from products`),
     pool.query(`
       select
         count(*)::int as total,
@@ -336,7 +330,22 @@ router.get("/metrics", adminAuth, async (_req, res) => {
     `)
   ]);
 
-  const product = productsSummary.rows[0] || {};
+  const pricedProducts = await applyCatalogPrices(productsRows.rows);
+  const validPrices = pricedProducts
+    .map((p) => Number(p.price_cents || 0))
+    .filter((price) => isValidPriceCents(price));
+  const avgPriceCents = validPrices.length
+    ? Math.round(validPrices.reduce((sum, price) => sum + price, 0) / validPrices.length)
+    : 0;
+  const product = {
+    total: pricedProducts.length,
+    active: pricedProducts.filter((p) => !!p.active).length,
+    inactive: pricedProducts.filter((p) => !p.active).length,
+    zero_price: pricedProducts.filter((p) => !isValidPriceCents(p.price_cents)).length,
+    avg_price_cents: avgPriceCents,
+    min_price_cents: validPrices.length ? Math.min(...validPrices) : 0,
+    max_price_cents: validPrices.length ? Math.max(...validPrices) : 0
+  };
   const order = ordersSummary.rows[0] || {};
   res.json({
     generated_at: new Date().toISOString(),

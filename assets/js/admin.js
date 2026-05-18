@@ -166,7 +166,7 @@
 
       const overview = panel('Visao operacional', 'Indicadores de saude do negocio',
         '<div class="sub-grid">' +
-          '<div class="sub-card"><small>Produtos sem preco</small><strong>' + number(p.zero_price) + '</strong></div>' +
+          '<div class="sub-card"><small>Precos invalidos</small><strong>' + number(p.zero_price) + '</strong></div>' +
           '<div class="sub-card"><small>Produtos inativos</small><strong>' + number(p.inactive) + '</strong></div>' +
           '<div class="sub-card"><small>Pedidos pendentes</small><strong>' + number(o.pending) + '</strong></div>' +
           '<div class="sub-card"><small>Pedidos com problema</small><strong>' + number(o.problem) + '</strong></div>' +
@@ -194,7 +194,7 @@
 
   function alertList(m) {
     const alerts = [];
-    if (m.products.zero_price) alerts.push(['warning', m.products.zero_price + ' produtos sem preco', 'Revise antes de vender ou anunciar.']);
+    if (m.products.zero_price) alerts.push(['warning', m.products.zero_price + ' produtos com preco invalido', 'Revise itens vazios ou abaixo de R$ 2,00.']);
     if (m.products.inactive) alerts.push(['warning', m.products.inactive + ' produtos inativos', 'Verifique se devem voltar para a vitrine.']);
     if (m.orders.pending) alerts.push(['warning', m.orders.pending + ' pedidos pendentes', 'Acompanhe pagamento e separacao.']);
     if (m.orders.problem) alerts.push(['error', m.orders.problem + ' pedidos com falha/cancelamento', 'Revise pagamentos e atendimento.']);
@@ -260,7 +260,7 @@
         '<td><input class="cell-input name-input" data-edit="name" value="' + esc(p.name) + '"></td>' +
         '<td><input class="cell-input" data-edit="brand" value="' + esc(p.brand || '') + '"></td>' +
         '<td><input class="cell-input" data-edit="category" value="' + esc(p.category || '') + '"></td>' +
-        '<td><input class="cell-input price-input" type="number" step="0.01" min="0" data-edit="price" value="' + Number(p.price || 0).toFixed(2) + '"></td>' +
+        '<td><input class="cell-input price-input" type="number" step="0.01" min="0" data-edit="price" value="' + Number(p.price || 0).toFixed(2) + '"' + (p.price_status === 'consult' ? ' title="Preco sob consulta ou abaixo de R$ 2,00"' : '') + '></td>' +
         '<td><button class="btn btn-sm ' + (p.active ? 'btn-green' : 'btn-outline') + '" data-toggle-active="' + esc(p.id) + '" data-active="' + p.active + '">' + (p.active ? 'Ativo' : 'Inativo') + '</button></td>' +
         '<td><div class="toolbar-group"><button class="btn btn-primary btn-sm" data-save-product="' + esc(p.id) + '">Salvar</button><button class="btn btn-outline btn-sm" data-view-product="' + esc(p.url || '') + '">Ver</button></div></td>' +
       '</tr>').join('') + '</tbody></table></div>';

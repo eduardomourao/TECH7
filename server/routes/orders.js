@@ -1,6 +1,7 @@
 import express from "express";
 import { pool } from "../lib/db.js";
 import { newId } from "../lib/ids.js";
+import { applyCatalogPrices, isValidPriceCents } from "../lib/prices.js";
 
 export const router = express.Router();
 
@@ -45,7 +46,7 @@ router.post("/", async (req, res) => {
 
   const itemsRes = await pool.query(
     `
-    select ci.product_id, ci.qty, p.price_cents, p.currency
+    select ci.product_id, ci.qty, p.slug, p.brand, p.section, p.price_cents, p.currency
     from cart_items ci
     join products p on p.id = ci.product_id
     where ci.cart_id = $1
@@ -53,9 +54,13 @@ router.post("/", async (req, res) => {
     [cartId]
   );
   if (itemsRes.rowCount === 0) return res.status(400).json({ error: "cart_empty" });
+  const pricedItems = await applyCatalogPrices(itemsRes.rows);
+  if (pricedItems.some((item) => !isValidPriceCents(item.price_cents))) {
+    return res.status(400).json({ error: "invalid_product_price" });
+  }
 
-  const currency = itemsRes.rows[0].currency || "BRL";
-  for (const r of itemsRes.rows) {
+  const currency = pricedItems[0].currency || "BRL";
+  for (const r of pricedItems) {
     if ((r.currency || "BRL") !== currency) return res.status(400).json({ error: "mixed_currency" });
   }
 
@@ -64,14 +69,14 @@ router.post("/", async (req, res) => {
   await pool.query("begin");
   try {
     let total = 0;
-    for (const r of itemsRes.rows) total += Number(r.price_cents) * Number(r.qty);
+    for (const r of pricedItems) total += Number(r.price_cents) * Number(r.qty);
 
     await pool.query(
       `insert into orders (id, status, currency, total_cents, cart_id) values ($1, 'pending', $2, $3, $4)`,
       [orderId, currency, total, cartId]
     );
 
-    for (const r of itemsRes.rows) {
+    for (const r of pricedItems) {
       const unit = Number(r.price_cents);
       const qty = Number(r.qty);
       await pool.query(
@@ -93,4 +98,3 @@ router.post("/", async (req, res) => {
   const full = await getOrder(orderId);
   res.status(201).json(full);
 });
-

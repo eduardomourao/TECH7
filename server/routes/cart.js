@@ -1,6 +1,7 @@
 import express from "express";
 import { pool } from "../lib/db.js";
 import { newId } from "../lib/ids.js";
+import { applyCatalogPrices, isValidPriceCents } from "../lib/prices.js";
 
 export const router = express.Router();
 
@@ -26,9 +27,9 @@ async function ensureProduct(productId, snapshot) {
       const priceCents = priceToCents(snapshot.price ?? snapshot.preco);
       await pool.query(
         `
-          update products
-          set
-            price_cents = case when $2 > 0 then $2 else price_cents end,
+            update products
+            set
+            price_cents = case when $2 >= 200 then $2 else price_cents end,
             image_url = coalesce($3, image_url),
             updated_at = now()
           where id = $1
@@ -57,7 +58,7 @@ async function ensureProduct(productId, snapshot) {
         name = excluded.name,
         brand = excluded.brand,
         section = excluded.section,
-        price_cents = case when excluded.price_cents > 0 then excluded.price_cents else products.price_cents end,
+        price_cents = case when excluded.price_cents >= 200 then excluded.price_cents else products.price_cents end,
         image_url = coalesce(excluded.image_url, products.image_url),
         active = true,
         updated_at = now()
@@ -84,7 +85,7 @@ async function getCart(cartId) {
     `,
     [cartId]
   );
-  return { ...cartRes.rows[0], items: itemsRes.rows };
+  return { ...cartRes.rows[0], items: await applyCatalogPrices(itemsRes.rows) };
 }
 
 router.post("/", async (_req, res) => {
@@ -118,6 +119,15 @@ async function upsertCartItem(req, res) {
 
   const hasProduct = await ensureProduct(productId, product);
   if (!hasProduct) return res.status(404).json({ error: "product_not_found" });
+
+  const priceCheck = await pool.query(
+    `select slug, brand, section, price_cents from products where id = $1 and active = true limit 1`,
+    [productId]
+  );
+  const pricedProduct = (await applyCatalogPrices(priceCheck.rows))[0];
+  if (q > 0 && (!pricedProduct || !isValidPriceCents(pricedProduct.price_cents))) {
+    return res.status(400).json({ error: "invalid_product_price" });
+  }
 
   await pool.query("begin");
   try {

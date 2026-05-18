@@ -1,5 +1,6 @@
 import express from "express";
 import { pool } from "../lib/db.js";
+import { applyCatalogPrices } from "../lib/prices.js";
 
 export const router = express.Router();
 
@@ -77,7 +78,8 @@ router.get("/", async (req, res) => {
     params
   );
 
-  const items = rowsRes.rows.map((row) => ({
+  const pricedRows = await applyCatalogPrices(rowsRes.rows);
+  const items = pricedRows.map((row) => ({
     id: row.id,
     slug: row.slug,
     title: row.name,
@@ -87,6 +89,8 @@ router.get("/", async (req, res) => {
     category: row.section,
     section: row.section,
     price_cents: Number(row.price_cents || 0),
+    price_available: !!row.price_available,
+    price_status: row.price_status || "consult",
     image: row.image_url || "",
     image_url: row.image_url || "",
     url: productUrlFromDb(row),

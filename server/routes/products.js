@@ -1,5 +1,6 @@
 import express from "express";
 import { pool } from "../lib/db.js";
+import { applyCatalogPrice, applyCatalogPrices, resolveCatalogPrice } from "../lib/prices.js";
 
 export const router = express.Router();
 
@@ -31,6 +32,10 @@ function mapProduct(row) {
     url: productUrlFromRow(row),
     updated_at: row.updated_at || null
   };
+}
+
+async function mapProductWithCatalogPrice(row) {
+  return mapProduct(await applyCatalogPrice(row));
 }
 
 router.post("/resolve-prices", async (req, res) => {
@@ -73,7 +78,7 @@ router.post("/resolve-prices", async (req, res) => {
     bySlug.set(slug, bucket);
   }
 
-  const items = normalized.map((item) => {
+  const items = normalized.map(async (item) => {
     const options = bySlug.get(item.slug) || [];
     let found = null;
     let bestScore = -1;
@@ -98,24 +103,29 @@ router.post("/resolve-prices", async (req, res) => {
         brand: item.brand,
         slug: item.slug,
         price_cents: 0,
+        price_available: false,
+        price_status: "consult",
         found: false
       };
     }
 
+    const price = await resolveCatalogPrice(found);
     return {
       id: found.id,
       section: found.section,
       brand: found.brand,
       slug: found.slug,
-      price_cents: Number(found.price_cents || 0),
+      price_cents: price.price_cents,
+      price_available: price.price_available,
+      price_status: price.price_status,
       image_url: found.image_url || "",
       url: productUrlFromRow(found),
       updated_at: found.updated_at || null,
-      found: true
+      found: price.found
     };
   });
 
-  res.json({ items });
+  res.json({ items: await Promise.all(items) });
 });
 
 router.get("/:id", async (req, res) => {
@@ -129,7 +139,7 @@ router.get("/:id", async (req, res) => {
     [String(req.params.id || "")]
   );
   if (!rows.length) return res.status(404).json({ error: "product_not_found" });
-  res.json(mapProduct(rows[0]));
+  res.json(await mapProductWithCatalogPrice(rows[0]));
 });
 
 router.get("/", async (req, res) => {
@@ -158,6 +168,7 @@ router.get("/", async (req, res) => {
     params
   );
 
-  res.json({ items: rows.map(mapProduct), limit, offset });
+  const pricedRows = await applyCatalogPrices(rows);
+  res.json({ items: pricedRows.map(mapProduct), limit, offset });
 });
 
