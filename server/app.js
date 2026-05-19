@@ -6,7 +6,6 @@ import express from "express";
 import { requireEnv, safeJson } from "./lib/env.js";
 import { databaseEnvName, databaseUrl, pool } from "./lib/db.js";
 import { ensureSchema } from "./lib/schema.js";
-import { CATALOG_ROUTE_SECTIONS, resolveShortCatalogRoute } from "./lib/catalog_routes.js";
 import { router as apiRouter } from "./routes/api.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -35,6 +34,25 @@ const CATEGORY_ROUTE_REDIRECTS = new Map([
   ["/maquinas-ferramentas", "/maquinas-e-ferramentas/"]
 ]);
 
+const LEGACY_PRODUCT_ROUTE_REDIRECTS = new Map([
+  [
+    "/display/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro",
+    "/display/samsung/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro/"
+  ],
+  [
+    "/display/tela-display-lcd-samsung-s23-s911-oled-com-aro",
+    "/display/samsung/tela-display-lcd-samsung-s23-s911-oled-com-aro/"
+  ],
+  [
+    "/display/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro",
+    "/display/samsung/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro/"
+  ],
+  [
+    "/display/tela-display-lcd-samsung-s23-5g-s911-original-retirada",
+    "/display/samsung/tela-display-lcd-samsung-s23-5g-s911-original-retirada/"
+  ]
+]);
+
 function joinRoute(prefix, route) {
   const cleanPrefix = prefix === "/" ? "" : String(prefix || "").replace(/\/+$/, "");
   return `${cleanPrefix}${route}`;
@@ -45,15 +63,13 @@ function normalizeRedirectPath(requestPath) {
   return CATEGORY_ROUTE_REDIRECTS.get(normalized.toLowerCase()) || null;
 }
 
-function registerApi(app, prefix) {
-  app.use(joinRoute(prefix, "/webhooks"), express.raw({ type: "*/*", limit: "2mb" }));
+function normalizeLegacyProductPath(requestPath) {
+  const normalized = String(requestPath || "/").replace(/\/+$/, "") || "/";
+  return LEGACY_PRODUCT_ROUTE_REDIRECTS.get(normalized.toLowerCase()) || null;
 }
 
-function shortCatalogRoutePatterns() {
-  return CATALOG_ROUTE_SECTIONS.flatMap((section) => [
-    `/${section}/:slug`,
-    `/${section}/:slug/index.html`
-  ]);
+function registerApi(app, prefix) {
+  app.use(joinRoute(prefix, "/webhooks"), express.raw({ type: "*/*", limit: "2mb" }));
 }
 
 const DEFAULT_CORS_ORIGINS = [
@@ -152,16 +168,9 @@ export function createApp(options = {}) {
       res.redirect(302, "/");
     });
 
-    app.get(shortCatalogRoutePatterns(), (req, res, next) => {
-      const section = req.path.split("/").filter(Boolean)[0];
-      const destination = resolveShortCatalogRoute({
-        staticDir: STATIC_DIR,
-        section,
-        slug: req.params.slug
-      });
-      if (!destination) return next();
-      const currentPath = req.path.endsWith("/") ? req.path : `${req.path}/`;
-      if (currentPath === destination) return next();
+    app.get(Array.from(LEGACY_PRODUCT_ROUTE_REDIRECTS.keys()).flatMap((route) => [route, `${route}/`]), (req, res) => {
+      const destination = normalizeLegacyProductPath(req.path);
+      if (!destination) return res.status(404).send("Not found");
       res.redirect(302, destination);
     });
 

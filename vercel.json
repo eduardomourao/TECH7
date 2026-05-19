@@ -1,11 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
-  "functions": {
-    "api/resolve-product-route.js": {
-      "includeFiles": "_assets/tech7/search-index.json"
-    }
-  },
   "redirects": [
     {
       "source": "/loja",
@@ -249,62 +244,6 @@
     }
   ],
   "rewrites": [
-    {
-      "source": "/baterias/:slug",
-      "destination": "/api/resolve-product-route.js?section=baterias&slug=:slug"
-    },
-    {
-      "source": "/baterias/:slug/index.html",
-      "destination": "/api/resolve-product-route.js?section=baterias&slug=:slug"
-    },
-    {
-      "source": "/baterias-celular/:slug",
-      "destination": "/api/resolve-product-route.js?section=baterias-celular&slug=:slug"
-    },
-    {
-      "source": "/baterias-celular/:slug/index.html",
-      "destination": "/api/resolve-product-route.js?section=baterias-celular&slug=:slug"
-    },
-    {
-      "source": "/display/:slug",
-      "destination": "/api/resolve-product-route.js?section=display&slug=:slug"
-    },
-    {
-      "source": "/display/:slug/index.html",
-      "destination": "/api/resolve-product-route.js?section=display&slug=:slug"
-    },
-    {
-      "source": "/display-e-lcd/:slug",
-      "destination": "/api/resolve-product-route.js?section=display-e-lcd&slug=:slug"
-    },
-    {
-      "source": "/display-e-lcd/:slug/index.html",
-      "destination": "/api/resolve-product-route.js?section=display-e-lcd&slug=:slug"
-    },
-    {
-      "source": "/pecas-e-componentes/:slug",
-      "destination": "/api/resolve-product-route.js?section=pecas-e-componentes&slug=:slug"
-    },
-    {
-      "source": "/pecas-e-componentes/:slug/index.html",
-      "destination": "/api/resolve-product-route.js?section=pecas-e-componentes&slug=:slug"
-    },
-    {
-      "source": "/tampas-e-carcacas/:slug",
-      "destination": "/api/resolve-product-route.js?section=tampas-e-carcacas&slug=:slug"
-    },
-    {
-      "source": "/tampas-e-carcacas/:slug/index.html",
-      "destination": "/api/resolve-product-route.js?section=tampas-e-carcacas&slug=:slug"
-    },
-    {
-      "source": "/touchs-e-visores/:slug",
-      "destination": "/api/resolve-product-route.js?section=touchs-e-visores&slug=:slug"
-    },
-    {
-      "source": "/touchs-e-visores/:slug/index.html",
-      "destination": "/api/resolve-product-route.js?section=touchs-e-visores&slug=:slug"
-    },
     {
       "source": "/api/:path*",
       "destination": "/api/[...path].js"
