@@ -38,19 +38,47 @@
     document.documentElement.classList.remove('modal-open');
   }
 
+  function fixRelativeProductLinks() {
+    var pathname = String(window.location.pathname || '');
+    var parts = pathname.replace(/\/index\.html?$/i, '').replace(/\/+$/, '').split('/').filter(Boolean);
+    if (parts.length < 3) return;
+
+    var basePath = pathname;
+    if (/\/index\.html?$/i.test(basePath)) basePath = basePath.replace(/index\.html?$/i, '');
+    else if (basePath.charAt(basePath.length - 1) !== '/') basePath += '/';
+
+    var baseUrl = window.location.origin + basePath;
+    document.querySelectorAll('.product-related a[href^="../"], .product-related a[href^="./"]').forEach(function(link) {
+      var rawHref = link.getAttribute('href') || '';
+      try {
+        var resolved = new URL(rawHref, baseUrl);
+        if (resolved.origin === window.location.origin) {
+          link.setAttribute('href', resolved.pathname + resolved.search + resolved.hash);
+        }
+      } catch (_err) {
+        // Ignore malformed legacy hrefs and keep the original link untouched.
+      }
+    });
+  }
+
+  function runDomFixes() {
+    hideUnavailableFeatures();
+    fixRelativeProductLinks();
+  }
+
   function onReady(fn) {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
     else fn();
   }
 
-  onReady(hideUnavailableFeatures);
-  window.addEventListener('load', hideUnavailableFeatures, { once: true });
-  setTimeout(hideUnavailableFeatures, 250);
-  setTimeout(hideUnavailableFeatures, 1200);
+  onReady(runDomFixes);
+  window.addEventListener('load', runDomFixes, { once: true });
+  setTimeout(runDomFixes, 250);
+  setTimeout(runDomFixes, 1200);
 
   if (window.MutationObserver) {
     onReady(function() {
-      var observer = new MutationObserver(function() { hideUnavailableFeatures(); });
+      var observer = new MutationObserver(function() { runDomFixes(); });
       observer.observe(document.documentElement, { childList: true, subtree: true });
       setTimeout(function() { observer.disconnect(); }, 5000);
     });
