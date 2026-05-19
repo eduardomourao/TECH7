@@ -34,6 +34,25 @@ const CATEGORY_ROUTE_REDIRECTS = new Map([
   ["/maquinas-ferramentas", "/maquinas-e-ferramentas/"]
 ]);
 
+const LEGACY_PRODUCT_ROUTE_REDIRECTS = new Map([
+  [
+    "/display/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro",
+    "/display/samsung/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro/"
+  ],
+  [
+    "/display/tela-display-lcd-samsung-s23-s911-oled-com-aro",
+    "/display/samsung/tela-display-lcd-samsung-s23-s911-oled-com-aro/"
+  ],
+  [
+    "/display/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro",
+    "/display/samsung/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro/"
+  ],
+  [
+    "/display/tela-display-lcd-samsung-s23-5g-s911-original-retirada",
+    "/display/samsung/tela-display-lcd-samsung-s23-5g-s911-original-retirada/"
+  ]
+]);
+
 function joinRoute(prefix, route) {
   const cleanPrefix = prefix === "/" ? "" : String(prefix || "").replace(/\/+$/, "");
   return `${cleanPrefix}${route}`;
@@ -42,6 +61,11 @@ function joinRoute(prefix, route) {
 function normalizeRedirectPath(requestPath) {
   const normalized = String(requestPath || "/").replace(/\/+$/, "") || "/";
   return CATEGORY_ROUTE_REDIRECTS.get(normalized.toLowerCase()) || null;
+}
+
+function normalizeLegacyProductPath(requestPath) {
+  const normalized = String(requestPath || "/").replace(/\/+$/, "") || "/";
+  return LEGACY_PRODUCT_ROUTE_REDIRECTS.get(normalized.toLowerCase()) || null;
 }
 
 function registerApi(app, prefix) {
@@ -142,6 +166,12 @@ export function createApp(options = {}) {
 
     app.get(["/loja", "/loja/"], (_req, res) => {
       res.redirect(302, "/");
+    });
+
+    app.get(Array.from(LEGACY_PRODUCT_ROUTE_REDIRECTS.keys()).flatMap((route) => [route, `${route}/`]), (req, res) => {
+      const destination = normalizeLegacyProductPath(req.path);
+      if (!destination) return res.status(404).send("Not found");
+      res.redirect(302, destination);
     });
 
     app.get(Array.from(CATEGORY_ROUTE_REDIRECTS.keys()).flatMap((route) => [route, `${route}/`]), (req, res) => {

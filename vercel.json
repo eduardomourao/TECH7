@@ -13,6 +13,96 @@
       "permanent": false
     },
     {
+      "source": "/display/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro",
+      "destination": "/display/samsung/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro/",
+      "permanent": false
+    },
+    {
+      "source": "/display/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro/",
+      "destination": "/display/samsung/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro/",
+      "permanent": false
+    },
+    {
+      "source": "/display/tela-display-lcd-samsung-s23-s911-oled-com-aro",
+      "destination": "/display/samsung/tela-display-lcd-samsung-s23-s911-oled-com-aro/",
+      "permanent": false
+    },
+    {
+      "source": "/display/tela-display-lcd-samsung-s23-s911-oled-com-aro/",
+      "destination": "/display/samsung/tela-display-lcd-samsung-s23-s911-oled-com-aro/",
+      "permanent": false
+    },
+    {
+      "source": "/display/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro",
+      "destination": "/display/samsung/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro/",
+      "permanent": false
+    },
+    {
+      "source": "/display/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro/",
+      "destination": "/display/samsung/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro/",
+      "permanent": false
+    },
+    {
+      "source": "/display/tela-display-lcd-samsung-s23-5g-s911-original-retirada",
+      "destination": "/display/samsung/tela-display-lcd-samsung-s23-5g-s911-original-retirada/",
+      "permanent": false
+    },
+    {
+      "source": "/display/tela-display-lcd-samsung-s23-5g-s911-original-retirada/",
+      "destination": "/display/samsung/tela-display-lcd-samsung-s23-5g-s911-original-retirada/",
+      "permanent": false
+    },
+    {
+      "source": "/display/:brand/:product",
+      "destination": "/display/:brand/:product/",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/:brand/:product",
+      "destination": "/display-e-lcd/:brand/:product/",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/:brand/:product",
+      "destination": "/baterias/:brand/:product/",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/:brand/:product",
+      "destination": "/baterias-celular/:brand/:product/",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/:brand/:product",
+      "destination": "/touchs-e-visores/:brand/:product/",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/:brand/:product",
+      "destination": "/touch-e-visor/:brand/:product/",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/:brand/:product",
+      "destination": "/pecas-e-componentes/:brand/:product/",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/:brand/:product",
+      "destination": "/tampas-e-carcacas/:brand/:product/",
+      "permanent": false
+    },
+    {
+      "source": "/maquinas-e-ferramentas/:brand/:product",
+      "destination": "/maquinas-e-ferramentas/:brand/:product/",
+      "permanent": false
+    },
+    {
+      "source": "/suprimentos/:brand/:product",
+      "destination": "/suprimentos/:brand/:product/",
+      "permanent": false
+    },
+    {
       "source": "/bateria",
       "destination": "/baterias-celular/",
       "permanent": false
