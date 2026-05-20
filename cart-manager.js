@@ -158,11 +158,29 @@
     var brand = String(item.brand || '').replace(/^\/+|\/+$/g, '');
     var slug = String(item.slug || '').replace(/^\/+|\/+$/g, '');
     if (section) parts.push(section);
-    if (brand && brand !== 'tech7' && brand !== 'catalogo') parts.push(brand);
+    if (brand && brand !== section && brand !== 'tech7' && brand !== 'catalogo') parts.push(brand);
     if (slug) parts.push(slug);
     if (!parts.length) return '';
     parts.push('index.html');
     return parts.join('/');
+  }
+
+  function _normalizeProductUrl(value) {
+    var clean = String(value || '').trim().replace(/\\/g, '/');
+    if (!clean) return '';
+    if (/^https?:\/\//i.test(clean)) {
+      try {
+        var parsed = new URL(clean, global.location && global.location.origin ? global.location.origin : undefined);
+        clean = parsed.pathname || '';
+      } catch (e) {
+        return '';
+      }
+    }
+    clean = clean.split('#')[0].split('?')[0].replace(/^\/+|\/+$/g, '');
+    if (!clean || /['"<>\s]|(?:\+)|(?:productUrl\()/i.test(clean)) return '';
+    if (!/^[a-z0-9._~/%-]+$/i.test(clean)) return '';
+    if (!/\.html$/i.test(clean)) clean += '/index.html';
+    return clean;
   }
 
   function _mapServerItem(item) {
@@ -173,7 +191,7 @@
       quantidade: Math.max(1, Number(item.qty || item.quantidade || 1)),
       imagem: String(item.image_url || item.imagem || ''),
       variacao: '',
-      url: _productUrlFromServer(item)
+      url: _normalizeProductUrl(item.url || item.product_url) || _productUrlFromServer(item)
     };
   }
 

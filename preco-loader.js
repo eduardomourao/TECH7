@@ -38,32 +38,79 @@
     document.documentElement.classList.remove('modal-open');
   }
 
-  function fixRelativeProductLinks() {
-    var pathname = String(window.location.pathname || '');
-    var parts = pathname.replace(/\/index\.html?$/i, '').replace(/\/+$/, '').split('/').filter(Boolean);
-    if (parts.length < 3) return;
+  function hydrateLazyImages() {
+    document.querySelectorAll('img[data-src]').forEach(function(img) {
+      var src = img.getAttribute('src');
+      var dataSrc = img.getAttribute('data-src');
+      if (dataSrc && (!src || src === '#' || src.indexOf('data:image/') === 0)) {
+        img.setAttribute('src', dataSrc);
+      }
+    });
 
-    var basePath = pathname;
-    if (/\/index\.html?$/i.test(basePath)) basePath = basePath.replace(/index\.html?$/i, '');
-    else if (basePath.charAt(basePath.length - 1) !== '/') basePath += '/';
-
-    var baseUrl = window.location.origin + basePath;
-    document.querySelectorAll('.product-related a[href^="../"], .product-related a[href^="./"]').forEach(function(link) {
-      var rawHref = link.getAttribute('href') || '';
-      try {
-        var resolved = new URL(rawHref, baseUrl);
-        if (resolved.origin === window.location.origin) {
-          link.setAttribute('href', resolved.pathname + resolved.search + resolved.hash);
-        }
-      } catch (_err) {
-        // Ignore malformed legacy hrefs and keep the original link untouched.
+    document.querySelectorAll('source[data-srcset]').forEach(function(source) {
+      if (!source.getAttribute('srcset')) {
+        source.setAttribute('srcset', source.getAttribute('data-srcset'));
       }
     });
   }
 
   function runDomFixes() {
+    hydrateLazyImages();
     hideUnavailableFeatures();
-    fixRelativeProductLinks();
+    enableStaticContactForm();
+  }
+
+  function enableStaticContactForm() {
+    var form = document.getElementById('form1');
+    if (!form || !form.classList || !form.classList.contains('formulario-contato') || form.dataset.tech7StaticContact === '1') return;
+    form.dataset.tech7StaticContact = '1';
+
+    function value(id) {
+      var field = document.getElementById(id);
+      return field ? String(field.value || '').trim() : '';
+    }
+
+    function setError(id, message) {
+      var field = document.getElementById(id);
+      var error = document.getElementById(id + '_erro');
+      if (field) field.setAttribute('aria-invalid', message ? 'true' : 'false');
+      if (error) {
+        error.textContent = message || '';
+        error.style.display = message ? '' : 'none';
+      }
+    }
+
+    function submitContact(event) {
+      if (event) event.preventDefault();
+
+      var nome = value('nome_contato');
+      var email = value('email_contato');
+      var telefone = value('telefone_contato');
+      var assunto = value('assunto');
+      var mensagem = value('mensagem_contato');
+      var hasError = false;
+
+      setError('nome_contato', nome ? '' : 'Digite seu nome.');
+      setError('email_contato', email ? '' : 'Digite seu email.');
+      setError('mensagem_contato', mensagem ? '' : 'Digite a mensagem a ser enviada.');
+      hasError = !nome || !email || !mensagem;
+      if (hasError) return;
+
+      var text = [
+        'Contato pelo site TECH 7',
+        'Nome: ' + nome,
+        'Email: ' + email,
+        telefone ? 'Telefone: ' + telefone : '',
+        assunto ? 'Assunto: ' + assunto : '',
+        'Mensagem: ' + mensagem
+      ].filter(Boolean).join('\n');
+
+      window.location.href = 'https://wa.me/5531973548107?text=' + encodeURIComponent(text);
+    }
+
+    form.addEventListener('submit', submitContact);
+    var button = document.getElementById('btn_submit');
+    if (button) button.addEventListener('click', submitContact);
   }
 
   function onReady(fn) {

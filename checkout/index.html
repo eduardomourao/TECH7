@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <base href="../">
   <title>Checkout | TECH 7</title>
-  <link rel="icon" href="logo.png">
+  <link rel="icon" href="../logo.png">
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
@@ -92,10 +92,12 @@
       border: 0;
       border-radius: 999px;
       padding: 0 58px 0 22px;
-      color: var(--checkout-text);
-      background: #e3e1df;
+      color: #111;
+      -webkit-text-fill-color: #111;
+      background: #e3e1df !important;
       outline: 2px solid transparent;
       font-weight: 700;
+      appearance: none;
     }
     .t7-search::placeholder { color: #74706c; }
     .t7-search:focus { outline-color: rgba(255, 106, 0, .45); background: #fff; }
@@ -141,7 +143,7 @@
     .checkout-main { flex: 1; padding: 34px 0 76px; }
     .checkout-breadcrumb { margin: 0 0 26px; color: var(--checkout-muted); font-size: 13px; font-weight: 600; }
     .checkout-breadcrumb strong { color: #fff; font-weight: 900; }
-    h1 { margin: 0; font-family: "Space Grotesk", Inter, sans-serif; font-size: clamp(34px, 5vw, 56px); line-height: 1; letter-spacing: -.04em; }
+    h1 { margin: 0; color: #fff !important; font-family: "Space Grotesk", Inter, sans-serif; font-size: clamp(34px, 5vw, 56px); line-height: 1; letter-spacing: 0; }
     .checkout-lead { max-width: 760px; margin: 12px 0 28px; color: var(--checkout-muted); line-height: 1.55; font-weight: 600; }
 
     .empty-checkout {
@@ -150,9 +152,12 @@
       text-align: center;
       border-radius: var(--checkout-radius-lg);
       background: var(--checkout-card);
+      color: var(--checkout-text);
       box-shadow: var(--checkout-shadow);
     }
     .empty-checkout.is-visible { display: block; }
+    .empty-checkout h2 { color: #fff !important; }
+    .empty-checkout p { color: var(--checkout-muted) !important; }
 
     .stepper {
       display: grid;
@@ -422,6 +427,7 @@
     @media (max-width: 760px) {
       .t7-topbar { display: none; }
       .t7-header { min-height: auto; grid-template-columns: 1fr; gap: 14px; padding: 16px 0; }
+      .t7-search-wrap { width: 100%; }
       .t7-actions { justify-content: space-between; }
       .checkout-main { padding-top: 24px; }
       .checkout-container, .t7-header, .t7-footer-inner { width: min(100% - 28px, 1264px); }
@@ -447,9 +453,9 @@
       </div>
       <div class="t7-header" aria-label="Cabeçalho principal">
         <a class="t7-logo" href="index.html" aria-label="TECH 7 - página inicial">
-          <img src="logo.png" alt="TECH 7">
+          <img src="../logo.png" alt="TECH 7" width="1291" height="517" loading="lazy">
         </a>
-        <form class="t7-search-wrap" action="loja/busca.php" method="get" role="search">
+        <form class="t7-search-wrap" action="busca/index.html" method="get" role="search">
           <label class="sr-only" for="busca-site">O que você procura?</label>
           <input class="t7-search" id="busca-site" name="palavra_busca" type="search" placeholder="O que você procura?">
           <span class="t7-search-icon" aria-hidden="true"></span>
@@ -953,7 +959,7 @@
           var row = document.createElement('div');
           row.className = 'summary-item';
           row.innerHTML =
-            '<div class="summary-thumb">' + (item.img ? '<img src="' + item.img + '" alt="">' : '') + '</div>' +
+            '<div class="summary-thumb">' + (item.img ? '<img src="' + item.img + '" alt="Imagem do produto" loading="lazy" width="64" height="64">' : '') + '</div>' +
             '<div><div class="summary-name"></div><div class="summary-qty"></div></div>' +
             '<div class="summary-price"></div>';
           row.querySelector('.summary-name').textContent = item.nome;
