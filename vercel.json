@@ -1,6 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "outputDirectory": ".",
   "cleanUrls": true,
+  "trailingSlash": false,
   "redirects": [
     {
       "source": "/loja",
@@ -11,239 +13,29 @@
       "source": "/loja/",
       "destination": "/",
       "permanent": false
-    },
-    {
-      "source": "/display/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro",
-      "destination": "/display/samsung/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro/",
-      "permanent": false
-    },
-    {
-      "source": "/display/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro/",
-      "destination": "/display/samsung/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro/",
-      "permanent": false
-    },
-    {
-      "source": "/display/tela-display-lcd-samsung-s23-s911-oled-com-aro",
-      "destination": "/display/samsung/tela-display-lcd-samsung-s23-s911-oled-com-aro/",
-      "permanent": false
-    },
-    {
-      "source": "/display/tela-display-lcd-samsung-s23-s911-oled-com-aro/",
-      "destination": "/display/samsung/tela-display-lcd-samsung-s23-s911-oled-com-aro/",
-      "permanent": false
-    },
-    {
-      "source": "/display/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro",
-      "destination": "/display/samsung/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro/",
-      "permanent": false
-    },
-    {
-      "source": "/display/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro/",
-      "destination": "/display/samsung/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro/",
-      "permanent": false
-    },
-    {
-      "source": "/display/tela-display-lcd-samsung-s23-5g-s911-original-retirada",
-      "destination": "/display/samsung/tela-display-lcd-samsung-s23-5g-s911-original-retirada/",
-      "permanent": false
-    },
-    {
-      "source": "/display/tela-display-lcd-samsung-s23-5g-s911-original-retirada/",
-      "destination": "/display/samsung/tela-display-lcd-samsung-s23-5g-s911-original-retirada/",
-      "permanent": false
-    },
-    {
-      "source": "/display/:brand/:product",
-      "destination": "/display/:brand/:product/",
-      "permanent": false
-    },
-    {
-      "source": "/display-e-lcd/:brand/:product",
-      "destination": "/display-e-lcd/:brand/:product/",
-      "permanent": false
-    },
-    {
-      "source": "/baterias/:brand/:product",
-      "destination": "/baterias/:brand/:product/",
-      "permanent": false
-    },
-    {
-      "source": "/baterias-celular/:brand/:product",
-      "destination": "/baterias-celular/:brand/:product/",
-      "permanent": false
-    },
-    {
-      "source": "/touchs-e-visores/:brand/:product",
-      "destination": "/touchs-e-visores/:brand/:product/",
-      "permanent": false
-    },
-    {
-      "source": "/touch-e-visor/:brand/:product",
-      "destination": "/touch-e-visor/:brand/:product/",
-      "permanent": false
-    },
-    {
-      "source": "/pecas-e-componentes/:brand/:product",
-      "destination": "/pecas-e-componentes/:brand/:product/",
-      "permanent": false
-    },
-    {
-      "source": "/tampas-e-carcacas/:brand/:product",
-      "destination": "/tampas-e-carcacas/:brand/:product/",
-      "permanent": false
-    },
-    {
-      "source": "/maquinas-e-ferramentas/:brand/:product",
-      "destination": "/maquinas-e-ferramentas/:brand/:product/",
-      "permanent": false
-    },
-    {
-      "source": "/suprimentos/:brand/:product",
-      "destination": "/suprimentos/:brand/:product/",
-      "permanent": false
-    },
-    {
-      "source": "/bateria",
-      "destination": "/baterias-celular/",
-      "permanent": false
-    },
-    {
-      "source": "/bateria/",
-      "destination": "/baterias-celular/",
-      "permanent": false
-    },
-    {
-      "source": "/bateria-celular",
-      "destination": "/baterias-celular/",
-      "permanent": false
-    },
-    {
-      "source": "/bateria-celular/",
-      "destination": "/baterias-celular/",
-      "permanent": false
-    },
-    {
-      "source": "/baterias",
-      "destination": "/baterias-celular/",
-      "permanent": false
-    },
-    {
-      "source": "/baterias/",
-      "destination": "/baterias-celular/",
-      "permanent": false
-    },
-    {
-      "source": "/display",
-      "destination": "/tela-display-lcd/",
-      "permanent": false
-    },
-    {
-      "source": "/display/",
-      "destination": "/tela-display-lcd/",
-      "permanent": false
-    },
-    {
-      "source": "/display-e-lcd",
-      "destination": "/tela-display-lcd/",
-      "permanent": false
-    },
-    {
-      "source": "/display-e-lcd/",
-      "destination": "/tela-display-lcd/",
-      "permanent": false
-    },
-    {
-      "source": "/display-lcd",
-      "destination": "/tela-display-lcd/",
-      "permanent": false
-    },
-    {
-      "source": "/display-lcd/",
-      "destination": "/tela-display-lcd/",
-      "permanent": false
-    },
-    {
-      "source": "/telas",
-      "destination": "/tela-display-lcd/",
-      "permanent": false
-    },
-    {
-      "source": "/telas/",
-      "destination": "/tela-display-lcd/",
-      "permanent": false
-    },
-    {
-      "source": "/telas-display-lcd",
-      "destination": "/tela-display-lcd/",
-      "permanent": false
-    },
-    {
-      "source": "/telas-display-lcd/",
-      "destination": "/tela-display-lcd/",
-      "permanent": false
-    },
-    {
-      "source": "/touch-visor",
-      "destination": "/touch-e-visor/",
-      "permanent": false
-    },
-    {
-      "source": "/touch-visor/",
-      "destination": "/touch-e-visor/",
-      "permanent": false
-    },
-    {
-      "source": "/touchs-e-visores",
-      "destination": "/touch-e-visor/",
-      "permanent": false
-    },
-    {
-      "source": "/touchs-e-visores/",
-      "destination": "/touch-e-visor/",
-      "permanent": false
-    },
-    {
-      "source": "/touchs-visores",
-      "destination": "/touch-e-visor/",
-      "permanent": false
-    },
-    {
-      "source": "/touchs-visores/",
-      "destination": "/touch-e-visor/",
-      "permanent": false
-    },
-    {
-      "source": "/pecas-componentes",
-      "destination": "/pecas-e-componentes/",
-      "permanent": false
-    },
-    {
-      "source": "/pecas-componentes/",
-      "destination": "/pecas-e-componentes/",
-      "permanent": false
-    },
-    {
-      "source": "/tampas-carcacas",
-      "destination": "/tampas-e-carcacas/",
-      "permanent": false
-    },
-    {
-      "source": "/tampas-carcacas/",
-      "destination": "/tampas-e-carcacas/",
-      "permanent": false
-    },
-    {
-      "source": "/maquinas-ferramentas",
-      "destination": "/maquinas-e-ferramentas/",
-      "permanent": false
-    },
-    {
-      "source": "/maquinas-ferramentas/",
-      "destination": "/maquinas-e-ferramentas/",
-      "permanent": false
     }
   ],
   "rewrites": [
+    {
+      "source": "/mvc/store/facebook_conversions/event/send",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/mvc/store/element/snippets/cart_preview/",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/mvc/store/newsletter/",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/mvc/store/product/discount",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/web_api/products/:id",
+      "destination": "/api/[...path].js"
+    },
     {
       "source": "/api/:path*",
       "destination": "/api/[...path].js"

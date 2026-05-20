@@ -27,7 +27,21 @@
   }
 
   function productUrl(value) {
-    return "../" + String(value || "index.html").replace(/^\/+/, "");
+    var clean = String(value || "index.html").trim().replace(/\\/g, "/");
+    if (/^https?:\/\//i.test(clean)) {
+      try {
+        var parsed = new URL(clean, window.location.origin);
+        clean = parsed.pathname;
+      } catch (e) {
+        clean = "index.html";
+      }
+    }
+    clean = clean.split("#")[0].split("?")[0].replace(/^\/+|\/+$/g, "");
+    if (!clean || /['"<>\s]|(?:\+)|(?:productUrl\()/i.test(clean) || !/^[a-z0-9._~/%-]+$/i.test(clean)) {
+      clean = "index.html";
+    }
+    if (!/\.html$/i.test(clean)) clean += "/index.html";
+    return "../" + clean;
   }
 
   function formatPriceFromCents(cents) {
@@ -49,23 +63,60 @@
     }
 
     results.className = "results-grid";
-    results.innerHTML = filtered.map(function (item) {
+    results.innerHTML = "";
+    filtered.forEach(function (item) {
       var name = item.title || item.name || "";
       var tag = item.brand || item.category || item.section || "TECH 7";
       var price = formatPriceFromCents(item.price_cents);
       var description = item.description || "Produto TECH 7 para reposicao de aparelho celular.";
 
-      return '<a class="result-card" href="' + productUrl(item.url) + '">' +
-        '<div class="pic"><img src="' + assetUrl(item.image || item.image_url) + '" alt="' + escapeHtml(name) + '" loading="lazy"></div>' +
-        '<div class="info">' +
-        '<div class="tag">' + escapeHtml(tag) + "</div>" +
-        '<h2 class="name">' + escapeHtml(name) + "</h2>" +
-        '<p class="desc">' + escapeHtml(description) + "</p>" +
-        (price ? '<p class="desc" style="color:#ffcf8a;font-weight:800;">' + escapeHtml(price) + "</p>" : "") +
-        "</div>" +
-        '<div class="cta">Ver produto</div>' +
-        "</a>";
-    }).join("");
+      var card = document.createElement("a");
+      card.className = "result-card";
+      card.href = productUrl(item.url);
+
+      var pic = document.createElement("div");
+      pic.className = "pic";
+      var img = document.createElement("img");
+      img.src = assetUrl(item.image || item.image_url);
+      img.alt = name;
+      img.loading = "lazy";
+      img.width = 180;
+      img.height = 180;
+      pic.appendChild(img);
+
+      var info = document.createElement("div");
+      info.className = "info";
+      var tagEl = document.createElement("div");
+      tagEl.className = "tag";
+      tagEl.textContent = tag;
+      var nameEl = document.createElement("h2");
+      nameEl.className = "name";
+      nameEl.textContent = name;
+      var desc = document.createElement("p");
+      desc.className = "desc";
+      desc.textContent = description;
+      info.appendChild(tagEl);
+      info.appendChild(nameEl);
+      info.appendChild(desc);
+
+      if (price) {
+        var priceEl = document.createElement("p");
+        priceEl.className = "desc";
+        priceEl.style.color = "#ffcf8a";
+        priceEl.style.fontWeight = "800";
+        priceEl.textContent = price;
+        info.appendChild(priceEl);
+      }
+
+      var cta = document.createElement("div");
+      cta.className = "cta";
+      cta.textContent = "Ver produto";
+
+      card.appendChild(pic);
+      card.appendChild(info);
+      card.appendChild(cta);
+      results.appendChild(card);
+    });
   }
 
   function renderEmptySearch() {
