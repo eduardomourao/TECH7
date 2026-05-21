@@ -1581,6 +1581,13 @@
       align-items: center;
       gap: 8px 16px;
       padding: 16px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    body[data-checkout-step="4"] .pix-card::before {
+      display: none;
     }
     body[data-checkout-step="4"] .pix-card strong {
       grid-area: title;
@@ -1837,6 +1844,81 @@
     body.checkout-active .t7-footer {
       display: none;
     }
+    body.checkout-active .checkout-layout {
+      perspective: 1100px;
+      transform-style: preserve-3d;
+    }
+    body.checkout-active .checkout-panel,
+    body.checkout-active .checkout-step.is-active,
+    body.checkout-active .summary-card,
+    body.checkout-active .pix-placeholder,
+    body.checkout-active .pix-loading-card {
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+    }
+    body.checkout-active .checkout-step.is-active,
+    body.checkout-active .summary-card {
+      box-shadow:
+        0 14px 34px rgba(17, 17, 17, .08),
+        0 1px 0 rgba(255, 255, 255, .88) inset;
+    }
+    body.checkout-active .checkout-step.is-active::after,
+    body.checkout-active .summary-card::before {
+      content: "";
+      position: absolute;
+      inset: auto 12px -10px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(17, 17, 17, .12);
+      filter: blur(13px);
+      transform: translateZ(-18px);
+      pointer-events: none;
+    }
+    body.checkout-active .checkout-panel.is-tilting .checkout-step.is-active {
+      box-shadow:
+        0 18px 40px rgba(17, 17, 17, .11),
+        0 0 0 1px rgba(255, 106, 0, .18),
+        0 1px 0 rgba(255, 255, 255, .92) inset;
+    }
+    body.checkout-active .checkout-panel.is-tilting + .summary-card {
+      box-shadow:
+        0 16px 36px rgba(17, 17, 17, .10),
+        0 1px 0 rgba(255, 255, 255, .9) inset;
+    }
+    body.checkout-active .pix-placeholder {
+      transform: translateZ(14px);
+      box-shadow:
+        0 12px 26px rgba(17, 17, 17, .10),
+        0 1px 0 rgba(255, 255, 255, .9) inset;
+    }
+    body.checkout-active .pix-loading-card,
+    body.checkout-active .pix-placeholder.has-qr img {
+      transform: translateZ(18px);
+      box-shadow: 0 10px 22px rgba(17, 17, 17, .10);
+    }
+    body.checkout-active .pix-loading-spinner {
+      transform: translateZ(28px);
+      box-shadow:
+        0 16px 28px rgba(17, 17, 17, .16),
+        0 0 0 7px rgba(255, 255, 255, .55);
+    }
+    body.checkout-active .summary-total,
+    body.checkout-active .btn-primary,
+    body.checkout-active .inline-btn,
+    body.checkout-active .btn-secondary {
+      transform: translateZ(10px);
+    }
+    body.checkout-active .btn:hover,
+    body.checkout-active .inline-btn:hover,
+    body.checkout-active .summary-checkout-btn:hover {
+      transform: translate3d(0, -2px, 18px);
+    }
+    body.checkout-active .step.is-active {
+      transform: translateZ(12px);
+    }
+    body.checkout-active .step.is-done {
+      transform: translateZ(5px);
+    }
     @media (prefers-reduced-motion: reduce) {
       .step,
       .checkout-step,
@@ -1855,6 +1937,21 @@
       .step.is-active::after,
       .pix-placeholder.is-loading::after {
         animation: none !important;
+      }
+      body.checkout-active .checkout-layout,
+      body.checkout-active .checkout-panel,
+      body.checkout-active .checkout-step.is-active,
+      body.checkout-active .summary-card,
+      body.checkout-active .pix-placeholder,
+      body.checkout-active .pix-loading-card,
+      body.checkout-active .pix-loading-spinner,
+      body.checkout-active .summary-total,
+      body.checkout-active .btn-primary,
+      body.checkout-active .inline-btn,
+      body.checkout-active .btn-secondary,
+      body.checkout-active .step {
+        transform: none !important;
+        transform-style: flat !important;
       }
     }
 
@@ -1917,7 +2014,7 @@
       body[data-checkout-step="4"] .pix-card {
         grid-template-columns: 118px minmax(0, 1fr);
         gap: 8px 10px;
-        padding: 12px;
+        padding: 0;
       }
       body[data-checkout-step="4"] .pix-placeholder {
         width: 118px;
@@ -3243,23 +3340,36 @@
       (function initTilt() {
         var layout = document.querySelector('.checkout-layout');
         var panel = document.querySelector('.checkout-panel');
+        var summary = document.querySelector('.summary-card');
         if (!layout || !panel || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         layout.addEventListener('pointermove', function (event) {
           var rect = layout.getBoundingClientRect();
           var x = ((event.clientX - rect.left) / rect.width) - .5;
           var y = ((event.clientY - rect.top) / rect.height) - .5;
           panel.classList.add('is-tilting');
-          panel.style.setProperty('--tilt-rx', (-y * 4).toFixed(2) + 'deg');
-          panel.style.setProperty('--tilt-ry', (x * 5).toFixed(2) + 'deg');
-          panel.style.setProperty('--tilt-x', (x * 6).toFixed(2) + 'px');
-          panel.style.setProperty('--tilt-y', (y * 6).toFixed(2) + 'px');
+          [
+            panel,
+            summary
+          ].forEach(function (target) {
+            if (!target) return;
+            target.style.setProperty('--tilt-rx', (-y * 3.2).toFixed(2) + 'deg');
+            target.style.setProperty('--tilt-ry', (x * 3.8).toFixed(2) + 'deg');
+            target.style.setProperty('--tilt-x', (x * 4).toFixed(2) + 'px');
+            target.style.setProperty('--tilt-y', (y * 4).toFixed(2) + 'px');
+          });
         });
         layout.addEventListener('pointerleave', function () {
           panel.classList.remove('is-tilting');
-          panel.style.removeProperty('--tilt-rx');
-          panel.style.removeProperty('--tilt-ry');
-          panel.style.removeProperty('--tilt-x');
-          panel.style.removeProperty('--tilt-y');
+          [
+            panel,
+            summary
+          ].forEach(function (target) {
+            if (!target) return;
+            target.style.removeProperty('--tilt-rx');
+            target.style.removeProperty('--tilt-ry');
+            target.style.removeProperty('--tilt-x');
+            target.style.removeProperty('--tilt-y');
+          });
         });
       })();
       document.getElementById('btn-copiar-pix').addEventListener('click', async function () {
