@@ -1369,6 +1369,171 @@
       font-size: clamp(30px, 4vw, 46px);
       letter-spacing: 0;
     }
+    .checkout-main {
+      background: linear-gradient(180deg, #ffffff 0%, #ffffff 55%, #f8f9fa 100%) !important;
+    }
+    .stepper,
+    .checkout-step,
+    .summary-card,
+    .pix-card {
+      position: relative;
+    }
+    .stepper {
+      overflow: hidden;
+    }
+    .step {
+      position: relative;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, color 180ms ease;
+    }
+    .step:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(17, 17, 17, .08);
+    }
+    .step.is-active {
+      box-shadow: inset 0 -2px 0 #ff6a00;
+    }
+    .step.is-active::after {
+      content: "";
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 6px;
+      height: 3px;
+      border-radius: 999px;
+      background: #ff6a00;
+      animation: checkoutStepGlow 1.8s ease-in-out infinite;
+    }
+    @keyframes checkoutStepGlow {
+      0%, 100% { opacity: .55; transform: scaleX(.86); }
+      50% { opacity: 1; transform: scaleX(1); }
+    }
+    .checkout-step,
+    .summary-card {
+      transition: box-shadow 220ms ease, transform 220ms ease, border-color 220ms ease;
+    }
+    .checkout-step.is-active {
+      overflow: hidden;
+    }
+    .checkout-step.is-active::before,
+    .summary-card::after,
+    .pix-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 4px;
+      background: linear-gradient(90deg, #ff6a00, rgba(255, 106, 0, .22), #ff6a00);
+      opacity: .9;
+    }
+    .checkout-step:hover,
+    .summary-card:hover {
+      border-color: rgba(255, 106, 0, .34);
+      box-shadow: 0 10px 30px rgba(17, 17, 17, .08);
+      transform: translateY(-1px);
+    }
+    .field input,
+    .field select,
+    .voucher-select,
+    .copy-pix input {
+      transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+    .field input:hover,
+    .field select:hover,
+    .voucher-select:hover,
+    .copy-pix input:hover {
+      border-color: rgba(255, 106, 0, .38);
+    }
+    .field input:focus,
+    .field select:focus,
+    .voucher-select:focus,
+    .copy-pix input:focus {
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 4px rgba(255, 106, 0, .10);
+    }
+    .btn,
+    .inline-btn,
+    .summary-checkout-btn {
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease;
+    }
+    .btn:hover,
+    .inline-btn:hover,
+    .summary-checkout-btn:hover {
+      transform: translateY(-1px);
+    }
+    .btn-primary,
+    .summary-checkout-btn {
+      box-shadow: 0 6px 18px rgba(255, 106, 0, .24);
+    }
+    .pix-card {
+      overflow: hidden;
+      background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9);
+    }
+    .pix-card strong {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pix-card strong::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #ff6a00;
+      box-shadow: 0 0 0 5px rgba(255, 106, 0, .12);
+    }
+    .pix-placeholder {
+      position: relative;
+      overflow: hidden;
+    }
+    .pix-placeholder.is-loading::after {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, .62) 50%, transparent 65%);
+      animation: pixPlaceholderSweep 2.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes pixPlaceholderSweep {
+      from { transform: translateX(-35%) rotate(8deg); }
+      to { transform: translateX(35%) rotate(8deg); }
+    }
+    .summary-card {
+      overflow: hidden;
+    }
+    .summary-total {
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 14px;
+      border: 1px solid #e5e7eb;
+    }
+    .security-badge {
+      transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+    }
+    .security-badge:hover {
+      border-color: rgba(255, 106, 0, .36);
+      box-shadow: 0 4px 16px rgba(255, 106, 0, .12);
+      transform: translateY(-1px);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .step,
+      .checkout-step,
+      .summary-card,
+      .field input,
+      .field select,
+      .voucher-select,
+      .copy-pix input,
+      .btn,
+      .inline-btn,
+      .summary-checkout-btn,
+      .security-badge {
+        transition: none !important;
+        transform: none !important;
+      }
+      .step.is-active::after,
+      .pix-placeholder.is-loading::after {
+        animation: none !important;
+      }
+    }
 
     @media (min-width: 720px) {
       .form-grid.two { grid-template-columns: 1fr 1fr; }
@@ -1578,7 +1743,7 @@
                 <section class="checkout-step" data-step="4">
                   <h2>Método de pagamento</h2>
                   <div class="payment-options" aria-label="Métodos de pagamento disponíveis">
-                    <span class="payment-option is-selected"><span class="payment-dot" aria-hidden="true"></span> PIX Woovi</span>
+                    <span class="payment-option is-selected"><span class="payment-dot" aria-hidden="true"></span> PIX</span>
                   </div>
                   <div class="pix-card">
                     <strong>PIX</strong>
@@ -1648,7 +1813,7 @@
               <p>Escaneie o QR Code ou copie o codigo abaixo. O pagamento fica em acompanhamento automatico nesta tela.</p>
               <div class="pix-fullscreen-meta">
                 <span id="pix-fullscreen-order">Pedido -</span>
-                <span>Woovi</span>
+                <span>PIX</span>
                 <span>TECH7 seguro</span>
               </div>
               <textarea class="pix-fullscreen-copy" id="pix-fullscreen-code" readonly aria-label="Codigo PIX copia e cola"></textarea>
