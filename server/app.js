@@ -82,7 +82,7 @@ export function createApp(options = {}) {
     "/mvc/store/element/snippets/cart_preview",
     "/mvc/store/element/snippets/cart_preview/"
   ], (_req, res) => {
-    res.type("html").send("");
+    res.status(204).end();
   });
 
   app.get("/mvc/store/cart/count", (_req, res) => {
@@ -90,7 +90,7 @@ export function createApp(options = {}) {
   });
 
   app.get("/mvc/store/greeting", (_req, res) => {
-    res.type("html").send("");
+    res.status(204).end();
   });
 
   app.post("/mvc/store/newsletter/", (_req, res) => {
@@ -112,14 +112,14 @@ export function createApp(options = {}) {
     "/mvc/store/product/variant_price",
     "/mvc/store/product/variant_price/"
   ], (_req, res) => {
-    res.json({});
+    res.status(204).end();
   });
 
   app.get([
     "/mvc/store/product/variant_reference",
     "/mvc/store/product/variant_reference/"
   ], (_req, res) => {
-    res.type("text").send("");
+    res.status(204).end();
   });
 
   app.get("/mvc/store/996644/google_tag_manager/updateGTM.json", (_req, res) => {
@@ -135,7 +135,7 @@ export function createApp(options = {}) {
     "/nocache/facebook-info.php",
     "/nocache/info.php"
   ], (_req, res) => {
-    res.type("html").send("");
+    res.status(204).end();
   });
 
   app.get("/web_api/products/:id", (req, res) => {
