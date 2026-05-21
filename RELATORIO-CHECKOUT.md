@@ -36,6 +36,7 @@ Status iPhone SE: APROVADO
 
 Validado:
 - `POST /api/payments/woovi` simulado retornou `brCode` e `qrCodeImage`.
+- Antes da resposta real do PIX, o checkout exibe um QR embaçado com spinner no lugar do texto estatico.
 - QR Code renderizou no checkout e no overlay fullscreen.
 - Codigo copia e cola foi preenchido.
 - Botao de copiar foi acionado.
@@ -65,6 +66,8 @@ Validado:
 Evidencias:
 - `validation-artifacts/desktop-pix-overlay.png`
 - `validation-artifacts/iphone-se-pix-overlay.png`
+- `C:\tmp\tech7-pix-loading-desktop.png`
+- `C:\tmp\tech7-pix-loading-iphone-se.png`
 
 ## 4. Overflow Horizontal
 

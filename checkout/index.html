@@ -345,6 +345,67 @@
       font-weight: 900;
       padding: 16px;
     }
+    .pix-placeholder.is-error {
+      border-color: rgba(220, 38, 38, .42);
+      background: rgba(254, 242, 242, .92);
+      color: #991b1b;
+    }
+    .pix-loading-card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 168px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 16px;
+      background: #fff;
+    }
+    .pix-loading-qr {
+      position: absolute;
+      inset: 14px;
+      border-radius: 14px;
+      opacity: .66;
+      filter: blur(3px);
+      transform: scale(1.02);
+      background:
+        linear-gradient(90deg, #111 11px, transparent 11px 18px, #111 18px 28px, transparent 28px 38px, #111 38px 48px, transparent 48px),
+        linear-gradient(#111 11px, transparent 11px 20px, #111 20px 31px, transparent 31px 42px, #111 42px 52px, transparent 52px),
+        radial-gradient(circle at 22% 22%, #111 0 24px, transparent 25px),
+        radial-gradient(circle at 78% 22%, #111 0 24px, transparent 25px),
+        radial-gradient(circle at 22% 78%, #111 0 24px, transparent 25px),
+        linear-gradient(135deg, rgba(255, 106, 0, .28), rgba(255, 255, 255, .92));
+      background-size: 58px 58px, 58px 58px, 76px 76px, 76px 76px, 76px 76px, 100% 100%;
+      background-position: 0 0, 8px 10px, 10px 10px, calc(100% - 10px) 10px, 10px calc(100% - 10px), 0 0;
+      background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+    }
+    .pix-loading-qr::after {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .32);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .46);
+    }
+    .pix-loading-spinner {
+      position: relative;
+      z-index: 1;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 5px solid rgba(17, 24, 39, .14);
+      border-top-color: var(--checkout-accent);
+      box-shadow: 0 14px 34px rgba(17, 24, 39, .18);
+      animation: pixSpinner 840ms linear infinite;
+    }
+    .pix-loading-spinner::after {
+      content: "";
+      position: absolute;
+      inset: 9px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .82);
+    }
+    @keyframes pixSpinner { to { transform: rotate(360deg); } }
     .copy-pix { display: grid; gap: 10px; }
     .review-list { display: grid; gap: 12px; margin-bottom: 18px; }
     .review-item {
@@ -710,6 +771,9 @@
       .pix-fullscreen.is-open .pix-fullscreen-card {
         animation: pixFadeIn 180ms ease forwards;
       }
+      .pix-loading-spinner {
+        animation: none;
+      }
       @keyframes pixFadeIn { to { opacity: 1; } }
     }
     @media (max-width: 760px) {
@@ -892,6 +956,18 @@
       background: #f8f9fa;
       color: #4b5563;
       box-shadow: none;
+    }
+    .pix-placeholder.is-error {
+      border-color: #fecaca;
+      background: #fef2f2;
+      color: #991b1b;
+    }
+    .pix-loading-card {
+      background: #ffffff;
+      box-shadow: inset 0 0 0 1px rgba(17, 24, 39, .06);
+    }
+    .pix-loading-qr {
+      opacity: .5;
     }
     .summary-card::before {
       background: #ff6a00;
@@ -1171,7 +1247,13 @@
                   <div class="pix-card">
                     <strong>PIX</strong>
                     <p>Escaneie o QR Code ou copie o código PIX. O pagamento aparece aqui automaticamente assim que você confirma a revisão do pedido.</p>
-                    <div class="pix-placeholder" id="pix-qrcode-container">QR Code PIX será gerado aqui</div>
+                    <div class="pix-placeholder is-loading" id="pix-qrcode-container" aria-live="polite">
+                      <div class="pix-loading-card" aria-hidden="true">
+                        <div class="pix-loading-qr"></div>
+                        <div class="pix-loading-spinner"></div>
+                      </div>
+                      <span class="sr-only">Aguardando geracao do QR Code PIX.</span>
+                    </div>
                     <div class="copy-pix">
                       <input id="pix-codigo" readonly placeholder="Código PIX será exibido aqui" aria-label="Código PIX copia e cola">
                       <button class="inline-btn" id="btn-copiar-pix" type="button">Copiar</button>
@@ -1771,6 +1853,7 @@
           regenerateBtn.style.display = 'none';
           regenerateBtn.disabled = true;
           setPaymentStatusText('Gerando PIX...');
+          renderPixLoadingPlaceholder();
           return;
         }
 
@@ -1808,6 +1891,25 @@
         setPaymentStatusText(info.message || 'Falha ao gerar PIX');
       }
 
+      function renderPixLoadingPlaceholder() {
+        var qrContainer = document.getElementById('pix-qrcode-container');
+        if (!qrContainer) return;
+        qrContainer.className = 'pix-placeholder is-loading';
+        qrContainer.innerHTML = '' +
+          '<div class="pix-loading-card" aria-hidden="true">' +
+            '<div class="pix-loading-qr"></div>' +
+            '<div class="pix-loading-spinner"></div>' +
+          '</div>' +
+          '<span class="sr-only">Aguardando geracao do QR Code PIX.</span>';
+      }
+
+      function renderPixMessage(message, isError) {
+        var qrContainer = document.getElementById('pix-qrcode-container');
+        if (!qrContainer) return;
+        qrContainer.className = 'pix-placeholder' + (isError ? ' is-error' : '');
+        qrContainer.textContent = message;
+      }
+
       function renderPixPayload(payload) {
         var pixCode = document.getElementById('pix-codigo');
         var qrContainer = document.getElementById('pix-qrcode-container');
@@ -1815,6 +1917,7 @@
         pixCode.value = payload && payload.codigoPix ? payload.codigoPix : '';
         qrContainer.innerHTML = '';
         if (payload && payload.qrCodeUrl) {
+          qrContainer.className = 'pix-placeholder has-qr';
           var img = document.createElement('img');
           img.src = payload.qrCodeUrl;
           img.alt = 'QR Code PIX';
@@ -1823,9 +1926,11 @@
           qrContainer.appendChild(img);
           return;
         }
-        qrContainer.textContent = payload && payload.codigoPix
-          ? 'PIX gerado. Use o codigo copia e cola.'
-          : 'QR Code PIX sera gerado aqui';
+        if (payload && payload.codigoPix) {
+          renderPixMessage('PIX gerado. Use o codigo copia e cola.', false);
+          return;
+        }
+        renderPixLoadingPlaceholder();
       }
 
       function humanizePaymentError(error) {
@@ -2030,8 +2135,7 @@
             canRegenerate: canRegenerate,
             message: humanizePaymentError(error)
           });
-          var qrContainer = document.getElementById('pix-qrcode-container');
-          if (qrContainer) qrContainer.textContent = humanizePaymentError(error);
+          renderPixMessage(humanizePaymentError(error), true);
         } finally {
           pixFlowInFlight = false;
         }
