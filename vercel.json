@@ -29,6 +29,18 @@
       "destination": "/api/[...path].js"
     },
     {
+      "source": "/mvc/store/996644/google_tag_manager/updateGTM.js",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/mvc/store/cart/count",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/mvc/store/greeting",
+      "destination": "/api/[...path].js"
+    },
+    {
       "source": "/mvc/store/product/variant_gallery",
       "destination": "/api/[...path].js"
     },

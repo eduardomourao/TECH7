@@ -85,6 +85,14 @@ export function createApp(options = {}) {
     res.type("html").send("");
   });
 
+  app.get("/mvc/store/cart/count", (_req, res) => {
+    res.json({ count: 0, total: 0 });
+  });
+
+  app.get("/mvc/store/greeting", (_req, res) => {
+    res.type("html").send("");
+  });
+
   app.post("/mvc/store/newsletter/", (_req, res) => {
     res.status(204).end();
   });
@@ -118,12 +126,16 @@ export function createApp(options = {}) {
     res.json({});
   });
 
+  app.get("/mvc/store/996644/google_tag_manager/updateGTM.js", (_req, res) => {
+    res.type("application/javascript").send("");
+  });
+
   app.get([
     "/nocache/app.php",
     "/nocache/facebook-info.php",
     "/nocache/info.php"
   ], (_req, res) => {
-    res.json({});
+    res.type("html").send("");
   });
 
   app.get("/web_api/products/:id", (req, res) => {
