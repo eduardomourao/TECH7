@@ -94,8 +94,8 @@ Status Desktop: APROVADO
 Status iPhone SE: APROVADO
 
 Validado visualmente:
-- Superficies internas deixaram de usar branco com texto claro.
-- Inputs, labels, botoes, resumo e PIX usam contraste alto em tema escuro.
+- Superficies internas usam fundo branco/claro, alinhadas visualmente ao carrinho.
+- Inputs, labels, botoes, resumo e PIX usam contraste alto em tema claro.
 - Foco possui destaque laranja visivel.
 
 ## Resultado Final
