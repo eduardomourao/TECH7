@@ -5,6 +5,7 @@ node_modules
 backend/node_modules
 test-results
 _validation
+validation-artifacts
 .codex-*.log
 *.log
 .adal

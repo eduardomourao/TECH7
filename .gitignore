@@ -39,6 +39,7 @@ npm-debug.log*
 
 # Artefatos locais
 _validation/
+validation-artifacts/
 test-results/
 
 # Logs e caches comuns
