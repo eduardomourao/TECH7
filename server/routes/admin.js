@@ -2,31 +2,11 @@ import express from "express";
 import crypto from "node:crypto";
 import { pool } from "../lib/db.js";
 import { applyCatalogPrices, isValidPriceCents } from "../lib/prices.js";
+import { normalizeProductSegment, productUrlFromRow } from "../lib/product-url.js";
 
 export const router = express.Router();
 const sessions = new Map();
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8;
-
-function normalizeSegment(value) {
-  return String(value || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, "")
-    .trim();
-}
-
-function productUrlFromRow(row) {
-  const section = normalizeSegment(row?.section);
-  const brand = normalizeSegment(row?.brand);
-  const slug = normalizeSegment(row?.slug);
-  const parts = [];
-
-  if (section) parts.push(section);
-  if (brand && brand !== "tech7" && brand !== "catalogo") parts.push(brand);
-  if (slug) parts.push(slug);
-
-  if (!parts.length) return "";
-  return `${parts.join("/")}/index.html`;
-}
 
 function adminAuth(req, res, next) {
   const header = String(req.headers.authorization || "");

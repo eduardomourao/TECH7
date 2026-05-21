@@ -1,29 +1,9 @@
 import express from "express";
 import { pool } from "../lib/db.js";
 import { applyCatalogPrices } from "../lib/prices.js";
+import { productUrlFromRow } from "../lib/product-url.js";
 
 export const router = express.Router();
-
-function normalizeSegment(value) {
-  return String(value || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, "")
-    .trim();
-}
-
-function productUrlFromDb(product) {
-  const section = normalizeSegment(product?.section);
-  const brand = normalizeSegment(product?.brand);
-  const slug = normalizeSegment(product?.slug);
-  const parts = [];
-
-  if (section) parts.push(section);
-  if (brand && brand !== "tech7" && brand !== "catalogo") parts.push(brand);
-  if (slug) parts.push(slug);
-
-  if (!parts.length) return "";
-  return `${parts.join("/")}/index.html`;
-}
 
 router.get("/", async (req, res) => {
   const q = String(req.query.q || req.query.palavra_busca || req.query.t || "").trim();
@@ -93,7 +73,7 @@ router.get("/", async (req, res) => {
     price_status: row.price_status || "consult",
     image: row.image_url || "",
     image_url: row.image_url || "",
-    url: productUrlFromDb(row),
+    url: productUrlFromRow(row),
     updated_at: row.updated_at || null
   }));
 

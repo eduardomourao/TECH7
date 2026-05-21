@@ -1,29 +1,9 @@
 import express from "express";
 import { pool } from "../lib/db.js";
 import { applyCatalogPrice, applyCatalogPrices, resolveCatalogPrice } from "../lib/prices.js";
+import { normalizeProductSegment, productUrlFromRow } from "../lib/product-url.js";
 
 export const router = express.Router();
-
-function normalizeSegment(value) {
-  return String(value || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, "")
-    .trim();
-}
-
-function productUrlFromRow(row) {
-  const section = normalizeSegment(row?.section);
-  const brand = normalizeSegment(row?.brand);
-  const slug = normalizeSegment(row?.slug);
-  const parts = [];
-
-  if (section) parts.push(section);
-  if (brand && brand !== "tech7" && brand !== "catalogo") parts.push(brand);
-  if (slug) parts.push(slug);
-
-  if (!parts.length) return "";
-  return `${parts.join("/")}/index.html`;
-}
 
 function mapProduct(row) {
   if (!row) return row;
@@ -38,15 +18,34 @@ async function mapProductWithCatalogPrice(row) {
   return mapProduct(await applyCatalogPrice(row));
 }
 
+router.get([
+  "/shipping",
+  "/payment-options",
+  "/payment-options-details",
+  "/variant-price",
+  "/variant-reference",
+  "/variant-form",
+  "/load-next-variant-dropdown",
+  "/question",
+  "/unavailable-let-me-know",
+  "/add-comment"
+], (_req, res) => {
+  res.type("html").send("");
+});
+
+router.get("/variant-gallery", (_req, res) => {
+  res.json([]);
+});
+
 router.post("/resolve-prices", async (req, res) => {
   const payload = Array.isArray(req.body?.items) ? req.body.items : [];
   if (!payload.length) return res.status(400).json({ error: "items_required" });
 
   const maxItems = Math.min(payload.length, 200);
   const normalized = payload.slice(0, maxItems).map((item) => {
-    const section = normalizeSegment(item?.section || item?.secao);
-    const brand = normalizeSegment(item?.brand || item?.marca);
-    const slug = normalizeSegment(item?.slug);
+    const section = normalizeProductSegment(item?.section || item?.secao);
+    const brand = normalizeProductSegment(item?.brand || item?.marca);
+    const slug = normalizeProductSegment(item?.slug);
     return { section, brand, slug };
   });
 
@@ -72,7 +71,7 @@ router.post("/resolve-prices", async (req, res) => {
 
   const bySlug = new Map();
   for (const row of rows) {
-    const slug = normalizeSegment(row.slug);
+    const slug = normalizeProductSegment(row.slug);
     const bucket = bySlug.get(slug) || [];
     bucket.push(row);
     bySlug.set(slug, bucket);
@@ -83,8 +82,8 @@ router.post("/resolve-prices", async (req, res) => {
     let found = null;
     let bestScore = -1;
     for (const candidate of options) {
-      const section = normalizeSegment(candidate.section);
-      const brand = normalizeSegment(candidate.brand);
+      const section = normalizeProductSegment(candidate.section);
+      const brand = normalizeProductSegment(candidate.brand);
       let score = 0;
       if (item.section && section === item.section) score += 4;
       if (item.brand && brand === item.brand) score += 2;

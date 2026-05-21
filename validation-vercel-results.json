@@ -1,0 +1,810 @@
+{
+  "baseUrl": "https://tech-7-9r3i6v1im-stiflerwfl1-oss-projects.vercel.app",
+  "section": "pecas-e-componentes",
+  "requestedProducts": 100,
+  "productsTested": 100,
+  "failedCount": 0,
+  "failed": [],
+  "results": [
+    {
+      "title": "Alto Falante Auricular Audio Motorola Moto G7 G7 Plus G7 Play G7 Power G8 Plus G8 Power G8 P.Lite G10 G20 G22 E7 Power-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/motorola/audio-moto-g7g7-plusg7-playg7-power",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_motorola_moto_g7_g7_plus_g7_play_g7-b602216a.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Audio Redmi 9,10 5G,12 13 Note 7 Note 12 4G Note 12 5G A1 Plus A2 Plus 10C 10A 12C 9A 13C-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/xiaomi-redmi/audio-redmi-note-7",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_redmi_note_7_note_12_4g_note_12_5g_2-0d677ef5.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Audio Samsung G3502 Core Plus-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/samsung/audio-tr-samg3502core-plus",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_sam_g3502_core_plus_4159_1_758dda285c1e2011ba73fcc335510b84.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Audio Samsung G360-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/samsung/audio-samsung-g360",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_samsung_g360_5699_1_3d94bbc60015ea1463a6c36e8995a29d.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Audio Samsung I8552-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/samsung/audio-sam-i8552",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_sam_i8552_4153_1_54fd8901f2fd1aa6b7e457f06577192a.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Audio Samsung S6 G925I Sensor-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/samsung/audio-sam-s6-g925i-sensor",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_sam_s6_g925i_sensor_2441_1_9126f24d2031021a43bf63d37d01d274.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Audio Samsung S7 G930 S7 Edge G935-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/samsung/audio-sam-s7-g930s7-edge-g935",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_sam_s7_g930_s7_edge_g935_2443_1_d2022776aa12d470cda9f9b40e928b60.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Audio Samsung S8 G950 S8 Plus G955-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/samsung/audio-sam-s8-g950-s8-plus-g955",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_sam_s8_g950_s8_plus_g955_2445_1_15f9f769530d34a84122c834b4b71e96.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Audio Samsung Z Fold 3 4 F926 F936-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/samsung/alto-falante-auricular-audio-samsung-z-fold-3-4-f926-f936",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_samsung_z_fold_3_4_f926_f936_7850_1-696beb7f.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular iPhone 11 - Áudio",
+      "route": "pecas-e-componentes/apple/alto-falante-auricular-audio-iphone-11-sem-flex",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_iphone_11_sem_flex_6301_1_4911adac27-2b1ae5ad.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular iPhone 11 Pro - Áudio",
+      "route": "pecas-e-componentes/apple/alto-falante-auricular-audio-iphone-11-pro-sem-flex",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_iphone_11_pro_sem_flex_6303_1_515836-a9d075e7.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular iPhone 11 Pro Max",
+      "route": "pecas-e-componentes/apple/alto-falante-auricular-audio-iphone-11-pro-max-sem-flex",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_iphone_11_pro_max_sem_flex_6305_1_da-90e81f55.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular iPhone 6 Plus",
+      "route": "pecas-e-componentes/apple/audio-iph-6g-plus",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_iph_6g_plus_965_1_5e81c2fb4f13e14b1ab964c5029e4230.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular iPhone 6G 6S 4.7",
+      "route": "pecas-e-componentes/apple/campainha-iph-6g-6s-4-7",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_iph_6g_6s_4_7_981_1_f17629bd42403c06295ee11dff3e694b.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular iPhone 6S Plus - Áudio",
+      "route": "pecas-e-componentes/apple/audio-iph-6s-plus",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_iph_6s_plus_967_1_b6a62b39d4cc0bec71710ee8858ef248.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular iPhone 7 e 8",
+      "route": "pecas-e-componentes/apple/audio-iph-7g-4-7iph-8g",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_iph_7g_4_7_iph_8g_3891_1_43520f5508cea7d6b4bc086533f810ff.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Moto G8 Play E13 XT2345",
+      "route": "pecas-e-componentes/motorola/audio-moto-g8-play",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_motorola_moto_g8_play_campainha_moto-7211b4eb.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Moto Z Play Xt1635 - Original",
+      "route": "pecas-e-componentes/motorola/audio-moto-z-play-xt1635moto-z-xt1650",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_moto_z_play_xt1635_1595_1_8eda7726e6ff36ca140b33b0cbc3e8f3.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Redmi Note 9 Pro - Peça Original",
+      "route": "pecas-e-componentes/xiaomi-redmi/audio-xiaomi-redmi-note-9-pro",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_xiaomi_redmi_note_9_pro_2151_1_b5f832226184d73a3d6b0642b819f18d.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Samsung A34 5G A346",
+      "route": "pecas-e-componentes/samsung/alto-falante-auricular-audio-samsung-a34-a346",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_samsung_a34_5g_a346_7860_1_701bdc1db-c9b61016.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Samsung A520 A720 2017",
+      "route": "pecas-e-componentes/samsung/audio-sam-a320-a520-a720-2017",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_samsung_a520_a720_2017_2421_1_01e69f-1467855e.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Samsung A53 A536 Original",
+      "route": "pecas-e-componentes/samsung/alto-falante-auricular-audio-samsung-a53-a536",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_samsung_a53_a536_7858_1_3296b962770b-5ee89357.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Samsung A54 A546",
+      "route": "pecas-e-componentes/samsung/alto-falante-auricular-audio-samsung-a54-a546",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_samsung_a54_a546_7856_1_f06cbcc35c25-f33ca180.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Samsung e Motorola",
+      "route": "pecas-e-componentes/samsung/audio-sam-a10sa20smoto-g8",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_samsung_a10s_a20s_motorola_moto_g8_a-653393a8.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Samsung J2 J5 J7 A20 A30 A50",
+      "route": "pecas-e-componentes/samsung/audio-sam-j2-primej5-primej7-primeg532g570g610a20a30a40a50m30",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_samsung_j2_prime_j5_prime_j7_prime_g-9218b812.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Samsung J7 J5 J3 A30S",
+      "route": "pecas-e-componentes/samsung/audio-sam-j710j510-metalj320j105a510a710j600j4-plusj6-plusj600a30sa31",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_sam_j710_j510_metal_j320_j105_a510_a710_j600_j4_plus_j6_plu-0065c85f.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Xiaomi Mi8 Lite",
+      "route": "pecas-e-componentes/xiaomi-redmi/audio-xiaomi-mi8-lite",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_xiaomi_mi8_lite_2147_1_e386a6b6297a2793855d864b1b471d80.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Auricular Xiaomi Mi8 Mi9 Pocofone F1",
+      "route": "pecas-e-componentes/xiaomi-redmi/audio-xiaomi-mi8pocofone-f1mi99semix-3mix-2smix-2a3a2",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_xiaomi_mi8_pocofone_f1_mi9_9se_mix_3_mix_2s_mix_2_a3_a2_214-847ece6d.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto Falante Moto G8 Power XT2041 Auricular",
+      "route": "pecas-e-componentes/motorola/audiocampainha-moto-g8-power-xt2041",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/audio_campainha_moto_g8_power_xt2041_1597_1_267c0528f4f6ce3e9a77-abc72537.jpeg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto-falante Auricular Samsung A73 A736",
+      "route": "pecas-e-componentes/samsung/alto-falante-auricular-audio-samsung-a73-a736",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_samsung_a73_a736_7854_1_283a77fc420e-59e9df7c.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Alto-Falante Auricular Samsung Z Fold 3 e 4",
+      "route": "pecas-e-componentes/samsung/alto-falante-auricular-audio-samsung-z-fold-3-4-f926-f936-7852",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/alto_falante_auricular_audio_samsung_z_fold_3_4_f926_f936_7852_1-1751bdde.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Aro Do Lcd Samsung A02S-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/samsung/aro-do-lcd-sam-a02s",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/aro_do_lcd_samsung_a02s_4127_1_9d586941fa64c876756b86cc187222f5.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Aro LCD Samsung A01 A015 - Chassi Original",
+      "route": "pecas-e-componentes/samsung/aro-lcd-sam-a01-a015",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/aro_lcd_samsung_a01_a015_2389_1_5546ac1ec35bee1c2a7a3219642caec4.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Aro LCD Samsung A11 A115 - Tela",
+      "route": "pecas-e-componentes/samsung/aro-lcd-sam-a11-a115",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/aro_lcd_samsung_a11_a115_2395_1_9b7d1c48dc569aaaa53c9b015d711e0f.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Aro Lcd Samsung A20S A207-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/samsung/aro-lcd-sam-a20s-a207",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/aro_lcd_samsung_a20s_a207_2399_1_f32b395f16949ceafd0d12312c502ded.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Aro Lcd Samsung J6 Plus J610-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/samsung/aro-lcd-sam-j6-plus-j610",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/aro_lcd_samsung_j6_plus_j610_2417_1_7747cac2d98f7f3072b9506568b04c79.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Bateria Moto E6 Plus Flex Power Original",
+      "route": "pecas-e-componentes/motorola/flex-power-moto-e6-plus",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/flex_power_motorola_moto_e6_plus_1847_1_e1f1d76957d7fa1d5fcb60fe0a51bb10.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botao Externo Volume Lateral Motorola Moto E5 Plus-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/motorola/botao-volumeon-kit-moto-e5-plus",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_e5_plus_1607_1_8d743c8-091f71a2.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botao Externo Volume Lateral Motorola Moto G31 Xt2173-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-motorola-moto-g31-xt2173",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g31_xt2173_8264_1_3363-389cecdb.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botao Externo Volume Lateral Motorola Moto G4 G4 Plus-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/motorola/botao-volumeon-kit-moto-g4g4-plus",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g4_g4_plus_1615_1_716f-f3362531.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botao Externo Volume Lateral Motorola Moto G4 Play-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/motorola/botao-volumeon-kit-moto-g4-play",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g4_play_1613_1_2a7e70e-4abb8a39.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botao Externo Volume Lateral Motorola Moto G6 G6 Plus-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/motorola/botao-volumeon-kit-volume-moto-g6g6-plus",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g6_g6_plus_1625_1_671d-2ef0a8a1.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botao Externo Volume Lateral Realme C75-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/realme/botao-externo-volume-lateral-realme-c75",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_realme_c75_8714_variacao_5226_1_3a53-61f5d700.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botao Externo Volume Lateral Redmi A5 A5x-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/xiaomi-redmi/botao-externo-volume-lateral-redmi-a5-a5x",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_redmi_a5_a5x_8668_1_93f3752f402f75cc-c4ad6685.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botao Externo Volume Lateral Samsung A71 A715-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/samsung/botao-externo-lateral-sam-a71-a715",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_lateral_samsung_a71_a715_2377_1_b6caf13865e13ddd175-857f047a.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botao Externo Volume Lateral Samsung S20Fe G780 G781 S20 FE-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/samsung/botao-volume-lateral-samsung-s20fe-g780-g781-s20-fe",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_samsung_s20fe_g780_g781_s20_fe_7642-5abb9d54.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Externo Volume Moto G04 XT2421 - Motorola",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-motorola-moto-g04",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g04_xt2421_8270_1_e80b-0b582744.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Externo Volume Moto G05 XT2523",
+      "route": "pecas-e-componentes/motorola/botao-externo-volume-lateral-motorola-moto-g05-xt2523",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g05_xt2523_8664_1_3b9f-bf163c66.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Externo Volume Moto G5S XT1792",
+      "route": "pecas-e-componentes/motorola/botao-externo-volume-moto-g5s-xt1792",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_motorola_moto_g5s_xt1792_1599_1_2c2507548a10-8b7f86d7.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Externo Volume Moto G7 Plus - Motorola",
+      "route": "pecas-e-componentes/motorola/botao-volumeon-kit-moto-g7-plus",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_volume_on_kit_motorola_moto_g7_plus_1619_1_fa2de0bdc44347cb-3f2c06a0.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Externo Volume Moto G84 5G XT2347-1",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-motorola-moto-g84-5g-xt2347-1",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g84_5g_xt2347_1_8262_1-a6b534b3.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Externo Volume Samsung A03s - Reposição",
+      "route": "pecas-e-componentes/samsung/botao-externo-lateral-samsung-a03s",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_samsung_a03s_8250_1_c441fb6aa28213c4-2504342c.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Externo Volume Samsung A05s A057",
+      "route": "pecas-e-componentes/samsung/botao-externo-lateral-samsung-a05s",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_samsung_a05s_a057_8244_1_d03166f038f-be7a3b5f.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Externo Volume Samsung A06 A065 - Original",
+      "route": "pecas-e-componentes/samsung/botao-externo-volume-lateral-samsung-a06-a065",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_samsung_a06_a065_8676_1_6d6e76a81580-68d75927.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Externo Volume Samsung A20 A30 - Original em Estoque",
+      "route": "pecas-e-componentes/samsung/botao-volumeon-kit-sam-a20a30",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_samsung_a20_a30_2451_1_b8a6aa2eb268c-b4b36b55.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Externo Volume Samsung A70 A705 - Reposição",
+      "route": "pecas-e-componentes/samsung/botao-volumeon-kit-sam-a70-a705",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_samsung_a70_a705_2459_1_e40d294ca81d-ed10abca.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Home Samsung G530 J5 J7",
+      "route": "pecas-e-componentes/samsung/botao-home-sam-g530btj5-j500j700j701g532710",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_home_samsung_g530bt_j5_j500_j700_j701_g532_710_2379_1_0d20e-36ffbf3c.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Home Samsung J2 Pro J250 - Reposição",
+      "route": "pecas-e-componentes/samsung/botao-home-sam-j2-pro-j250",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_home_samsung_j2_pro_j250_2381_1_719d4c5ea9946bf3c1820407bf70fcc0.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Lateral Volume Moto G22 Xt2231 - Motorola",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-motorola-moto-g22-xt2231",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g22_xt2231_8462_1_a840-ce644c93.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Lateral Volume Redmi A3 A3x - Peças Xiaomi",
+      "route": "pecas-e-componentes/xiaomi-redmi/botao-externo-volume-lateral-redmi-a3-a3x",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_redmi_a3_a3x_8624_1_2977958b5a5e037a-073940cc.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Lateral Volume Samsung A05 A055 - Original",
+      "route": "pecas-e-componentes/samsung/botao-externo-lateral-samsung-a05",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_samsung_a05_a055_8246_1_96b66f7605c8-cea277b7.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botao Power Motorola Moto G3 Xt1544 Xt1542-TECH 7 - Peças para celular",
+      "route": "pecas-e-componentes/motorola/botao-power-moto-g3-xt1544-xt1542",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_power_moto_g3_xt1544_xt1542_1605_1_97104d3ff5593f3a07733fc16ea85082.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume iPhone 14 / 14 Plus - Peça Original",
+      "route": "pecas-e-componentes/apple/botao-externo-lateral-iphone-1414-plus",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_iphone_14_14_plus_8276_1_68556da2f8e-59cc1e13.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Lateral Moto E13 Xt2345 - Motorola",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-motorola-moto-e13-xt2345",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_e13_xt2345_8100_1_aa88-8d2efc2e.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Lateral Moto G8 Play - Motorola",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-moto-g8-play",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g8_play_5012_1_280e284-2912a8ff.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Lateral Moto G9 Plus - Motorola",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-moto-g9-plus",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g9_plus_5018_1_952af3f-8a5c7afa.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Moto E20 XT2155-1",
+      "route": "pecas-e-componentes/motorola/botao-volume-externo-motorola-moto-e20",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_e20_xt2155_1_7636_1_96-1dea3339.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Moto E5 G6 Play XT1922",
+      "route": "pecas-e-componentes/motorola/botao-volumeon-kit-moto-e5g6-play-xt1922",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_e5_g6_play_xt1922_1609-6ec2bcc2.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Moto Edge 60 5G XT2505 - Peça Original em Estoque",
+      "route": "pecas-e-componentes/motorola/botao-externo-volume-lateral-motorola-moto-edge-60-5g",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_edge_60_5g_xt2505_8870-23357c60.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Moto G15 XT2521 - Peça Original",
+      "route": "pecas-e-componentes/motorola/botao-externo-volume-lateral-motorola-moto-g15-xt2521",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g15_xt2521_8666_1_7dd1-acb2232a.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Moto G53 5G Xt2335-1 - Peça Original em Estoque",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-motorola-moto-g53",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g53_5g_xt2335_1_8268_1-e2043720.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Moto G54 XT2343 - Motorola",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-motorola-moto-g54-xt2343",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g54_xt2343_8266_1_a91a-7cfc540e.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Moto G56 XT2529 - Motorola",
+      "route": "pecas-e-componentes/motorola/botao-externo-volume-lateral-motorola-moto-g56",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g56_xt2529_8872_1_dde8-0c64607e.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Moto G60 G60s XT2135 XT2133",
+      "route": "pecas-e-componentes/motorola/botao-volume-externo-motorola-moto-g60-g60s",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g60_g60s_xt2135_xt2133-787fb70e.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Moto G7 Power - Peça Motorola",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-moto-g7-power",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g7_power_5010_1_f72d68-6c262aa3.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Moto G8 Plus - Peça Motorola",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-moto-g8-plus",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g8_plus_5014_1_9fe8933-862b7ec2.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Moto G8 Power Lite - Motorola",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-moto-g8-power-lite",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g8_power_lite_5016_1-044e7c8d.jpeg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Moto One Action XT2013 - Motorola",
+      "route": "pecas-e-componentes/motorola/botao-volumeon-kit-moto-one-action",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_one_action_xt2013_1621-693bea08.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Moto One Vision - Motorola",
+      "route": "pecas-e-componentes/motorola/botao-volumeon-kit-moto-one-vision",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_one_vision_4185_1_99c1-bbaaa6ea.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Motorola Moto E22 Xt2239 - Original",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-motorola-moto-e22-xt2239",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_e22_xt2239_8274_1_1e06-8ef396e6.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Motorola Moto E7 Power Xt2097",
+      "route": "pecas-e-componentes/motorola/botao-volume-externo-motorola-moto-e7-power",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_e7_power_xt2097_7638_1-c7cb502a.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Motorola Moto Edge 30 Neo Xt2245",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-motorola-moto-edge-30-neo",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_edge_30_neo_xt2245_827-f678ad92.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Motorola Moto G14 XT2341 - Peças",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-motorola-moto-g14",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g14_xt2341_8068_1_50e3-e2bea836.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Motorola Moto G34 Xt2363",
+      "route": "pecas-e-componentes/motorola/botao-externo-lateral-motorola-moto-g34",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g34_xt2363_8054_1_7382-d7369346.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Motorola Moto G7 Play - Original",
+      "route": "pecas-e-componentes/motorola/botao-volumeon-kit-moto-g7-play",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_motorola_moto_g7_play_1617_1_65fbea1-54796d51.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Realme Note 50 - Peça de Reposição",
+      "route": "pecas-e-componentes/realme/botao-externo-volume-lateral-realme-note-60",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_realme_note_50_8662_1_8ab1fd33c34f34-04a2d62c.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Redmi 14C Poco C75 - Peças Xiaomi",
+      "route": "pecas-e-componentes/xiaomi-redmi/botao-externo-volume-lateral-redmi-14c-poco-c75",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_redmi_14c_poco_c75_8648_1_f110e587fc-7566ea30.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Redmi 9A - Xiaomi",
+      "route": "pecas-e-componentes/xiaomi-redmi/botao-externo-lateral-xiaomi-redmi-9a",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_xiaomi_redmi_9a_8254_1_3d641e8760b63-152e1a2a.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Redmi Note 11/11s 4G - Lateral",
+      "route": "pecas-e-componentes/xiaomi-redmi/botao-externo-volume-lateral-redmi-note-11-4g-note-11s-4g",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_redmi_note_11_4g_note_11s_4g_8626_1-af469258.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Redmi Note 12 4G - Peças Xiaomi",
+      "route": "pecas-e-componentes/xiaomi-redmi/botao-externo-volume-lateral-redmi-note-12-4g",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_redmi_note_12_4g_8628_1_9dbbed7914c2-4ac9e760.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Redmi Note 12 5G - Peça Original",
+      "route": "pecas-e-componentes/xiaomi-redmi/botao-externo-volume-lateral-redmi-note-12-5g",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_redmi_note_12_5g_8670_1_7cf2507936b7-e1f3f843.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Redmi Note 13 4G - Peça Reposição",
+      "route": "pecas-e-componentes/xiaomi-redmi/botao-externo-volume-lateral-redmi-note-13-4g",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_redmi_note_13_4g_8630_1_8e3e769e8050-b1faec31.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Redmi Note 13 5G - Peças Xiaomi",
+      "route": "pecas-e-componentes/xiaomi-redmi/botao-externo-volume-lateral-redmi-note-13-5g",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_redmi_note_13_5g_8672_1_b5d8a6d827da-01d7d0cc.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Redmi Note 14 5G - Peças Xiaomi",
+      "route": "pecas-e-componentes/xiaomi-redmi/botao-externo-volume-lateral-redmi-note-14-5g",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_redmi_note_14_5g_8674_1_4469d28c9896-375cc09b.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Redmi Note 8 - Peças Xiaomi",
+      "route": "pecas-e-componentes/xiaomi-redmi/botao-externo-lateral-redmi-note-8",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_redmi_note_8_5020_1_d9815ab04718d418-0f04fe31.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Redmi Note 9s 9 Pro - Original",
+      "route": "pecas-e-componentes/xiaomi-redmi/botao-externo-volume-lateral-redmi-note-9s-note-9-pro",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_redmi_note_9s_note_9_pro_8632_1_e2c4-f19f9698.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Samsung A03 Core - Peça Reposição",
+      "route": "pecas-e-componentes/samsung/botao-externo-lateral-samsung-a03-core",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_samsung_a03_core_8252_1_e688034b2299-8a9dd4ea.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Samsung A04 A045 - Peça de Reposição",
+      "route": "pecas-e-componentes/samsung/botao-externo-lateral-samsung-a04",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_samsung_a04_a045_8248_1_7b7b5985960a-4f1e67d9.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Samsung A10 A105 - Peça Reposição",
+      "route": "pecas-e-componentes/samsung/botao-volumeon-kit-sam-a10-a105",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_samsung_a10_a105_2447_1_5a935e77a8ba-d019a01e.jpg",
+      "imageStatus": 200,
+      "ok": true
+    },
+    {
+      "title": "Botão Volume Samsung A10S A107 - Peça Original",
+      "route": "pecas-e-componentes/samsung/botao-volumeon-kit-sam-a10s-a107",
+      "status": 200,
+      "image": "_assets/images.tcdn.com.br/img/img_prod/996644/botao_externo_volume_lateral_samsung_a10s_a107_2449_1_b80176071cc-618d397b.jpg",
+      "imageStatus": 200,
+      "ok": true
+    }
+  ]
+}

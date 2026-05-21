@@ -1,6 +1,6 @@
 # Auditoria de Assets TECH7
 
-Gerado: 2026-05-20T23:35:40.890Z
+Gerado: 2026-05-21T04:49:55.025Z
 
 ## Resumo
 

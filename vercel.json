@@ -17,68 +17,12 @@
   ],
   "rewrites": [
     {
-      "source": "/mvc/store/facebook_conversions/event/send",
-      "destination": "/api/[...path].js"
-    },
-    {
-      "source": "/nocache/:path*",
-      "destination": "/api/[...path].js"
-    },
-    {
-      "source": "/mvc/store/996644/google_tag_manager/updateGTM.json",
-      "destination": "/api/[...path].js"
-    },
-    {
-      "source": "/mvc/store/996644/google_tag_manager/updateGTM.js",
-      "destination": "/api/[...path].js"
-    },
-    {
-      "source": "/mvc/store/cart/count",
-      "destination": "/api/[...path].js"
-    },
-    {
-      "source": "/mvc/store/greeting",
-      "destination": "/api/[...path].js"
-    },
-    {
-      "source": "/mvc/store/product/variant_gallery",
-      "destination": "/api/[...path].js"
-    },
-    {
-      "source": "/mvc/store/product/variant_price",
-      "destination": "/api/[...path].js"
-    },
-    {
-      "source": "/mvc/store/product/variant_reference",
-      "destination": "/api/[...path].js"
-    },
-    {
-      "source": "/mvc/store/element/snippets/cart_preview",
-      "destination": "/api/[...path].js"
-    },
-    {
-      "source": "/mvc/store/element/snippets/cart_preview/",
-      "destination": "/api/[...path].js"
-    },
-    {
-      "source": "/mvc/store/newsletter/",
-      "destination": "/api/[...path].js"
-    },
-    {
-      "source": "/mvc/store/product/discount",
-      "destination": "/api/[...path].js"
-    },
-    {
-      "source": "/web_api/products/:id",
-      "destination": "/api/[...path].js"
-    },
-    {
       "source": "/api/:path*",
       "destination": "/api/[...path].js"
     },
     {
       "source": "/loja/busca.php",
-      "destination": "/busca/index.html"
+      "destination": "/api/[...path].js"
     }
   ],
   "headers": [

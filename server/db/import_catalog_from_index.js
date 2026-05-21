@@ -44,7 +44,8 @@ async function run() {
     }
     const slug = normalizeId(item.slug || toSlugFromUrl(item.url));
     const section = normalizeId(toSectionFromUrl(item.url, item.category));
-    const brand = normalizeId(item.brand || "tech7");
+    const rawBrand = normalizeId(item.brand || "tech7");
+    const brand = rawBrand === section ? "tech7" : rawBrand;
     if (!slug) {
       skipped += 1;
       continue;

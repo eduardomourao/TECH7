@@ -2,6 +2,7 @@ import express from "express";
 import { pool } from "../lib/db.js";
 import { newId } from "../lib/ids.js";
 import { applyCatalogPrices, isValidPriceCents } from "../lib/prices.js";
+import { productUrlFromRow } from "../lib/product-url.js";
 
 export const router = express.Router();
 
@@ -85,7 +86,11 @@ async function getCart(cartId) {
     `,
     [cartId]
   );
-  return { ...cartRes.rows[0], items: await applyCatalogPrices(itemsRes.rows) };
+  const items = (await applyCatalogPrices(itemsRes.rows)).map((item) => ({
+    ...item,
+    url: productUrlFromRow(item)
+  }));
+  return { ...cartRes.rows[0], items };
 }
 
 router.post("/", async (_req, res) => {

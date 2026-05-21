@@ -442,6 +442,523 @@
       .t7-footer-inner { min-height: auto; align-items: start; }
     }
   </style>
+  <style>
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(255, 106, 0, .18), transparent 24%),
+        radial-gradient(circle at top right, rgba(255, 208, 120, .12), transparent 18%),
+        linear-gradient(180deg, #050505 0%, #0a0908 34%, #050505 100%) !important;
+      overflow-x: hidden;
+    }
+    .t7-shell {
+      position: relative;
+      isolation: isolate;
+    }
+    .t7-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(255,255,255,.02), transparent 26%),
+        radial-gradient(circle at 18% 18%, rgba(255,106,0,.08), transparent 20%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    .t7-top {
+      background: linear-gradient(180deg, rgba(12, 12, 12, .96), rgba(12, 12, 12, .84));
+      box-shadow: 0 16px 40px rgba(0,0,0,.22);
+      backdrop-filter: blur(12px);
+    }
+    .checkout-container {
+      position: relative;
+      z-index: 1;
+    }
+    .checkout-hero {
+      display: grid;
+      gap: 22px;
+      align-items: stretch;
+      margin-bottom: 30px;
+    }
+    .checkout-copy {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+    .checkout-breadcrumb {
+      margin: 0;
+      font-weight: 700;
+    }
+    .checkout-overline {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: max-content;
+      min-height: 38px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #ffd27a;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .checkout-overline::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff6a00;
+      box-shadow: 0 0 0 6px rgba(255,106,0,.14);
+    }
+    h1 {
+      max-width: 10.5ch;
+      font-size: clamp(38px, 6vw, 68px);
+      line-height: .94;
+      letter-spacing: -.05em;
+      text-wrap: balance;
+    }
+    .checkout-lead {
+      max-width: 720px;
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.62;
+    }
+    .checkout-trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .checkout-trust-pill {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0 15px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+      color: #f6efe8;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .checkout-trust-pill::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ffd27a, #ff6a00);
+    }
+    .checkout-highlight-card,
+    .checkout-step,
+    .voucher-card,
+    .summary-card,
+    .empty-checkout,
+    .confirmation {
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 30px 80px rgba(0,0,0,.42);
+      backdrop-filter: blur(12px);
+    }
+    .checkout-highlight-card {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      gap: 18px;
+      padding: 24px;
+      border-radius: 34px;
+      background:
+        linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.03)),
+        linear-gradient(180deg, rgba(18,18,18,.96), rgba(10,10,10,.92));
+    }
+    .checkout-highlight-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -52px -72px auto;
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,106,0,.28), transparent 70%);
+      pointer-events: none;
+    }
+    .checkout-highlight-label {
+      display: inline-flex;
+      align-items: center;
+      width: max-content;
+      min-height: 31px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: rgba(255,106,0,.12);
+      color: #ffd27a;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .checkout-highlight-card strong {
+      display: block;
+      margin-top: 12px;
+      color: #fff;
+      font-family: "Space Grotesk", Inter, sans-serif;
+      font-size: clamp(24px, 3.2vw, 32px);
+      line-height: 1.02;
+      letter-spacing: -.04em;
+      max-width: 11ch;
+    }
+    .checkout-highlight-card p {
+      margin: 10px 0 0;
+      color: #b7aea5;
+      font-size: 14px;
+      line-height: 1.55;
+      font-weight: 600;
+      max-width: 30ch;
+    }
+    .checkout-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .checkout-kpi {
+      min-height: 98px;
+      display: grid;
+      gap: 8px;
+      align-content: space-between;
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .checkout-kpi span {
+      color: #b7aea5;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .checkout-kpi strong {
+      margin: 0;
+      max-width: none;
+      font-family: Inter, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.3;
+      letter-spacing: 0;
+    }
+    .stepper {
+      gap: 14px;
+      margin-bottom: 26px;
+      max-width: none;
+    }
+    .step {
+      min-height: 72px;
+      padding: 12px 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .step-circle {
+      width: 38px;
+      height: 38px;
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
+    }
+    .step.is-active {
+      color: #fff;
+      background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.04));
+      border-color: rgba(255,106,0,.35);
+      box-shadow: 0 24px 54px rgba(255,106,0,.18);
+    }
+    .step.is-active .step-circle,
+    .step.is-done .step-circle {
+      background: linear-gradient(180deg, #ff7d24, #df5400);
+      color: #fff;
+    }
+    .step.is-done {
+      color: #fff;
+      background: rgba(255,106,0,.12);
+      border-color: rgba(255,106,0,.22);
+    }
+    .checkout-layout {
+      gap: 28px;
+    }
+    .checkout-step,
+    .voucher-card,
+    .summary-card,
+    .empty-checkout,
+    .confirmation {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)),
+        linear-gradient(180deg, rgba(16,16,16,.96), rgba(10,10,10,.94));
+      border-radius: 34px;
+    }
+    .checkout-step {
+      position: relative;
+      overflow: hidden;
+      padding: 28px;
+    }
+    .checkout-step::before {
+      content: "Etapa " attr(data-step);
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 0 12px;
+      margin-bottom: 14px;
+      border-radius: 999px;
+      background: rgba(255,106,0,.12);
+      color: #ffd27a;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .checkout-step.is-active {
+      box-shadow: 0 30px 80px rgba(0,0,0,.42), 0 24px 54px rgba(255,106,0,.18);
+    }
+    .checkout-step h2,
+    .voucher-card h2,
+    .summary-card h2 {
+      color: #fff !important;
+      font-size: clamp(24px, 2.4vw, 34px);
+    }
+    .field label {
+      font-size: 12px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #f2ece5;
+    }
+    .field input,
+    .field select,
+    .voucher-select,
+    .copy-pix input {
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.06);
+      background: #f6f2ec;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
+    }
+    .field input:focus,
+    .field select:focus,
+    .voucher-select:focus,
+    .copy-pix input:focus {
+      box-shadow: 0 0 0 4px rgba(255,106,0,.12), 0 10px 30px rgba(0,0,0,.18);
+    }
+    .btn,
+    .inline-btn,
+    .summary-checkout-btn {
+      border-radius: 18px;
+      border: 1px solid transparent;
+      transition: transform .18s ease, background .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .btn-primary,
+    .summary-checkout-btn {
+      background: linear-gradient(180deg, #ff7b1f, #eb5600);
+      box-shadow: 0 14px 30px rgba(255,106,0,.22);
+    }
+    .btn-primary:hover,
+    .summary-checkout-btn:hover {
+      background: linear-gradient(180deg, #ff8d3b, #ff6a00);
+      box-shadow: 0 16px 34px rgba(255,106,0,.28);
+    }
+    .btn-secondary,
+    .inline-btn {
+      background: rgba(255,255,255,.04);
+      color: #fff;
+      border-color: rgba(255,255,255,.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .btn-secondary:hover,
+    .inline-btn:hover {
+      color: #fff;
+      border-color: rgba(255,106,0,.34);
+      box-shadow: inset 0 0 0 1px rgba(255,106,0,.18), 0 12px 26px rgba(0,0,0,.18);
+    }
+    .checkout-actions {
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .delivery-option,
+    .shipping-card,
+    .pix-card,
+    .review-item,
+    .review-totals,
+    .security-badge,
+    .summary-item,
+    .summary-trust span,
+    .summary-note {
+      border-radius: 20px;
+    }
+    .delivery-option,
+    .shipping-card,
+    .pix-card,
+    .review-item,
+    .review-totals,
+    .security-badge,
+    .summary-item {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #fff;
+    }
+    .delivery-option {
+      padding-right: 20px;
+    }
+    .delivery-option-title {
+      color: #fff;
+    }
+    .delivery-option-desc,
+    .shipping-card span,
+    .pix-card p,
+    .summary-subtitle,
+    .summary-note {
+      color: #b7aea5;
+    }
+    .delivery-option.is-selected {
+      background: linear-gradient(180deg, rgba(255,106,0,.18), rgba(255,255,255,.04));
+    }
+    .payment-options {
+      color: #fff;
+    }
+    .payment-dot {
+      border-color: rgba(255,255,255,.3);
+    }
+    .pix-placeholder {
+      border: 1px dashed rgba(255,255,255,.24);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at center, rgba(255,106,0,.08), transparent 62%),
+        rgba(255,255,255,.02);
+    }
+    .review-item {
+      padding: 16px;
+    }
+    .review-item small,
+    .summary-qty,
+    .summary-line,
+    .summary-subtitle {
+      color: #b7aea5;
+    }
+    .review-totals {
+      padding: 18px;
+      background: rgba(255,255,255,.04);
+    }
+    .security-badge {
+      background: rgba(255,255,255,.04);
+      color: #f8f3ec;
+    }
+    .summary-card {
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+    }
+    .summary-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 160px;
+      background:
+        radial-gradient(circle at top left, rgba(255,106,0,.22), transparent 54%),
+        linear-gradient(180deg, rgba(255,255,255,.06), transparent 88%);
+      pointer-events: none;
+    }
+    .summary-head,
+    .summary-toggle,
+    .summary-body {
+      position: relative;
+      z-index: 1;
+    }
+    .summary-head {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .summary-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      width: max-content;
+      min-height: 30px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: rgba(255,106,0,.12);
+      color: #ffd27a;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .summary-trust {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .summary-trust span {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 12px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+      color: #f7f1ea;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .summary-toggle {
+      font-size: clamp(24px, 3vw, 30px);
+    }
+    .summary-list {
+      gap: 14px;
+    }
+    .summary-item {
+      padding: 12px;
+    }
+    .summary-thumb {
+      background: rgba(255,255,255,.08);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+    .summary-lines {
+      padding-bottom: 18px;
+      margin-bottom: 6px;
+    }
+    .summary-note {
+      margin: 0;
+      padding: 16px 18px;
+      background: rgba(255,106,0,.1);
+      border: 1px solid rgba(255,106,0,.18);
+      color: #fff1e6;
+      font-size: 13px;
+      line-height: 1.55;
+      font-weight: 700;
+    }
+    .confirmation,
+    .empty-checkout {
+      background:
+        linear-gradient(180deg, rgba(22,22,22,.96), rgba(10,10,10,.96));
+    }
+    .t7-footer {
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    @media (min-width: 720px) {
+      .checkout-hero {
+        grid-template-columns: minmax(0, 1.25fr) minmax(300px, .92fr);
+      }
+    }
+    @media (min-width: 1024px) {
+      .checkout-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
+        gap: 32px;
+      }
+    }
+    @media (max-width: 760px) {
+      h1 {
+        max-width: 12ch;
+        font-size: clamp(34px, 13vw, 50px);
+      }
+      .checkout-kpi-grid {
+        grid-template-columns: 1fr;
+      }
+      .checkout-step::before {
+        margin-bottom: 12px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="t7-shell">
@@ -468,9 +985,44 @@
 
     <main class="checkout-main">
       <div class="checkout-container">
-        <p class="checkout-breadcrumb">Início &gt;&gt; Carrinho &gt;&gt; <strong>Checkout</strong></p>
-        <h1>Checkout</h1>
-        <p class="checkout-lead">Revise seus dados, escolha a entrega e finalize o pedido com uma experiência simples, segura e alinhada à TECH7.</p>
+        <section class="checkout-hero" aria-label="Apresentacao do checkout">
+          <div class="checkout-copy">
+            <p class="checkout-breadcrumb">Início &gt;&gt; Carrinho &gt;&gt; <strong>Checkout</strong></p>
+            <span class="checkout-overline">Checkout premium TECH 7</span>
+            <h1>Finalize seu pedido com um fluxo mais premium e seguro.</h1>
+            <p class="checkout-lead">Revise seus dados, escolha a entrega e gere o PIX com uma experiência mais refinada, mantendo o atendimento direto da TECH 7 do jeito que seu cliente já conhece.</p>
+            <div class="checkout-trust-row" aria-label="Destaques do processo">
+              <span class="checkout-trust-pill">PIX Woovi integrado</span>
+              <span class="checkout-trust-pill">Entrega por Uber ou retirada</span>
+              <span class="checkout-trust-pill">Confirmação e suporte via WhatsApp</span>
+            </div>
+          </div>
+          <aside class="checkout-highlight-card" aria-label="Resumo premium do atendimento">
+            <div>
+              <span class="checkout-highlight-label">Atendimento humano</span>
+              <strong>Checkout pensado para converter sem parecer genérico.</strong>
+              <p>O pedido é fechado rápido, o pagamento fica claro e o contato com a loja continua direto no WhatsApp.</p>
+            </div>
+            <div class="checkout-kpi-grid">
+              <div class="checkout-kpi">
+                <span>Pagamento</span>
+                <strong>PIX com QR Code e copia e cola</strong>
+              </div>
+              <div class="checkout-kpi">
+                <span>Recebimento</span>
+                <strong>Entrega local ou retirada na TECH 7</strong>
+              </div>
+              <div class="checkout-kpi">
+                <span>Status</span>
+                <strong>Pedido e confirmação acompanhados no fluxo</strong>
+              </div>
+              <div class="checkout-kpi">
+                <span>Contato</span>
+                <strong>Suporte comercial via WhatsApp</strong>
+              </div>
+            </div>
+          </aside>
+        </section>
 
         <div class="empty-checkout" id="empty-checkout">
           <h2>Seu carrinho está vazio</h2>
@@ -643,8 +1195,18 @@
             </section>
 
             <aside class="summary-card" aria-label="Resumo do pedido">
+              <div class="summary-head">
+                <span class="summary-eyebrow">Resumo TECH 7</span>
+                <h2>Seu pedido</h2>
+                <p class="summary-subtitle">Acompanhe os itens, o formato de entrega e o status do pagamento sem sair do checkout.</p>
+                <div class="summary-trust" aria-label="Indicadores de confianca">
+                  <span>Compra segura</span>
+                  <span>Dados protegidos</span>
+                  <span>Atendimento real</span>
+                </div>
+              </div>
               <button class="summary-toggle" type="button" id="summary-toggle" aria-expanded="false" aria-controls="summary-body">
-                <span>Itens</span>
+                <span>Itens no pedido</span>
                 <span id="summary-toggle-total">R$ 0,00</span>
               </button>
               <div class="summary-body" id="summary-body">
@@ -656,6 +1218,7 @@
                   <div class="summary-line summary-total"><span>Total</span><strong id="total">R$ 0,00</strong></div>
                   <div class="summary-line"><span>Pagamento</span><strong id="payment-status">PIX</strong></div>
                 </div>
+                <p class="summary-note">A entrega é alinhada pela equipe logo após o pedido. Se optar por retirada, a confirmação continua pelo WhatsApp da TECH 7.</p>
                 <button class="summary-checkout-btn" type="button" hidden>Checkout</button>
               </div>
             </aside>
@@ -1528,5 +2091,5 @@
       restorePixSession().catch(function () {});
     })();
   </script>
-</body>
+<script src="/assets/js/tech7-local-runtime.js"></script></body>
 </html>
