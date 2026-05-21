@@ -78,7 +78,10 @@ export function createApp(options = {}) {
     res.status(204).end();
   });
 
-  app.get("/mvc/store/element/snippets/cart_preview/", (_req, res) => {
+  app.get([
+    "/mvc/store/element/snippets/cart_preview",
+    "/mvc/store/element/snippets/cart_preview/"
+  ], (_req, res) => {
     res.type("html").send("");
   });
 
@@ -88,6 +91,39 @@ export function createApp(options = {}) {
 
   app.get("/mvc/store/product/discount", (_req, res) => {
     res.type("html").send("");
+  });
+
+  app.get([
+    "/mvc/store/product/variant_gallery",
+    "/mvc/store/product/variant_gallery/"
+  ], (_req, res) => {
+    res.json([]);
+  });
+
+  app.get([
+    "/mvc/store/product/variant_price",
+    "/mvc/store/product/variant_price/"
+  ], (_req, res) => {
+    res.json({});
+  });
+
+  app.get([
+    "/mvc/store/product/variant_reference",
+    "/mvc/store/product/variant_reference/"
+  ], (_req, res) => {
+    res.type("text").send("");
+  });
+
+  app.get("/mvc/store/996644/google_tag_manager/updateGTM.json", (_req, res) => {
+    res.json({});
+  });
+
+  app.get([
+    "/nocache/app.php",
+    "/nocache/facebook-info.php",
+    "/nocache/info.php"
+  ], (_req, res) => {
+    res.json({});
   });
 
   app.get("/web_api/products/:id", (req, res) => {

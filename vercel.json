@@ -21,6 +21,30 @@
       "destination": "/api/[...path].js"
     },
     {
+      "source": "/nocache/:path*",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/mvc/store/996644/google_tag_manager/updateGTM.json",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/mvc/store/product/variant_gallery",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/mvc/store/product/variant_price",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/mvc/store/product/variant_reference",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/mvc/store/element/snippets/cart_preview",
+      "destination": "/api/[...path].js"
+    },
+    {
       "source": "/mvc/store/element/snippets/cart_preview/",
       "destination": "/api/[...path].js"
     },
