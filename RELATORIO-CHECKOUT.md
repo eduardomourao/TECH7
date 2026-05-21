@@ -94,6 +94,7 @@ Status Desktop: APROVADO
 Status iPhone SE: APROVADO
 
 Validado visualmente:
+- Cabecalho do checkout renderiza em preto puro (`rgb(0, 0, 0)`) em desktop e iPhone SE, alinhado ao cabecalho da home.
 - Superficies internas usam fundo branco/claro, alinhadas visualmente ao carrinho.
 - Inputs, labels, botoes, resumo e PIX usam contraste alto em tema claro.
 - Foco possui destaque laranja visivel.
