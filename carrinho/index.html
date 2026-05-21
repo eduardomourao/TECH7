@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <base href="../">
   <title>Meu Carrinho | TECH 7</title>
-  <link rel="icon" href="logo.png">
+  <link rel="icon" href="../logo.png">
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
@@ -94,15 +94,19 @@
     }
     .t7-logo img { width: 92px; max-height: 58px; object-fit: contain; }
     .t7-search {
+      display: block;
       height: 56px;
       width: 100%;
       border: 0;
       border-radius: 10px;
       padding: 0 22px;
-      color: var(--cart-text);
-      background: #fff;
+      color: #111;
+      -webkit-text-fill-color: #111;
+      background: #fff !important;
       outline: 2px solid transparent;
+      appearance: none;
     }
+    .t7-search::placeholder { color: #4b5563; opacity: 1; }
     .t7-search:focus { outline-color: rgba(255, 106, 0, .45); }
     .t7-actions {
       display: flex;
@@ -466,6 +470,7 @@
         gap: 14px;
         padding: 18px 0;
       }
+      .t7-header form { width: 100%; }
       .t7-actions { justify-content: space-between; }
       .cart-title-row {
         align-items: flex-start;
@@ -485,9 +490,9 @@
       </div>
       <div class="t7-header" aria-label="Cabecalho principal">
         <a class="t7-logo" href="index.html" aria-label="TECH 7 - pagina inicial">
-          <img src="logo.png" alt="TECH 7">
+          <img src="../logo.png" alt="TECH 7" width="1291" height="517" loading="lazy">
         </a>
-        <form action="loja/busca.php" method="get" role="search">
+        <form action="busca/index.html" method="get" role="search">
           <label class="sr-only" for="busca-site">O que voce procura?</label>
           <input class="t7-search" id="busca-site" name="palavra_busca" type="search" placeholder="O que voce procura?">
         </form>
@@ -627,7 +632,7 @@
           article.className = 'cart-item';
           article.innerHTML =
             '<div class="cart-thumb">' +
-              (item.img ? '<img src="' + item.img + '" alt="">' : '') +
+              (item.img ? '<img src="' + item.img + '" alt="Imagem do produto" loading="lazy" width="64" height="64">' : '') +
             '</div>' +
             '<div class="cart-item-body">' +
               '<div class="cart-item-top">' +
@@ -701,7 +706,7 @@
 
       checkoutBtn.addEventListener('click', function () {
         if (!readCart().length) return;
-        window.location.href = 'checkout/';
+        window.location.href = '/checkout/';
       });
 
       function setShareNote(message, type) {

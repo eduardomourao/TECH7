@@ -14,6 +14,23 @@
 
   function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+  function productUrl(value) {
+    var clean = String(value || '').trim().replace(/\\/g, '/');
+    if (!clean) return '';
+    if (/^https?:\/\//i.test(clean)) {
+      try {
+        clean = new URL(clean, window.location.origin).pathname;
+      } catch (e) {
+        return '';
+      }
+    }
+    clean = clean.split('#')[0].split('?')[0].replace(/^\/+|\/+$/g, '');
+    if (!clean || /['"<>\s]|(?:\+)|(?:productUrl\()/i.test(clean)) return '';
+    if (!/^[a-z0-9._~/%-]+$/i.test(clean)) return '';
+    if (!/\.html$/i.test(clean)) clean += '/index.html';
+    return clean;
+  }
+
   function render() {
     if (!cartList || !window.CartManager) return;
     var items = CartManager.obter();
@@ -30,7 +47,9 @@
       var article = document.createElement('article');
       article.className = 'cart-item';
       article.dataset.id = item.id;
-      var link = item.url ? ' style="cursor:pointer;" onclick="window.location.href=\'' + esc(item.url) + '\';return false;"' : '';
+      var itemUrl = productUrl(item.url);
+      if (itemUrl) article.dataset.url = itemUrl;
+      var link = itemUrl ? ' style="cursor:pointer;" data-product-link="1"' : '';
 
       article.innerHTML =
         '<div class="cart-thumb"' + link + '>' +
@@ -76,6 +95,16 @@
 
   if (cartList) {
     cartList.addEventListener('click', function (e) {
+      var productTarget = e.target.closest('[data-product-link]');
+      if (productTarget) {
+        var productItem = productTarget.closest('.cart-item');
+        var itemUrl = productItem && productItem.dataset.url;
+        if (itemUrl) {
+          window.location.href = itemUrl;
+          return;
+        }
+      }
+
       var btn = e.target.closest('button[data-action]');
       if (!btn) return;
       var itemEl = btn.closest('.cart-item');

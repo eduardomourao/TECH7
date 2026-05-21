@@ -6,6 +6,7 @@ import express from "express";
 import { requireEnv, safeJson } from "./lib/env.js";
 import { databaseEnvName, databaseUrl, pool } from "./lib/db.js";
 import { ensureSchema } from "./lib/schema.js";
+import { resolveProductRoutePath } from "./lib/product-url.js";
 import { router as apiRouter } from "./routes/api.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -17,55 +18,9 @@ const STATIC_DIR = process.env.STATIC_DIR
   ? path.resolve(process.env.STATIC_DIR)
   : path.resolve(__dirname, "..");
 
-const CATEGORY_ROUTE_REDIRECTS = new Map([
-  ["/bateria", "/baterias-celular/"],
-  ["/bateria-celular", "/baterias-celular/"],
-  ["/baterias", "/baterias-celular/"],
-  ["/display", "/tela-display-lcd/"],
-  ["/display-e-lcd", "/tela-display-lcd/"],
-  ["/display-lcd", "/tela-display-lcd/"],
-  ["/telas", "/tela-display-lcd/"],
-  ["/telas-display-lcd", "/tela-display-lcd/"],
-  ["/touch-visor", "/touch-e-visor/"],
-  ["/touchs-e-visores", "/touch-e-visor/"],
-  ["/touchs-visores", "/touch-e-visor/"],
-  ["/pecas-componentes", "/pecas-e-componentes/"],
-  ["/tampas-carcacas", "/tampas-e-carcacas/"],
-  ["/maquinas-ferramentas", "/maquinas-e-ferramentas/"]
-]);
-
-const LEGACY_PRODUCT_ROUTE_REDIRECTS = new Map([
-  [
-    "/display/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro",
-    "/display/samsung/tela-display-lcd-samsung-s23-fe-s23-fe-s711-oled-com-aro/"
-  ],
-  [
-    "/display/tela-display-lcd-samsung-s23-s911-oled-com-aro",
-    "/display/samsung/tela-display-lcd-samsung-s23-s911-oled-com-aro/"
-  ],
-  [
-    "/display/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro",
-    "/display/samsung/tela-display-lcd-samsung-s23-plus-s916-oled-com-aro/"
-  ],
-  [
-    "/display/tela-display-lcd-samsung-s23-5g-s911-original-retirada",
-    "/display/samsung/tela-display-lcd-samsung-s23-5g-s911-original-retirada/"
-  ]
-]);
-
 function joinRoute(prefix, route) {
   const cleanPrefix = prefix === "/" ? "" : String(prefix || "").replace(/\/+$/, "");
   return `${cleanPrefix}${route}`;
-}
-
-function normalizeRedirectPath(requestPath) {
-  const normalized = String(requestPath || "/").replace(/\/+$/, "") || "/";
-  return CATEGORY_ROUTE_REDIRECTS.get(normalized.toLowerCase()) || null;
-}
-
-function normalizeLegacyProductPath(requestPath) {
-  const normalized = String(requestPath || "/").replace(/\/+$/, "") || "/";
-  return LEGACY_PRODUCT_ROUTE_REDIRECTS.get(normalized.toLowerCase()) || null;
 }
 
 function registerApi(app, prefix) {
@@ -119,6 +74,34 @@ export function createApp(options = {}) {
 
   app.use(express.json({ limit: "1mb" }));
 
+  app.all("/mvc/store/facebook_conversions/event/send", (_req, res) => {
+    res.status(204).end();
+  });
+
+  app.get("/mvc/store/element/snippets/cart_preview/", (_req, res) => {
+    res.type("html").send("");
+  });
+
+  app.post("/mvc/store/newsletter/", (_req, res) => {
+    res.status(204).end();
+  });
+
+  app.get("/mvc/store/product/discount", (_req, res) => {
+    res.type("html").send("");
+  });
+
+  app.get("/web_api/products/:id", (req, res) => {
+    res.json({ Product: { id: String(req.params.id || "") } });
+  });
+
+  app.get("*", (req, res, next) => {
+    const apiStrippedPath = req.path.replace(/^\/api(?=\/)/, "");
+    const resolved = resolveProductRoutePath(req.path) || resolveProductRoutePath(apiStrippedPath);
+    if (!resolved) return next();
+    res.set("Cache-Control", "public, max-age=0, s-maxage=86400");
+    return res.sendFile(path.join(STATIC_DIR, ...resolved.split("/")));
+  });
+
   for (const prefix of apiPrefixes) {
     app.use(prefix || "/", (_req, res, next) => {
       res.set("Cache-Control", "no-store");
@@ -166,18 +149,6 @@ export function createApp(options = {}) {
 
     app.get(["/loja", "/loja/"], (_req, res) => {
       res.redirect(302, "/");
-    });
-
-    app.get(Array.from(LEGACY_PRODUCT_ROUTE_REDIRECTS.keys()).flatMap((route) => [route, `${route}/`]), (req, res) => {
-      const destination = normalizeLegacyProductPath(req.path);
-      if (!destination) return res.status(404).send("Not found");
-      res.redirect(302, destination);
-    });
-
-    app.get(Array.from(CATEGORY_ROUTE_REDIRECTS.keys()).flatMap((route) => [route, `${route}/`]), (req, res) => {
-      const destination = normalizeRedirectPath(req.path);
-      if (!destination) return res.status(404).send("Not found");
-      res.redirect(302, destination);
     });
 
     // Serve static site.
