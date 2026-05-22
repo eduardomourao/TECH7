@@ -1,4 +1,5 @@
 import express from "express";
+import crypto from "node:crypto";
 import { pool } from "../lib/db.js";
 import { requireEnv } from "../lib/env.js";
 
@@ -12,6 +13,48 @@ function rawBodyToString(req) {
   } catch {
     return "";
   }
+}
+
+function parseWebhookJson(raw) {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return { raw };
+  }
+}
+
+function rawBodyDedupeKey(raw) {
+  return `raw:${Buffer.from(raw, "utf8").toString("base64").slice(0, 128)}`;
+}
+
+function verifyMetaSignature(raw, signature, appSecret) {
+  if (!appSecret) return true;
+  if (!signature || !signature.startsWith("sha256=")) return false;
+
+  const expected = `sha256=${crypto
+    .createHmac("sha256", appSecret)
+    .update(raw, "utf8")
+    .digest("hex")}`;
+
+  const signatureBuffer = Buffer.from(signature, "utf8");
+  const expectedBuffer = Buffer.from(expected, "utf8");
+  return signatureBuffer.length === expectedBuffer.length && crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
+}
+
+function extractWhatsAppEventId(payload) {
+  const entries = Array.isArray(payload?.entry) ? payload.entry : [];
+  for (const entry of entries) {
+    const changes = Array.isArray(entry?.changes) ? entry.changes : [];
+    for (const change of changes) {
+      const value = change?.value || {};
+      const message = Array.isArray(value.messages) ? value.messages[0] : null;
+      const status = Array.isArray(value.statuses) ? value.statuses[0] : null;
+      const phoneNumberId = value?.metadata?.phone_number_id || "unknown_phone";
+      if (message?.id) return `message:${phoneNumberId}:${message.id}`;
+      if (status?.id) return `status:${phoneNumberId}:${status.id}:${status.status || "unknown"}`;
+    }
+  }
+  return null;
 }
 
 async function mpFetch(path) {
@@ -108,6 +151,45 @@ router.post("/mercadopago", async (req, res) => {
       // Swallow: webhook should ack even if processing fails (we have raw stored for replay).
     }
   }
+
+  res.status(200).json({ ok: true });
+});
+
+router.get("/whatsapp", (req, res) => {
+  const mode = String(req.query["hub.mode"] || "");
+  const token = String(req.query["hub.verify_token"] || "");
+  const challenge = req.query["hub.challenge"];
+
+  if (mode === "subscribe" && token === process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN) {
+    return res.status(200).send(String(challenge || ""));
+  }
+
+  return res.status(403).send("forbidden");
+});
+
+router.post("/whatsapp", async (req, res) => {
+  const raw = rawBodyToString(req);
+  const signature = req.header("x-hub-signature-256") || "";
+
+  if (!verifyMetaSignature(raw, signature, process.env.WHATSAPP_APP_SECRET || "")) {
+    return res.status(401).json({ error: "invalid_signature" });
+  }
+
+  const payload = parseWebhookJson(raw);
+  const dedupeKey = extractWhatsAppEventId(payload) || rawBodyDedupeKey(raw);
+
+  const existing = await pool.query(`select id from webhook_events where provider = 'whatsapp' and dedupe_key = $1`, [
+    dedupeKey
+  ]);
+  if (existing.rowCount > 0) return res.status(200).json({ ok: true, deduped: true });
+
+  await pool.query(
+    `
+      insert into webhook_events (provider, dedupe_key, request_id, signature, raw_body, parsed_json)
+      values ('whatsapp', $1, $2, $3, $4, $5)
+    `,
+    [dedupeKey, null, signature || null, raw, payload]
+  );
 
   res.status(200).json({ ok: true });
 });
