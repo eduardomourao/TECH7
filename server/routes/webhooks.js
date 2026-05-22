@@ -64,7 +64,7 @@ function extractWhatsAppIncomingMessages(payload) {
     const changes = Array.isArray(entry?.changes) ? entry.changes : [];
     for (const change of changes) {
       const value = change?.value || {};
-      const phoneNumberId = value?.metadata?.phone_number_id || process.env.WHATSAPP_PHONE_NUMBER_ID || "";
+      const phoneNumberId = value?.metadata?.phone_number_id || getWhatsAppPhoneNumberId();
       const incomingMessages = Array.isArray(value.messages) ? value.messages : [];
       for (const message of incomingMessages) {
         if (message?.from && message?.type !== "unsupported") {
@@ -76,9 +76,26 @@ function extractWhatsAppIncomingMessages(payload) {
   return messages;
 }
 
+function getWhatsAppAccessToken() {
+  return (
+    process.env.WHATSAPP_ACCESS_TOKEN ||
+    process.env.TOKEN_DE_ACESSO_DO_WHATSAPP ||
+    ""
+  );
+}
+
+function getWhatsAppPhoneNumberId() {
+  return (
+    process.env.WHATSAPP_PHONE_NUMBER_ID ||
+    process.env.ID_DO_NUMERO_DE_TELEFONE_DO_WHATSAPP ||
+    process.env["ID_DO_NÚMERO_DE_TELEFONE_DO_WHATSAPP"] ||
+    ""
+  );
+}
+
 async function sendWhatsAppText({ phoneNumberId, to, body }) {
-  const token = process.env.WHATSAPP_ACCESS_TOKEN || "";
-  const resolvedPhoneNumberId = phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || "";
+  const token = getWhatsAppAccessToken();
+  const resolvedPhoneNumberId = phoneNumberId || getWhatsAppPhoneNumberId();
   if (!token || !resolvedPhoneNumberId || !to) return { sent: false, reason: "not_configured" };
 
   const response = await fetch(`https://graph.facebook.com/v25.0/${resolvedPhoneNumberId}/messages`, {
