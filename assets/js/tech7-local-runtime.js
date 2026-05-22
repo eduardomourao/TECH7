@@ -367,15 +367,14 @@
       });
     });
   }
-  function normalizeDisplayMenuLinks() {
-    var links = document.querySelectorAll('.header .nav .list > li[data-id="3"] a.second-nivel[href], .content-nav .list-nav a.second-nivel[href]');
+  function normalizeMenuLinks() {
+    var links = document.querySelectorAll('.header .nav a[href], .content-nav a[href]');
     links.forEach(function (link) {
       var href = String(link.getAttribute('href') || '').trim();
       if (!href) return;
       if (/^(?:[a-z]+:|\/\/|#|\?|javascript:|mailto:|tel:)/i.test(href)) return;
       if (href.charAt(0) === '/') return;
-      if (!/^(display-e-lcd|display|tela-display-lcd)\//i.test(href)) return;
-      link.setAttribute('href', '/' + href.replace(/^\.?\//, ''));
+      link.setAttribute('href', '/' + href.replace(/^\.\.\//g, '').replace(/^\.?\//, ''));
     });
   }
 
@@ -454,7 +453,7 @@
 
   onReady(function () {
     normalizeSearchForms();
-    normalizeDisplayMenuLinks();
+    normalizeMenuLinks();
     normalizeNewsletterForms();
     normalizeUnavailableNotice();
   });
@@ -465,7 +464,7 @@
     localResponse: localResponse,
     refreshForms: function () {
       normalizeSearchForms();
-      normalizeDisplayMenuLinks();
+      normalizeMenuLinks();
       normalizeNewsletterForms();
       normalizeUnavailableNotice();
     }
