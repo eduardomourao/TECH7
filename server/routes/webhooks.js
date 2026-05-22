@@ -57,6 +57,52 @@ function extractWhatsAppEventId(payload) {
   return null;
 }
 
+function extractWhatsAppIncomingMessages(payload) {
+  const messages = [];
+  const entries = Array.isArray(payload?.entry) ? payload.entry : [];
+  for (const entry of entries) {
+    const changes = Array.isArray(entry?.changes) ? entry.changes : [];
+    for (const change of changes) {
+      const value = change?.value || {};
+      const phoneNumberId = value?.metadata?.phone_number_id || process.env.WHATSAPP_PHONE_NUMBER_ID || "";
+      const incomingMessages = Array.isArray(value.messages) ? value.messages : [];
+      for (const message of incomingMessages) {
+        if (message?.from && message?.type !== "unsupported") {
+          messages.push({ phoneNumberId, from: message.from, id: message.id || null });
+        }
+      }
+    }
+  }
+  return messages;
+}
+
+async function sendWhatsAppText({ phoneNumberId, to, body }) {
+  const token = process.env.WHATSAPP_ACCESS_TOKEN || "";
+  const resolvedPhoneNumberId = phoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID || "";
+  if (!token || !resolvedPhoneNumberId || !to) return { sent: false, reason: "not_configured" };
+
+  const response = await fetch(`https://graph.facebook.com/v25.0/${resolvedPhoneNumberId}/messages`, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${token}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to,
+      type: "text",
+      text: {
+        preview_url: false,
+        body
+      }
+    })
+  });
+
+  const json = await response.json().catch(() => ({}));
+  return { sent: response.ok, status: response.status, json };
+}
+
 async function mpFetch(path) {
   const token = requireEnv("MP_ACCESS_TOKEN");
   const url = `https://api.mercadopago.com${path}`;
@@ -178,18 +224,35 @@ router.post("/whatsapp", async (req, res) => {
   const payload = parseWebhookJson(raw);
   const dedupeKey = extractWhatsAppEventId(payload) || rawBodyDedupeKey(raw);
 
-  const existing = await pool.query(`select id from webhook_events where provider = 'whatsapp' and dedupe_key = $1`, [
-    dedupeKey
-  ]);
-  if (existing.rowCount > 0) return res.status(200).json({ ok: true, deduped: true });
+  try {
+    const existing = await pool.query(`select id from webhook_events where provider = 'whatsapp' and dedupe_key = $1`, [
+      dedupeKey
+    ]);
+    if (existing.rowCount > 0) return res.status(200).json({ ok: true, deduped: true });
 
-  await pool.query(
-    `
-      insert into webhook_events (provider, dedupe_key, request_id, signature, raw_body, parsed_json)
-      values ('whatsapp', $1, $2, $3, $4, $5)
-    `,
-    [dedupeKey, null, signature || null, raw, payload]
-  );
+    await pool.query(
+      `
+        insert into webhook_events (provider, dedupe_key, request_id, signature, raw_body, parsed_json)
+        values ('whatsapp', $1, $2, $3, $4, $5)
+      `,
+      [dedupeKey, null, signature || null, raw, payload]
+    );
+  } catch {
+    // Keep WhatsApp webhook responsive even if persistence is temporarily unavailable.
+  }
+
+  const incomingMessages = extractWhatsAppIncomingMessages(payload);
+  for (const message of incomingMessages) {
+    try {
+      await sendWhatsAppText({
+        phoneNumberId: message.phoneNumberId,
+        to: message.from,
+        body: "Olá! Recebemos sua mensagem na Tech 7. Em breve vamos te atender."
+      });
+    } catch {
+      // Keep webhook ACK stable; event is stored and can be replayed/debugged later.
+    }
+  }
 
   res.status(200).json({ ok: true });
 });
