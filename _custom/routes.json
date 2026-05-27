@@ -1,0 +1,111 @@
+{
+  "generatedAt": "2026-05-24T15:37:02.452Z",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "categories": {
+    "baterias": "/baterias-celular",
+    "display": "/tela-display-lcd",
+    "touchs-visores": "/touch-e-visor",
+    "pecas-componentes": "/pecas-e-componentes",
+    "tampas-carcacas": "/tampas-e-carcacas",
+    "ferramentas": "/maquinas-e-ferramentas"
+  },
+  "groups": {
+    "display": {
+      "categoryCanonical": "/tela-display-lcd",
+      "productCanonical": "/tela-display-lcd",
+      "rootAliases": [
+        "/display",
+        "/display-e-lcd",
+        "/display-lcd",
+        "/telas-display-lcd"
+      ],
+      "wildcardAliases": [
+        "/display-e-lcd",
+        "/display-lcd",
+        "/telas-display-lcd"
+      ],
+      "blockedWildcards": [
+        "/display"
+      ]
+    },
+    "baterias": {
+      "categoryCanonical": "/baterias-celular",
+      "productCanonical": "/baterias",
+      "rootAliases": [
+        "/bateria",
+        "/bateria-celular",
+        "/baterias"
+      ],
+      "wildcardAliases": [
+        "/bateria",
+        "/bateria-celular"
+      ],
+      "staticAliasHandledByPage": [
+        "/baterias-celular/:path*"
+      ]
+    },
+    "touch": {
+      "categoryCanonical": "/touch-e-visor",
+      "productCanonical": "/touchs-e-visores",
+      "rootAliases": [
+        "/touch",
+        "/touch-visor",
+        "/touchs-visores",
+        "/touchs-e-visores"
+      ],
+      "wildcardAliases": [
+        "/touch",
+        "/touch-visor",
+        "/touchs-visores"
+      ],
+      "staticAliasHandledByPage": [
+        "/touch-e-visor/:path*"
+      ]
+    },
+    "pecas": {
+      "categoryCanonical": "/pecas-e-componentes",
+      "productCanonical": "/pecas-e-componentes",
+      "rootAliases": [
+        "/pecas",
+        "/pecas-componentes",
+        "/componentes"
+      ],
+      "wildcardAliases": [
+        "/pecas",
+        "/pecas-componentes",
+        "/componentes"
+      ]
+    },
+    "tampas": {
+      "categoryCanonical": "/tampas-e-carcacas",
+      "productCanonical": "/tampas-e-carcacas",
+      "rootAliases": [
+        "/tampas",
+        "/tampas-carcacas",
+        "/carcacas"
+      ],
+      "wildcardAliases": [
+        "/tampas",
+        "/tampas-carcacas",
+        "/carcacas"
+      ]
+    },
+    "ferramentas": {
+      "categoryCanonical": "/maquinas-e-ferramentas",
+      "productCanonical": null,
+      "rootAliases": [
+        "/ferramentas",
+        "/maquinas-ferramentas"
+      ],
+      "wildcardAliases": [],
+      "blockedWildcards": [
+        "/ferramentas",
+        "/maquinas-ferramentas"
+      ],
+      "blockers": [
+        "ferramentas product routes are not exact: maquinas-e-ferramentas pages meta-refresh to pecas-e-componentes"
+      ]
+    }
+  }
+}

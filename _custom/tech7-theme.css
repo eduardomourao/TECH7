@@ -1,0 +1,459 @@
+/* ==========================================================================
+   TECH 7 — Visual Identity (Light Theme)
+   Alinhado ao design system Stitch (Kinetic Tech) em modo LIGHT
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Space+Grotesk:wght@600&display=swap');
+
+:root {
+  /* Light theme tokens — Kinetic Tech adapted for WHITE background */
+  --tech-bg: #ffffff;
+  --tech-surface: #ffffff;
+  --tech-surface-alt: #f8f9fa;
+  --tech-border: #e5e7eb;
+  --tech-text: #111111;
+  --tech-text-muted: #4b5563;
+  --tech-accent: #ff6a00;
+  --tech-accent-hover: #e85f00;
+  --tech-accent-soft: #ffedd5;
+  --tech-input-bg: #ffffff;
+  --tech-footer-bg: #0b0b0b;
+  --tech-footer-text: #f7f7f7;
+
+  /* Spacing & radius from Stitch tokens */
+  --stitch-radius: 8px;
+  --stitch-container-max: 1280px;
+  --stitch-section-gap: 80px;
+}
+
+html, body {
+  background: var(--tech-bg) !important;
+  color: var(--tech-text) !important;
+  font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif !important;
+  margin: 0;
+  padding: 0;
+}
+
+.application {
+  max-width: var(--stitch-container-max);
+  margin: 40px auto;
+  border: 1px solid var(--tech-border);
+  border-radius: var(--stitch-radius);
+  overflow: hidden;
+  background: var(--tech-surface) !important;
+  box-shadow: 0 10px 40px rgba(17, 17, 17, 0.08);
+}
+
+/* =====================================================================
+   HEADER & NAVIGATION — preserva fundo escuro do tema original
+   NÃO sobrescrever com branco pois o texto dos itens é branco (#ffffff)
+   ===================================================================== */
+
+/* Barra superior: mantém fundo preto (--header_top: #000000) */
+.bar-top {
+  background: var(--header_top, #000000) !important;
+  color: var(--header_icon_top, #ffffff) !important;
+}
+.bar-top a,
+.bar-top .item,
+.bar-top .text {
+  color: var(--header_text_top, #ffffff) !important;
+}
+
+/* Header principal: mantém fundo preto (--header_top: #000000) */
+.wrapper.menu-icons.position-header,
+.header,
+.header .bg,
+.header .bg.bg-mob,
+.header .line,
+.header .line.container {
+  background: var(--header_top, #000000) !important;
+}
+
+/* Ícones e textos do header: mantém cor branca */
+.header .account span,
+.header .title-store,
+.header .icon-user path,
+.header .cart-header .icon path {
+  color: var(--header_icon_top, #ffffff) !important;
+  fill: var(--header_icon_top, #ffffff) !important;
+}
+
+/* Barra de navegação de categorias: fundo preto (--nav_bg: #000000) */
+.nav,
+.nav .container,
+.nav .list {
+  background: var(--nav_bg, #000000) !important;
+}
+
+/* Itens do nav: texto branco (--nav_color: #ffffff) */
+.nav .list > li > a,
+.nav .list > li > a .name,
+.nav .name {
+  color: var(--nav_color, #ffffff) !important;
+}
+
+/* Hover nos itens do nav */
+.nav .list > li > a:hover,
+.nav .list > li > a:hover .name {
+  color: var(--nav_color, #ffffff) !important;
+  background: var(--nav_bg_hover, #ff6a00) !important;
+}
+
+/* Menu mobile: fundo escuro */
+.nav-mobile,
+.nav-mobile .header-nav,
+.nav-mobile .content-nav {
+  background: #111111 !important;
+}
+.nav-mobile a,
+.nav-mobile span,
+.nav-mobile .text {
+  color: #ffffff !important;
+}
+
+/* Submenu desktop/mobile: inicia fechado e abre apenas em hover/focus */
+.header .nav .sub-line-category {
+  display: none !important;
+}
+.header .nav li:hover > .sub-line-category,
+.header .nav li:focus-within > .sub-line-category {
+  display: flex !important;
+}
+
+/* Remove popup de newsletter/cupom em todo o site */
+.modal-theme.email-modal {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Garante ícones das categorias visíveis no menu */
+.header .nav .list > li > a img,
+.header .nav .list > li > a .icon {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Contenção global de overflow horizontal (carrosséis/sliders) */
+html,
+body {
+  overflow-x: hidden !important;
+}
+
+.swiper-container,
+.swiper,
+.swiper-wrapper,
+.t7-product-carousel-section,
+.brands,
+.section-showcase,
+.showcase {
+  overflow-x: hidden !important;
+}
+
+/* Evita overflow causado pelo plugin de zoom da imagem do produto */
+img.zoomImg,
+.zoomContainer,
+.zoomWindowContainer,
+.zoomWindow,
+.zoomLens {
+  display: none !important;
+}
+
+/* Sub-menus dropdown: fundo branco com texto escuro */
+.sub-line-category,
+.sub-line-category .header-sub,
+.sub-line-category .over {
+  background: var(--bg_sub, #ffffff) !important;
+}
+.sub-line-category .header-sub {
+  color: var(--tech-text) !important;
+  border-color: var(--nav_color_border, #ff6a00) !important;
+}
+.list-line-sub li a,
+.second-nivel {
+  color: var(--nav_color_sub, #333333) !important;
+}
+.list-line-sub li a:hover,
+.second-nivel:hover {
+  color: var(--nav_bg_hover, #ff6a00) !important;
+}
+
+/* Logo container */
+.header .logo {
+  background: transparent !important;
+  border: none !important;
+  padding: 4px 8px;
+}
+.header .logo img {
+  max-height: 48px !important;
+}
+
+/* Search bar — light input dentro do header escuro */
+.header .search-header,
+.search-header .input-search {
+  background: var(--tech-input-bg) !important;
+  border: 1px solid var(--tech-border) !important;
+  color: var(--tech-text) !important;
+  border-radius: var(--stitch-radius);
+}
+.search-header .input-search:focus,
+.header .search-header:focus-within {
+  border-color: var(--tech-accent) !important;
+  box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.15) !important;
+}
+.rastreio input,
+.modal-theme input,
+.footer .newsletter input {
+  background: var(--tech-input-bg) !important;
+  border: 1px solid var(--tech-border) !important;
+  color: var(--tech-text) !important;
+  border-radius: var(--stitch-radius);
+}
+.rastreio input:focus,
+.footer .newsletter input:focus {
+  border-color: var(--tech-accent) !important;
+  box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.15) !important;
+}
+
+/* =====================================================================
+   CONTEÚDO PRINCIPAL — fundo branco (correto)
+   ===================================================================== */
+
+.section-showcase,
+.showcase,
+.list-product,
+.line-info,
+.brands,
+.dep-content,
+.container-info {
+  background: var(--tech-surface) !important;
+}
+
+/* Product cards — white com shadow e accent laranja no hover */
+.product,
+.box-product,
+.product-grid .product,
+.catalog-product {
+  background: var(--tech-surface) !important;
+  border: 1px solid var(--tech-border) !important;
+  border-radius: var(--stitch-radius) !important;
+  box-shadow: 0 4px 20px rgba(17, 17, 17, 0.06) !important;
+  transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease !important;
+}
+.product:hover,
+.box-product:hover {
+  transform: translateY(-2px);
+  border-color: var(--tech-accent) !important;
+  box-shadow: 0 12px 32px rgba(255, 106, 0, 0.12) !important;
+}
+
+/* Typography */
+.product-name,
+.product .name,
+.title-page,
+.title-section span,
+h1, h2, h3, h4, h5, h6,
+.breadcrumb,
+.breadcrumb a,
+.category-description,
+.footer .title,
+.footer .text,
+.footer a,
+.copy .text {
+  color: var(--tech-text) !important;
+}
+
+/* Price & badges */
+.product .price,
+.product-price .price-off,
+.preco_color,
+.footer .first,
+.title-section span::after,
+.list-tags .item,
+.seal.featured,
+.seal.new,
+.tag,
+.product .seals > div {
+  color: #ffffff !important;
+  background: var(--tech-accent) !important;
+}
+
+/* Buttons */
+button,
+.action,
+.botao-commerce,
+.news-button,
+.button-search,
+.button,
+.btn,
+input[type='submit'] {
+  background: var(--tech-accent) !important;
+  border-color: var(--tech-accent) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 16px rgba(255, 106, 0, 0.25) !important;
+  border-radius: var(--stitch-radius);
+  font-weight: 600;
+}
+button:hover,
+.action:hover,
+.botao-commerce:hover,
+.news-button:hover,
+.button:hover,
+.btn:hover,
+input[type='submit']:hover {
+  background: var(--tech-accent-hover) !important;
+  border-color: var(--tech-accent-hover) !important;
+}
+
+/* Footer */
+.footer,
+.copy {
+  background: var(--tech-footer-bg) !important;
+  border-top: 1px solid #1f1f1f;
+}
+.footer .box,
+.footer .box--social,
+.footer .newsletter {
+  background: #1a1c1c !important;
+  border: 1px solid #333535 !important;
+  border-radius: var(--stitch-radius) !important;
+}
+
+/* =====================================================================
+   UTILITY OVERRIDES — fundo branco apenas no conteúdo (não no header/nav)
+   ===================================================================== */
+
+.line-info,
+.container-info .open_desk,
+.line-info .line,
+.section-showcase,
+.product-grid,
+.main-showcase,
+.list-product,
+.brands,
+.brands .swiper-container,
+.content-home > .container,
+.section-showcase > .showcase,
+.dep-content,
+.brands .swiper-slide,
+.line-info .item {
+  background-color: var(--tech-surface) !important;
+  color: var(--tech-text) !important;
+}
+
+/* Fundo branco somente no conteúdo principal */
+.site-main,
+.page-content,
+.content-home,
+.container-info,
+.section-showcase,
+.section-banners,
+.brands,
+.bg-cat {
+  background: #ffffff !important;
+}
+
+/* T7-PRODUCT-VARIATION-SWATCHES */
+#t7-variacao-container {
+  margin: 4px 0 2px !important;
+}
+
+#t7-variacao-container .texto_variacao h2 {
+  margin: 0 0 10px !important;
+  color: var(--tech-text) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+}
+
+#t7-variacao-container .texto_variacao span {
+  display: none !important;
+}
+
+#t7-variacao-container .lista_cor_variacao {
+  display: flex !important;
+  width: auto !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  list-style: none !important;
+}
+
+#t7-variacao-container .lista_cor_variacao li {
+  position: relative !important;
+  display: inline-flex !important;
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  margin: 0 !important;
+  padding: 4px !important;
+  border: 2px solid var(--tech-border) !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  box-shadow: 0 3px 12px rgba(17, 17, 17, 0.08) !important;
+  cursor: pointer !important;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease, opacity 160ms ease !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+#t7-variacao-container .lista_cor_variacao li:hover,
+#t7-variacao-container .lista_cor_variacao li:focus-visible,
+#t7-variacao-container .lista_cor_variacao li.t7-variant-selected {
+  border-color: var(--tech-accent) !important;
+  box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.16), 0 8px 22px rgba(255, 106, 0, 0.16) !important;
+  transform: translateY(-1px) !important;
+  outline: 0 !important;
+}
+
+#t7-variacao-container .lista_cor_variacao li.sem_estoque {
+  opacity: 0.48 !important;
+}
+
+#t7-variacao-container .lista_cor_variacao li.sem_estoque::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 6px !important;
+  right: 6px !important;
+  top: 50% !important;
+  height: 2px !important;
+  background: rgba(239, 68, 68, 0.82) !important;
+  transform: rotate(-35deg) !important;
+  pointer-events: none !important;
+}
+
+#t7-variacao-container .lista_cor_variacao img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  border-radius: 8px !important;
+  object-fit: cover !important;
+}
+
+@media (max-width: 767px) {
+  #t7-variacao-container .lista_cor_variacao li {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+  }
+}
+/* /T7-PRODUCT-VARIATION-SWATCHES */
+/* T7-GLOBAL-HEADER-COMPACT */
+.wrapper.menu-icons,.wrapper.menu-icons.position-header{position:relative!important;top:auto!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;transform:none!important}.wrapper.menu-icons>.header,.header{position:relative!important;top:auto!important;left:auto!important;right:auto!important;z-index:20!important;margin:0!important}.header .bg{padding:6px 0!important}.header .line.container{height:64px!important;min-height:64px!important;gap:12px!important;align-items:center!important}.header .logo{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:0!important;text-decoration:none!important;min-width:0!important;padding:0!important;background:transparent!important;border:0!important}.header .logo img{width:auto!important;height:52px!important;max-width:190px!important;max-height:52px!important;object-fit:contain!important;display:block!important}.header .logo .title-store{display:none!important}.header .search-header{flex:1 1 540px!important;max-width:720px!important;margin:0 auto!important;align-self:center!important}.header .search-header .input-search{height:42px!important;min-height:42px!important;padding-top:0!important;padding-bottom:0!important}.header .account,.header .cart-header .area{height:40px!important;min-height:40px!important;display:flex!important;align-items:center!important}.header .account{gap:10px!important;padding:0 8px!important}.header .account .icon-user{width:32px!important;height:32px!important}.header .cart-header .icon{width:34px!important;height:36px!important}.bar-top{min-height:26px!important;padding-top:3px!important;padding-bottom:3px!important}.bar-top .container,.bar-top .line{min-height:0!important;padding-top:0!important;padding-bottom:0!important}@media (max-width:767px){.header .bg{padding:6px 0!important}.header .line.container{height:auto!important;min-height:58px!important;gap:8px!important}.header .logo img{width:auto!important;height:42px!important;max-width:170px!important;max-height:42px!important}.header .search-header .input-search{height:38px!important;min-height:38px!important}}
+/* /T7-GLOBAL-HEADER-COMPACT */

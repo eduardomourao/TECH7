@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin - TECH 7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --panel: #12121a;
+      --panel-2: #1f1f2e;
+      --panel-3: #2a2a3a;
+      --line: #1f1f2e;
+      --line-2: #2a2a3a;
+      --text: #f5f5f7;
+      --muted: #9ca3af;
+      --dim: #6b7280;
+      --blue: #3b82f6;
+      --blue-strong: #2563eb;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --purple: #8b5cf6;
+      --orange: #f97316;
+      --radius: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      min-height: 100vh;
+      color: var(--text);
+      background: radial-gradient(circle at top right, rgba(37, 99, 235, .14), transparent 34rem), var(--bg);
+      font-family: Inter, system-ui, sans-serif;
+      line-height: 1.45;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: default; opacity: .45; }
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 2px;
+    }
+
+    .login-screen { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+    .login-card {
+      width: min(100%, 430px);
+      padding: 32px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(18, 18, 26, .98), rgba(18, 18, 26, .92));
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .36);
+    }
+    .login-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+    .brand-mark, .avatar {
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+    .brand-mark { width: 44px; height: 44px; }
+    .avatar { width: 34px; height: 34px; border-radius: 999px; font-size: 12px; }
+    .login-card h1 { font-size: 24px; line-height: 1.15; }
+    .login-card p { margin-top: 4px; color: var(--muted); font-size: 14px; }
+    .form-stack { display: grid; gap: 14px; }
+    label { color: var(--muted); font-size: 13px; font-weight: 700; }
+    input, select {
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 1px solid var(--line-2);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 13px;
+    }
+    .form-stack label { display: grid; gap: 7px; }
+    .error { display: none; margin-top: 12px; color: #fca5a5; font-size: 13px; font-weight: 700; }
+
+    .app-screen { display: none; min-height: 100vh; }
+    .layout { min-height: 100vh; }
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 40;
+      width: 264px;
+      border-right: 1px solid var(--line);
+      background: rgba(18, 18, 26, .98);
+    }
+    .side-head { padding: 24px; border-bottom: 1px solid var(--line); }
+    .side-title { font-size: 20px; font-weight: 800; }
+    .side-subtitle { margin-top: 2px; color: var(--dim); font-family: "Fira Code", monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    .nav { display: grid; gap: 6px; padding: 16px; }
+    .nav button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      transition: .18s ease;
+    }
+    .nav button:hover { color: var(--text); background: var(--panel-2); }
+    .nav button.active { color: var(--blue); border-color: rgba(37, 99, 235, .24); background: rgba(37, 99, 235, .1); }
+    .nav svg, .metric-icon svg { width: 18px; height: 18px; flex: none; }
+    .side-foot { position: absolute; left: 0; right: 0; bottom: 0; padding: 16px; border-top: 1px solid var(--line); }
+    .user-pill { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
+    .user-pill strong { display: block; font-size: 13px; }
+    .user-pill span { display: block; color: var(--dim); font-size: 12px; }
+
+    .main { min-height: 100vh; padding-left: 264px; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      min-height: 64px;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(18, 18, 26, .94);
+      backdrop-filter: blur(12px);
+    }
+    .status-line { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 13px; }
+    .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--green); box-shadow: 0 0 0 6px rgba(34, 197, 94, .1); }
+    .mono { font-family: "Fira Code", monospace; }
+    .top-meta { color: var(--dim); font-size: 12px; }
+    .content { width: min(100%, 1360px); margin: 0 auto; padding: 28px 24px 42px; }
+    .page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+    .page-head h1 { font-size: clamp(26px, 3vw, 34px); line-height: 1.1; letter-spacing: 0; }
+    .page-head p { margin-top: 8px; color: var(--muted); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-bottom: 18px; }
+    .grid-wide { display: grid; grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr); gap: 18px; margin-bottom: 18px; }
+    .metric, .panel, .sub-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+    .metric { min-height: 132px; padding: 18px; transition: border-color .18s ease, transform .18s ease; }
+    .metric:hover, .sub-card:hover { border-color: rgba(59, 130, 246, .32); }
+    .metric-icon { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 12px; border-radius: var(--radius); background: var(--panel-2); color: var(--blue); }
+    .metric small, .sub-card small { color: var(--muted); font-size: 12px; }
+    .metric strong { display: block; margin-top: 4px; font-size: 25px; line-height: 1; }
+    .metric span { display: block; margin-top: 8px; color: var(--dim); font-size: 12px; }
+    .panel { overflow: hidden; margin-bottom: 18px; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 18px; border-bottom: 1px solid var(--line); }
+    .panel-head h2 { font-size: 17px; }
+    .panel-head p { margin-top: 2px; color: var(--dim); font-size: 13px; }
+    .panel-body { padding: 18px; }
+    .sub-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .sub-card { padding: 14px; background: var(--panel-2); }
+    .sub-card strong { display: block; margin-top: 4px; color: var(--text); font-size: 21px; }
+
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .toolbar-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .toolbar input { max-width: 320px; }
+    .toolbar select { max-width: 210px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 8px 13px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: .18s ease;
+    }
+    .btn-sm { min-height: 32px; padding: 6px 10px; font-size: 12px; }
+    .btn-primary { background: var(--blue-strong); color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-outline { border-color: var(--line-2); color: #d1d5db; }
+    .btn-outline:hover { border-color: rgba(59, 130, 246, .55); color: #fff; background: rgba(59, 130, 246, .08); }
+    .btn-green { border-color: rgba(34, 197, 94, .24); background: rgba(34, 197, 94, .11); color: #4ade80; }
+    .btn-red { border-color: rgba(239, 68, 68, .24); background: rgba(239, 68, 68, .11); color: #f87171; }
+
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+    table { width: 100%; min-width: 980px; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+    th { color: var(--dim); background: #0f0f16; font-family: "Fira Code", monospace; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+    td { color: #d1d5db; }
+    tr:hover td { background: rgba(31, 31, 46, .62); }
+    tr:last-child td { border-bottom: 0; }
+    td strong { color: var(--text); }
+    .cell-input { min-width: 110px; max-width: 180px; min-height: 33px; }
+    .name-input { min-width: 250px; max-width: 360px; }
+    .price-input { max-width: 112px; font-family: "Fira Code", monospace; }
+
+    .badge { display: inline-flex; align-items: center; min-height: 24px; padding: 3px 9px; border: 1px solid transparent; border-radius: 999px; font-size: 11px; font-weight: 800; }
+    .badge-pending { border-color: rgba(245, 158, 11, .25); background: rgba(245, 158, 11, .1); color: #fbbf24; }
+    .badge-paid { border-color: rgba(34, 197, 94, .25); background: rgba(34, 197, 94, .1); color: #4ade80; }
+    .badge-bad { border-color: rgba(239, 68, 68, .25); background: rgba(239, 68, 68, .1); color: #f87171; }
+    .badge-info { border-color: rgba(59, 130, 246, .25); background: rgba(59, 130, 246, .1); color: #60a5fa; }
+
+    .bars { display: grid; gap: 12px; }
+    .bar-row { display: grid; grid-template-columns: minmax(120px, 180px) 1fr auto; gap: 12px; align-items: center; color: var(--muted); font-size: 13px; }
+    .bar-track { height: 8px; overflow: hidden; border-radius: 999px; background: var(--panel-3); }
+    .bar-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--purple)); }
+    .bar-fill.green { background: linear-gradient(90deg, #10b981, #22c55e); }
+    .bar-fill.yellow { background: linear-gradient(90deg, #f59e0b, #f97316); }
+
+    .order-detail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .field { min-height: 70px; padding: 12px; border-radius: var(--radius); background: #0f0f16; }
+    .field label { display: block; margin-bottom: 4px; color: var(--dim); font-family: "Fira Code", monospace; font-size: 11px; text-transform: uppercase; }
+    .field span { color: var(--text); overflow-wrap: anywhere; }
+    .empty, .loading, .error-state { padding: 40px 14px; color: var(--dim); text-align: center; }
+    .error-state { color: #f87171; }
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; }
+    .toast { position: fixed; top: 18px; right: 18px; z-index: 9999; max-width: min(440px, calc(100vw - 36px)); padding: 12px 16px; border-radius: var(--radius); color: #fff; font-size: 13px; font-weight: 800; transform: translateY(-10px); opacity: 0; pointer-events: none; transition: .22s ease; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-success { background: #166534; }
+    .toast-error { background: #991b1b; }
+
+    @media (max-width: 1080px) {
+      .sidebar { position: static; width: 100%; border-right: 0; border-bottom: 1px solid var(--line); }
+      .side-foot { display: none; }
+      .nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .main { padding-left: 0; }
+      .grid-4, .sub-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-wide, .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .login-card { padding: 24px; }
+      .topbar, .page-head { align-items: flex-start; flex-direction: column; }
+      .content { padding: 22px 14px 34px; }
+      .nav { grid-template-columns: 1fr; }
+      .grid-4, .sub-grid { grid-template-columns: 1fr; }
+      .toolbar, .toolbar-group { align-items: stretch; flex-direction: column; width: 100%; }
+      .toolbar input, .toolbar select, .toolbar .btn { max-width: none; width: 100%; }
+      .order-detail { grid-template-columns: 1fr; }
+      .bar-row { grid-template-columns: 1fr; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-mark" aria-hidden="true">T7</div>
+        <div>
+          <h1>Admin TECH 7</h1>
+          <p>Console operacional da loja</p>
+        </div>
+      </div>
+      <div class="form-stack">
+        <label for="usernameInput">Usuario
+          <input type="text" id="usernameInput" placeholder="Usuario" autocomplete="username">
+        </label>
+        <label for="passwordInput">Senha
+          <input type="password" id="passwordInput" placeholder="Senha" autocomplete="current-password">
+        </label>
+        <button class="btn btn-primary" id="loginBtn">Entrar</button>
+      </div>
+      <div class="error" id="loginError">Credenciais invalidas</div>
+    </div>
+  </div>
+
+  <div class="app-screen" id="appScreen">
+    <div class="layout">
+      <aside class="sidebar" aria-label="Navegacao administrativa">
+        <div class="side-head">
+          <div class="side-title">TECH 7</div>
+          <div class="side-subtitle">Backend Command</div>
+        </div>
+        <nav class="nav"><div class="container"><ul class="list flex grow"><li class="relative" data-id="1" data-level="0"><a class="icon-show sub vertical-icon" href="/baterias-celular/index.html"><img alt="BATERIAS" class="icon" src="/_assets/images.tcdn.com.br/img/img_prod/996644/categoria_img_1_20220331152230.png" width="70" height="70" loading="lazy"/><div class="name">BATERIAS</div></a><div class="sub-line-category flex product-sub"><div class="header-sub">BATERIAS</div><div class="over flex"><ul class="list-line-sub"><li><a class="second-nivel" href="/baterias-celular/apple/index.html">APPLE</a></li><li><a class="second-nivel" href="/baterias-celular/samsung/index.html">SAMSUNG</a></li><li><a class="second-nivel" href="/baterias-celular/xiaomi-redmi/index.html">XIAOMI REDMI</a></li><li><a class="second-nivel" href="/baterias-celular/motorola/index.html">MOTOROLA</a></li><li><a class="second-nivel" href="/baterias-celular/lg/index.html">LG</a></li><li><a class="second-nivel" href="/baterias-celular/realme/index.html">REALME</a></li></ul></div></div></li><li class="relative" data-id="3" data-level="0"><a class="icon-show sub vertical-icon" href="/tela-display-lcd/index.html"><img alt="DISPLAY" class="icon" src="/_assets/images.tcdn.com.br/img/img_prod/996644/categoria_img_3_20220331152301.png" width="70" height="70" loading="lazy"/><div class="name">DISPLAY</div></a><div class="sub-line-category flex product-sub"><div class="header-sub">DISPLAY</div><div class="over flex"><ul class="list-line-sub"><li><a class="second-nivel" href="/tela-display-lcd/apple/index.html">APPLE</a></li><li><a class="second-nivel" href="/tela-display-lcd/samsung/index.html">SAMSUNG</a></li><li><a class="second-nivel" href="/tela-display-lcd/xiaomi-redmi/index.html">XIAOMI REDMI</a></li><li><a class="second-nivel" href="/tela-display-lcd/motorola/index.html">MOTOROLA</a></li><li><a class="second-nivel" href="/tela-display-lcd/realme/index.html">REALME</a></li><li><a class="second-nivel" href="/tela-display-lcd/lg/index.html">LG</a></li></ul></div></div></li><li class="relative" data-id="7" data-level="0"><a class="icon-show sub vertical-icon" href="/pecas-e-componentes/index.html"><img alt="PEÇAS E COMPONENTES" class="icon" src="/_assets/images.tcdn.com.br/img/img_prod/996644/categoria_img_7_20220331150543.png" width="70" height="70" loading="lazy"/><div class="name">PEÇAS E COMPONENTES</div></a><div class="sub-line-category flex product-sub"><div class="header-sub">PEÇAS E COMPONENTES</div><div class="over flex"><ul class="list-line-sub"><li><a class="second-nivel" href="/pecas-e-componentes/apple/index.html">APPLE</a></li><li><a class="second-nivel" href="/pecas-e-componentes/samsung/index.html">SAMSUNG</a></li><li><a class="second-nivel" href="/pecas-e-componentes/xiaomi-redmi/index.html">XIAOMI REDMI</a></li><li><a class="second-nivel" href="/pecas-e-componentes/motorola/index.html">MOTOROLA</a></li><li><a class="second-nivel" href="/pecas-e-componentes/lg/index.html">LG</a></li><li><a class="second-nivel" href="/pecas-e-componentes/realme/index.html">REALME</a></li></ul></div></div></li><li class="relative" data-id="11" data-level="0"><a class="icon-show sub vertical-icon" href="/tampas-e-carcacas/index.html"><img alt="TAMPAS E CARCAÇAS" class="icon" src="/_assets/images.tcdn.com.br/img/img_prod/996644/categoria_img_11_20220331152405.png" width="70" height="70" loading="lazy"/><div class="name">TAMPAS E CARCAÇAS</div></a><div class="sub-line-category flex product-sub"><div class="header-sub">TAMPAS E CARCAÇAS</div><div class="over flex"><ul class="list-line-sub"><li><a class="second-nivel" href="/tampas-e-carcacas/apple/index.html">APPLE</a></li><li><a class="second-nivel" href="/tampas-e-carcacas/samsung/index.html">SAMSUNG</a></li><li><a class="second-nivel" href="/tampas-e-carcacas/xiaomi-redmi/index.html">XIAOMI REDMI</a></li><li><a class="second-nivel" href="/tampas-e-carcacas/motorola/index.html">MOTOROLA</a></li><li><a class="second-nivel" href="/tampas-e-carcacas/lg/index.html">LG</a></li><li><a class="second-nivel" href="/tampas-e-carcacas/realme/index.html">REALME</a></li></ul></div></div></li></ul></div></nav>
+        <div class="side-foot">
+          <div class="user-pill">
+            <div class="avatar" aria-hidden="true">GA</div>
+            <div><strong>Administrador</strong><span>Acesso total</span></div>
+          </div>
+        </div>
+      </aside>
+
+      <div class="main">
+        <header class="topbar">
+          <div class="status-line"><span class="dot" aria-hidden="true"></span><span>Sistema operacional</span></div>
+          <div class="top-meta mono" id="lastSync">Aguardando dados</div>
+          <button class="btn btn-outline btn-sm" id="logoutBtn">Sair</button>
+        </header>
+        <main class="content">
+          <section class="page-head">
+            <div>
+              <h1 id="pageTitle">Painel de controle</h1>
+              <p id="pageSubtitle">Metricas e operacao da TECH 7 em tempo real.</p>
+            </div>
+            <div class="toolbar-group">
+              <button class="btn btn-outline btn-sm" id="refreshBtn">Atualizar</button>
+              <button class="btn btn-primary btn-sm" id="exportBtn">Exportar CSV</button>
+            </div>
+          </section>
+          <div class="tab-content active" id="tab-dashboard"></div>
+          <div class="tab-content" id="tab-products"></div>
+          <div class="tab-content" id="tab-orders"></div>
+          <div class="tab-content" id="tab-pricing"></div>
+          <div class="tab-content" id="tab-reports"></div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="assets/js/admin.js"></script>
+<script src="/assets/js/tech7-local-runtime.js"></script></body>
+</html>

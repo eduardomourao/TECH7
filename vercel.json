@@ -1,0 +1,2037 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "outputDirectory": ".",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/tampas-e-carcacas/outros",
+      "destination": "/tampas-e-carcacas",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/outros",
+      "destination": "/pecas-e-componentes/xiaomi-redmi",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/outros/lente-da-camera-poco-x3",
+      "destination": "/pecas-e-componentes/xiaomi-redmi/lente-da-camera-poco-x3",
+      "permanent": true
+    },
+    {
+      "source": "/pecas-e-componentes/outros/lente-da-camera-poco-m3",
+      "destination": "/pecas-e-componentes/xiaomi-redmi/lente-da-camera-poco-m3",
+      "permanent": true
+    },
+    {
+      "source": "/baterias-celular/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias-celular/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/baterias/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria-celular/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/bateria/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tela-display-lcd/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-lcd/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas-display-lcd/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/telas/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-componentes/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/pecas/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/componentes/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-e-carcacas/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas-carcacas/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/tampas/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/carcacas/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-e-visor/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-e-visores/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touchs-visores/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch-visor/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/zenfone",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/asus",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/infinix",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/lenovo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/nokia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/alcatel",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/cce",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/importados",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/importado",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/multilaser",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/positivo",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/sony",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/sony-experia",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/blu",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/touch/zz-outras",
+      "destination": "/404.html",
+      "permanent": false
+    },
+    {
+      "source": "/display-e-lcd",
+      "destination": "/tela-display-lcd",
+      "permanent": true
+    },
+    {
+      "source": "/display",
+      "destination": "/tela-display-lcd",
+      "permanent": true
+    },
+    {
+      "source": "/display-lcd",
+      "destination": "/tela-display-lcd",
+      "permanent": true
+    },
+    {
+      "source": "/display-e-lcd/:path*",
+      "destination": "/tela-display-lcd/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/telas-display-lcd",
+      "destination": "/tela-display-lcd",
+      "permanent": true
+    },
+    {
+      "source": "/display-lcd/:path*",
+      "destination": "/tela-display-lcd/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/telas-display-lcd/:path*",
+      "destination": "/tela-display-lcd/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/bateria",
+      "destination": "/baterias-celular",
+      "permanent": true
+    },
+    {
+      "source": "/bateria-celular",
+      "destination": "/baterias-celular",
+      "permanent": true
+    },
+    {
+      "source": "/baterias",
+      "destination": "/baterias-celular",
+      "permanent": true
+    },
+    {
+      "source": "/bateria/:path*",
+      "destination": "/baterias/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/bateria-celular/:path*",
+      "destination": "/baterias/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/touch",
+      "destination": "/touch-e-visor",
+      "permanent": true
+    },
+    {
+      "source": "/touch-visor",
+      "destination": "/touch-e-visor",
+      "permanent": true
+    },
+    {
+      "source": "/touchs-visores",
+      "destination": "/touch-e-visor",
+      "permanent": true
+    },
+    {
+      "source": "/touchs-e-visores",
+      "destination": "/touch-e-visor",
+      "permanent": true
+    },
+    {
+      "source": "/touch/:path*",
+      "destination": "/touchs-e-visores/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/touch-visor/:path*",
+      "destination": "/touchs-e-visores/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/touchs-visores/:path*",
+      "destination": "/touchs-e-visores/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/pecas",
+      "destination": "/pecas-e-componentes",
+      "permanent": true
+    },
+    {
+      "source": "/pecas-componentes",
+      "destination": "/pecas-e-componentes",
+      "permanent": true
+    },
+    {
+      "source": "/componentes",
+      "destination": "/pecas-e-componentes",
+      "permanent": true
+    },
+    {
+      "source": "/pecas/:path*",
+      "destination": "/pecas-e-componentes/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/pecas-componentes/:path*",
+      "destination": "/pecas-e-componentes/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/componentes/:path*",
+      "destination": "/pecas-e-componentes/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/tampas",
+      "destination": "/tampas-e-carcacas",
+      "permanent": true
+    },
+    {
+      "source": "/tampas-carcacas",
+      "destination": "/tampas-e-carcacas",
+      "permanent": true
+    },
+    {
+      "source": "/carcacas",
+      "destination": "/tampas-e-carcacas",
+      "permanent": true
+    },
+    {
+      "source": "/tampas/:path*",
+      "destination": "/tampas-e-carcacas/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/tampas-carcacas/:path*",
+      "destination": "/tampas-e-carcacas/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/carcacas/:path*",
+      "destination": "/tampas-e-carcacas/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/ferramentas",
+      "destination": "/maquinas-e-ferramentas",
+      "permanent": true
+    },
+    {
+      "source": "/maquinas-ferramentas",
+      "destination": "/maquinas-e-ferramentas",
+      "permanent": true
+    },
+    {
+      "source": "/loja",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/loja/",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/loja/login_layout.php",
+      "destination": "/my-account/login",
+      "permanent": true
+    },
+    {
+      "source": "/loja/logout.php",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/loja/redirect_cart_service.php",
+      "destination": "/carrinho",
+      "permanent": true
+    },
+    {
+      "source": "/loja/catalogo.php",
+      "destination": "/busca",
+      "permanent": true
+    },
+    {
+      "source": "/loja/busca.php",
+      "destination": "/busca",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/loja/cartService.php",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/mvc/store/newsletter",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/mvc/store/newsletter/",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/contato/contato.php",
+      "destination": "/api/[...path].js"
+    },
+    {
+      "source": "/depoimentos-de-clientes/funcoes/envia_depoimento.php",
+      "destination": "/api/[...path].js"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "Content-Security-Policy-Report-Only",
+          "value": "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: data: blob:; connect-src 'self' https:; font-src 'self' https: data:; frame-ancestors 'none'"
+        }
+      ]
+    },
+    {
+      "source": "/api/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/loja/cartService.php",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/mvc/store/newsletter",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ]
+}

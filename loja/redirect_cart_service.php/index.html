@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Finalizar pedido | TECH 7</title>
+  <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon"/><link href="/favicon.png" rel="icon" type="image/png" sizes="512x512"/><link href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050505;
+      --panel: #111111;
+      --text: #f4f4f4;
+      --muted: #bcbcbc;
+      --border: #282828;
+      --accent: #ff6a00;
+      --accent-hover: #e65f00;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 106, 0, 0.18), transparent 20%),
+        linear-gradient(180deg, #0b0b0b 0%, #050505 100%);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: min(700px, 100%);
+      background: rgba(17, 17, 17, 0.94);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: #fff;
+      text-decoration: none;
+      margin-bottom: 18px;
+    }
+    .logo img { width: 88px; height: auto; }
+    .logo span {
+      font-family: "Space Grotesk", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      line-height: 1.08;
+    }
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 20px;
+      border-radius: 14px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+    .button:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+    .button.secondary {
+      background: transparent;
+      border-color: #3a3a3a;
+      color: #fff;
+    }
+    .button.secondary:hover {
+      background: rgba(255, 106, 0, 0.08);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <section class="card">
+    <a class="logo" href="../../index.html">
+      <img src="../../logo.png" alt="TECH 7" width="1291" height="517" loading="lazy">
+      <span>TECH 7</span>
+    </a>
+    <h1>Finalização de pedido indisponível no GitHub Pages.</h1>
+    <p>
+      O checkout da TECH 7 depende da plataforma original da loja. Nesta versão estática, você pode falar com o atendimento
+      para concluir a compra ou tirar dúvidas sobre disponibilidade.
+    </p>
+    <div class="actions">
+      <a class="button" href="https://wa.me/5531999454848" target="_blank" rel="noopener noreferrer">Finalizar pelo WhatsApp</a>
+      <a class="button secondary" href="../../index.html">Voltar para a home</a>
+    </div>
+  </section>
+<script>
+  window.location.replace("../../checkout/");
+</script>
+<script src="/assets/js/tech7-local-runtime.js"></script><script src="../../preco-loader.js"></script>
+</body>
+</html>

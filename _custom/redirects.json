@@ -1,0 +1,3502 @@
+{
+  "generatedAt": "2026-05-24T15:37:02.454Z",
+  "redirects": [
+    {
+      "source": "/tampas-e-carcacas/outros",
+      "destination": "/tampas-e-carcacas",
+      "permanent": false
+    },
+    {
+      "source": "/pecas-e-componentes/outros",
+      "destination": "/pecas-e-componentes/xiaomi-redmi",
+      "permanent": false,
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "proof": "outros-menu-reclassify-poco"
+    },
+    {
+      "source": "/pecas-e-componentes/outros/lente-da-camera-poco-x3",
+      "destination": "/pecas-e-componentes/xiaomi-redmi/lente-da-camera-poco-x3",
+      "permanent": true,
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "proof": "outros-menu-reclassify-poco"
+    },
+    {
+      "source": "/pecas-e-componentes/outros/lente-da-camera-poco-m3",
+      "destination": "/pecas-e-componentes/xiaomi-redmi/lente-da-camera-poco-m3",
+      "permanent": true,
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "proof": "outros-menu-reclassify-poco"
+    },
+    {
+      "source": "/baterias-celular/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias-celular/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/baterias/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria-celular/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/bateria/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tela-display-lcd/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-lcd/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas-display-lcd/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/telas/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-e-componentes/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas-componentes/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/pecas/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/componentes/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-e-carcacas/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas-carcacas/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/tampas/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/carcacas/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-e-visor/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-e-visores/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touchs-visores/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch-visor/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/zenfone",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/asus",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/infinix",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/lenovo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/nokia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/alcatel",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/cce",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/importados",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/importado",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/multilaser",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/positivo",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/sony",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/sony-experia",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/blu",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/touch/zz-outras",
+      "destination": "/404.html",
+      "type": "removed-brand-category",
+      "method": "GET",
+      "strategy": "404-redirect",
+      "permanent": false,
+      "proof": "catalog-brand-cleanup"
+    },
+    {
+      "source": "/display-e-lcd",
+      "destination": "/tela-display-lcd",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/display",
+      "destination": "/tela-display-lcd",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/display-lcd",
+      "destination": "/tela-display-lcd",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/display-e-lcd/:path*",
+      "destination": "/tela-display-lcd/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/telas-display-lcd",
+      "destination": "/tela-display-lcd",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/display-lcd/:path*",
+      "destination": "/tela-display-lcd/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/telas-display-lcd/:path*",
+      "destination": "/tela-display-lcd/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/bateria",
+      "destination": "/baterias-celular",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/bateria-celular",
+      "destination": "/baterias-celular",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/baterias",
+      "destination": "/baterias-celular",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/bateria/:path*",
+      "destination": "/baterias/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/bateria-celular/:path*",
+      "destination": "/baterias/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/touch",
+      "destination": "/touch-e-visor",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/touch-visor",
+      "destination": "/touch-e-visor",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/touchs-visores",
+      "destination": "/touch-e-visor",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/touchs-e-visores",
+      "destination": "/touch-e-visor",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/touch/:path*",
+      "destination": "/touchs-e-visores/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/touch-visor/:path*",
+      "destination": "/touchs-e-visores/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/touchs-visores/:path*",
+      "destination": "/touchs-e-visores/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/pecas",
+      "destination": "/pecas-e-componentes",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/pecas-componentes",
+      "destination": "/pecas-e-componentes",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/componentes",
+      "destination": "/pecas-e-componentes",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/pecas/:path*",
+      "destination": "/pecas-e-componentes/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/pecas-componentes/:path*",
+      "destination": "/pecas-e-componentes/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/componentes/:path*",
+      "destination": "/pecas-e-componentes/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/tampas",
+      "destination": "/tampas-e-carcacas",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/tampas-carcacas",
+      "destination": "/tampas-e-carcacas",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/carcacas",
+      "destination": "/tampas-e-carcacas",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/tampas/:path*",
+      "destination": "/tampas-e-carcacas/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/tampas-carcacas/:path*",
+      "destination": "/tampas-e-carcacas/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/carcacas/:path*",
+      "destination": "/tampas-e-carcacas/:path*",
+      "type": "product",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "complete-product-page-equivalence"
+    },
+    {
+      "source": "/ferramentas",
+      "destination": "/maquinas-e-ferramentas",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/maquinas-ferramentas",
+      "destination": "/maquinas-e-ferramentas",
+      "type": "category",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "category-root-exists"
+    },
+    {
+      "source": "/loja",
+      "destination": "/",
+      "type": "endpoint",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "legacy-endpoint-map"
+    },
+    {
+      "source": "/loja/",
+      "destination": "/",
+      "type": "endpoint",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "legacy-endpoint-map"
+    },
+    {
+      "source": "/loja/login_layout.php",
+      "destination": "/my-account/login",
+      "type": "endpoint",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "legacy-endpoint-map"
+    },
+    {
+      "source": "/loja/logout.php",
+      "destination": "/",
+      "type": "endpoint",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "legacy-endpoint-map"
+    },
+    {
+      "source": "/loja/redirect_cart_service.php",
+      "destination": "/carrinho",
+      "type": "endpoint",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "legacy-endpoint-map"
+    },
+    {
+      "source": "/loja/catalogo.php",
+      "destination": "/busca",
+      "type": "endpoint",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "legacy-endpoint-map"
+    },
+    {
+      "source": "/loja/busca.php",
+      "destination": "/busca",
+      "type": "endpoint",
+      "method": "GET",
+      "strategy": "vercel-redirect",
+      "permanent": true,
+      "proof": "legacy-endpoint-map"
+    }
+  ]
+}

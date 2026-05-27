@@ -1,0 +1,47 @@
+{
+  "name": "site-loja-funcional",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "node server/index.js",
+    "start": "node server/index.js",
+    "db:migrate": "node server/db/migrate.js",
+    "db:seed": "node server/db/seed.js",
+    "db:import-catalog": "node server/db/import_catalog_from_index.js",
+    "validate:links": "node scripts/validate-links.js",
+    "validate:assets": "node scripts/validate-assets.js",
+    "validate:routes": "node scripts/validate-routes.js",
+    "validate:endpoints": "node scripts/validate-endpoints.js",
+    "validate:redirects": "node scripts/validate-redirects.js",
+    "validate:menu-routes": "node scripts/validate-menu-routes.js",
+    "validate:section-filters": "node scripts/validate-section-filters.mjs",
+    "validate:api-security": "node scripts/validate-api-security.mjs",
+    "validate:backend-prices": "node scripts/validate-backend-prices.mjs",
+    "validate:product-exactness": "node scripts/validate-product-exactness.js",
+    "validate:product-cards": "node scripts/validate-product-cards.mjs",
+    "audit:product-cards": "node scripts/audit-product-card-images.mjs",
+    "audit:site-images": "node scripts/audit-site-card-gallery-images.mjs",
+    "validate:product-images": "node scripts/validate-product-images-visible.mjs",
+    "validate:product-gallery": "node scripts/validate-product-gallery.mjs",
+    "validate:product-gallery-static-dedupe": "node scripts/validate-product-gallery-static-dedupe.mjs",
+    "validate:product-gallery-dedupe": "node scripts/validate-product-gallery-dedupe.mjs",
+    "validate:gallery-position": "node scripts/validate-gallery-position.mjs",
+    "validate:display-gallery": "node scripts/validate-all-display-gallery.mjs",
+    "validate:build": "node scripts/validate-build.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.2",
+    "motion": "^12.40.0",
+    "pg": "^8.12.0",
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}

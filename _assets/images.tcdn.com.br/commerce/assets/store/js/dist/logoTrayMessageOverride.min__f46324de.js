@@ -1,0 +1,1 @@
+jQuery(document).ready(function(){var e=jQuery('a[href*="tray.com.br"][target="_blank"]');e.length&&e.each(function(){var e=jQuery(this),r=e.attr("rel");r&&r.includes("noopener")&&!r.includes("nofollow")&&e.attr("rel",r+" nofollow")})});

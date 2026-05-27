@@ -1,0 +1,134 @@
+{
+  "generatedAt": "2026-05-23T07:30:56.506Z",
+  "endpoints": [
+    {
+      "method": "POST",
+      "source": "/api/cart/add",
+      "route": "/api/cart/add",
+      "strategy": "api-handler"
+    },
+    {
+      "method": "POST",
+      "source": "/api/newsletter",
+      "route": "/api/newsletter",
+      "strategy": "api-handler"
+    },
+    {
+      "method": "POST",
+      "source": "/api/comments",
+      "route": "/api/comments",
+      "strategy": "api-handler"
+    },
+    {
+      "method": "POST",
+      "source": "/api/contact",
+      "route": "/api/contact",
+      "strategy": "api-handler"
+    },
+    {
+      "method": "POST",
+      "source": "/api/testimonials",
+      "route": "/api/testimonials",
+      "strategy": "api-handler"
+    },
+    {
+      "method": "GET",
+      "source": "/api/search",
+      "route": "/api/search",
+      "strategy": "api-handler"
+    },
+    {
+      "method": "POST",
+      "source": "/api/products/add-comment",
+      "route": "/api/products/add-comment",
+      "strategy": "api-handler",
+      "compatibility": true
+    },
+    {
+      "method": "GET",
+      "source": "/api/products/add-comment",
+      "route": "/api/products/add-comment",
+      "strategy": "api-handler",
+      "compatibility": true
+    },
+    {
+      "method": "POST",
+      "source": "/api/products/unavailable-let-me-know",
+      "route": "/api/products/unavailable-let-me-know",
+      "strategy": "api-handler",
+      "compatibility": true
+    },
+    {
+      "method": "GET",
+      "source": "/api/products/unavailable-let-me-know",
+      "route": "/api/products/unavailable-let-me-know",
+      "strategy": "api-handler",
+      "compatibility": true
+    }
+  ],
+  "legacy": [
+    {
+      "source": "/loja/cartService.php",
+      "method": "POST",
+      "destination": "/api/cart/add",
+      "strategy": "vercel-rewrite",
+      "proof": "legacy-form-action"
+    },
+    {
+      "source": "/loja/login_layout.php",
+      "method": "GET",
+      "destination": "/my-account/login",
+      "strategy": "vercel-redirect",
+      "proof": "legacy-menu-link"
+    },
+    {
+      "source": "/loja/catalogo.php",
+      "method": "GET",
+      "destination": "/busca",
+      "strategy": "vercel-redirect",
+      "proof": "legacy-link"
+    },
+    {
+      "source": "/loja/busca.php",
+      "method": "GET",
+      "destination": "/busca",
+      "strategy": "vercel-redirect",
+      "proof": "legacy-search-link"
+    },
+    {
+      "source": "/loja/logout.php",
+      "method": "GET",
+      "destination": "/",
+      "strategy": "vercel-redirect",
+      "proof": "legacy-link"
+    },
+    {
+      "source": "/loja/redirect_cart_service.php",
+      "method": "GET",
+      "destination": "/carrinho",
+      "strategy": "vercel-redirect",
+      "proof": "legacy-link"
+    },
+    {
+      "source": "/mvc/store/newsletter/",
+      "method": "POST",
+      "destination": "/api/newsletter",
+      "strategy": "vercel-rewrite",
+      "proof": "legacy-form-action"
+    },
+    {
+      "source": "/contato/contato.php",
+      "method": "POST",
+      "destination": "/api/contact",
+      "strategy": "vercel-rewrite",
+      "proof": "legacy-form-action"
+    },
+    {
+      "source": "/depoimentos-de-clientes/funcoes/envia_depoimento.php",
+      "method": "POST",
+      "destination": "/api/testimonials",
+      "strategy": "vercel-rewrite",
+      "proof": "legacy-form-action"
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pagina nao encontrada - TECH 7</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.ico">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0b0b;
+      --panel: #161616;
+      --line: rgba(214, 163, 75, .42);
+      --text: #f6f1e8;
+      --muted: #b8b1a7;
+      --gold: #d6a34b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, rgba(214, 163, 75, .10), transparent 34%), var(--bg);
+      color: var(--text);
+      font-family: Inter, Arial, sans-serif;
+      padding: 24px;
+    }
+    main {
+      width: min(520px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, .36);
+    }
+    .code {
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-size: clamp(26px, 5vw, 38px);
+      line-height: 1.1;
+      margin: 0 0 12px;
+    }
+    p {
+      color: var(--muted);
+      line-height: 1.55;
+      margin: 0 0 22px;
+    }
+    a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    a:hover { border-color: var(--gold); }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="code">Erro 404</div>
+    <h1>Pagina nao encontrada</h1>
+    <p>O endereco acessado nao corresponde a uma pagina ativa da TECH 7. Use a busca ou volte para a pagina inicial.</p>
+    <a href="/">Voltar para a home</a>
+  </main>
+</body>
+</html>
