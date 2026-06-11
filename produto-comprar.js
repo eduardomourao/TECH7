@@ -1,4 +1,4 @@
-﻿/**
+/**
  * produto-comprar.js v5 â€” BotÃ£o de compra independente, zero dependÃªncia Tray.
  *
  * Fontes de dados:
@@ -97,6 +97,51 @@
     var img = document.querySelector('.image-show img, .box-gallery img, [data-src]');
     if (img) return img.src || img.getAttribute('data-src') || '';
     return '';
+  }
+
+  function buildWhatsAppConsultaUrl(productName) {
+    var name = normalizeText(productName || getNome() || 'Produto TECH 7');
+    var text = 'Ola, vim pelo site e gostaria de saber se o produto ' + name + ' esta disponivel.';
+    return 'https://wa.me/5531999454848?text=' + encodeURIComponent(text);
+  }
+
+  function criarBotaoConsultaWhatsApp(dados) {
+    var link = document.createElement('a');
+    var nome = normalizeText(dados && dados.nome);
+    link.className = 't7-whatsapp-consulta';
+    link.href = buildWhatsAppConsultaUrl(nome);
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.setAttribute('aria-label', 'Consultar disponibilidade no WhatsApp');
+    link.textContent = 'Consultar no WhatsApp';
+    link.style.cssText = [
+      'display:inline-flex;align-items:center;justify-content:center;',
+      'min-height:48px;padding:13px 24px;border-radius:8px;',
+      'background:#128c3a;color:#fff;text-decoration:none;',
+      'font-size:16px;font-weight:800;line-height:1.2;',
+      'box-shadow:0 8px 18px rgba(18,140,58,.18);',
+      'transition:background .2s,transform .15s,box-shadow .2s;',
+      'font-family:inherit;'
+    ].join('');
+    link.addEventListener('mouseenter', function () {
+      link.style.background = '#0f7a32';
+      link.style.transform = 'translateY(-1px)';
+      link.style.boxShadow = '0 12px 24px rgba(18,140,58,.24)';
+    });
+    link.addEventListener('mouseleave', function () {
+      link.style.background = '#128c3a';
+      link.style.transform = '';
+      link.style.boxShadow = '0 8px 18px rgba(18,140,58,.18)';
+    });
+    link.addEventListener('focus', function () {
+      link.style.outline = '3px solid rgba(18,140,58,.28)';
+      link.style.outlineOffset = '3px';
+    });
+    link.addEventListener('blur', function () {
+      link.style.outline = '';
+      link.style.outlineOffset = '';
+    });
+    return link;
   }
 
   /* ================================================================ */
@@ -350,8 +395,10 @@
 
     // Extrai variaÃ§Ãµes antes de remover
     extrairVariacao();
-    _insertParent = form.parentNode;
-    _insertBefore = form.nextSibling;
+    var stableParent = form.closest('.fixed-info') || form.closest('.product-colum-right') || form.parentNode;
+    var freightBox = stableParent ? stableParent.querySelector('.box-frete, .new-frete, .produto-calcular-frete') : null;
+    _insertParent = stableParent;
+    _insertBefore = freightBox && freightBox.parentNode === stableParent ? freightBox : null;
 
     // Remove o form
     if (form.parentNode) form.parentNode.removeChild(form);
@@ -384,6 +431,20 @@
     price.style.cssText = 'font-size:30px;line-height:1.15;font-weight:900;color:#ff6a00;letter-spacing:-.02em;';
     price.textContent = dados.preco >= 2 ? formatMoney(dados.preco) : 'Preco sob consulta';
     container.appendChild(price);
+
+    if (dados.preco < 2) {
+      var consultText = document.createElement('p');
+      consultText.className = 't7-whatsapp-consulta-text';
+      consultText.textContent = 'Este produto esta sem preco no momento. Consulte disponibilidade direto com a loja.';
+      consultText.style.cssText = 'max-width:420px;margin:0;color:#444;font-size:14px;line-height:1.5;';
+      container.appendChild(consultText);
+
+      var consultRow = document.createElement('div');
+      consultRow.style.cssText = 'display:flex;align-items:center;gap:12px;flex-wrap:wrap;';
+      consultRow.appendChild(criarBotaoConsultaWhatsApp(dados));
+      container.appendChild(consultRow);
+      return container;
+    }
 
     // VariaÃ§Ãµes
     if (_variacaoHtml) {
@@ -458,7 +519,7 @@
     if (!btn) return;
     var orig = btn.textContent;
     btn.disabled = true;
-    btn.textContent = 'âœ— ' + msg;
+    btn.textContent = '\u2716 ' + msg;
     btn.style.background = '#dc2626';
     btn.style.borderColor = '#dc2626';
     setTimeout(function () {
@@ -506,7 +567,7 @@
     if (btn) {
       var bgOrig = btn.style.background;
       btn.disabled = true;
-      btn.textContent = 'âœ“ Adicionado!';
+      btn.textContent = '\u2714 Adicionado!';
       btn.style.background = '#16a34a';
       setTimeout(function () {
         btn.style.background = bgOrig;
@@ -607,4 +668,3 @@
   }
 
 })();
-

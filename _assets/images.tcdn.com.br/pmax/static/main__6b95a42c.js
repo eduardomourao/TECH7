@@ -1,5 +1,5 @@
 // gtag script
-const script = document.createElement("script");
+var script = document.createElement("script");
 script.type = "text/javascript";
 script.src = "https://www.googletagmanager.com/gtag/js";
 script.async = !0;

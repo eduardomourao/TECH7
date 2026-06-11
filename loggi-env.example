@@ -1,0 +1,32 @@
+# Loggi shipping runtime configuration
+LOGGI_API_URL="https://stg.api.loggi.com"
+LOGGI_CLIENT_ID=""
+LOGGI_CLIENT_SECRET=""
+LOGGI_COMPANY_ID=""
+LOGGI_EXTERNAL_SERVICE_IDS=""
+
+# Store/origin address used by quotations and shipment creation
+LOGGI_ORIGIN_NAME="TECH 7"
+LOGGI_ORIGIN_TAX_ID=""
+LOGGI_ORIGIN_ADDRESS="Avenida Oiapoque"
+LOGGI_ORIGIN_NUMBER="156"
+LOGGI_ORIGIN_COMPLEMENT=""
+LOGGI_ORIGIN_NEIGHBORHOOD="Centro"
+LOGGI_ORIGIN_ZIPCODE="30111070"
+LOGGI_ORIGIN_CITY="Belo Horizonte"
+LOGGI_ORIGIN_STATE="MG"
+
+# Default package dimensions used for quote/shipment when products do not carry dimensions
+LOGGI_DEFAULT_WEIGHT_G="500"
+LOGGI_DEFAULT_LENGTH_CM="20"
+LOGGI_DEFAULT_WIDTH_CM="15"
+LOGGI_DEFAULT_HEIGHT_CM="8"
+
+# Optional: enable automatic shipment creation after paid webhooks
+LOGGI_AUTO_CREATE_SHIPMENT="true"
+LOGGI_LABEL_RESPONSE_TYPE="LABEL_RESPONSE_TYPE_URL"
+
+# Loggi webhook Basic Auth
+ENABLE_LOGGI_WEBHOOKS="true"
+LOGGI_WEBHOOK_USERNAME=""
+LOGGI_WEBHOOK_PASSWORD=""

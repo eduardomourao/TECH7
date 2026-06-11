@@ -2,6 +2,7 @@ import express from "express";
 import crypto from "node:crypto";
 import { pool } from "../lib/db.js";
 import { requireEnv } from "../lib/env.js";
+import { createLoggiShipmentForOrder } from "../lib/loggi_fulfillment.js";
 
 export const router = express.Router();
 
@@ -45,6 +46,25 @@ function timingSafeStringEqual(a, b) {
   const left = Buffer.from(String(a || ""), "utf8");
   const right = Buffer.from(String(b || ""), "utf8");
   return left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
+function expectedBasicAuthorization(username, password) {
+  if (!username || !password) return "";
+  return `Basic ${Buffer.from(`${username}:${password}`, "utf8").toString("base64")}`;
+}
+
+function expectedLoggiAuthorization() {
+  const explicit = String(process.env.LOGGI_WEBHOOK_AUTHORIZATION || "").trim();
+  if (explicit) return explicit;
+  return expectedBasicAuthorization(process.env.LOGGI_WEBHOOK_USERNAME, process.env.LOGGI_WEBHOOK_PASSWORD);
+}
+
+async function triggerLoggiShipment(orderId) {
+  try {
+    await createLoggiShipmentForOrder(orderId);
+  } catch {
+    // Payment webhooks must be acknowledged even if fulfillment is temporarily unavailable.
+  }
 }
 
 function parseSignatureHeader(value) {
@@ -229,6 +249,7 @@ router.post("/mercadopago", async (req, res) => {
       if (orderId && typeof orderId === "string") {
         if (status === "approved") {
           await pool.query(`update orders set status = 'paid', updated_at = now() where id = $1`, [orderId]);
+          await triggerLoggiShipment(orderId);
         } else if (status === "cancelled" || status === "rejected") {
           await pool.query(`update orders set status = 'failed', updated_at = now() where id = $1 and status = 'pending'`, [
             orderId
@@ -271,6 +292,100 @@ router.get("/whatsapp", (req, res) => {
   }
 
   return res.status(403).send("forbidden");
+});
+
+router.post("/loggi", async (req, res) => {
+  const raw = rawBodyToString(req);
+  const authorization = req.header("authorization") || "";
+  const expectedAuthorization = expectedLoggiAuthorization();
+
+  if (!expectedAuthorization) return res.status(503).json({ error: "webhook_secret_not_configured" });
+  if (!timingSafeStringEqual(authorization, expectedAuthorization)) {
+    return res.status(401).json({ error: "invalid_authorization" });
+  }
+
+  const payload = parseWebhookJson(raw);
+  const packages = Array.isArray(payload?.packages) ? payload.packages : [];
+  const eventId = payload?.id || payload?.eventId || payload?.requestId || null;
+  const packageKeys = packages
+    .map((pkg) => [pkg.loggiKey, pkg.trackingCode, pkg.status?.code, pkg.status?.updatedTime].filter(Boolean).join(":"))
+    .filter(Boolean)
+    .join("|");
+  const dedupeKey = String(eventId || packageKeys || rawBodyDedupeKey(raw));
+
+  const existing = await pool.query(`select id from webhook_events where provider = 'loggi' and dedupe_key = $1`, [
+    dedupeKey
+  ]);
+  if (existing.rowCount > 0) return res.status(200).json({ ok: true, deduped: true });
+
+  await pool.query(
+    `
+      insert into webhook_events (provider, dedupe_key, request_id, signature, raw_body, parsed_json)
+      values ('loggi', $1, $2, 'basic', $3, $4)
+    `,
+    [dedupeKey, eventId ? String(eventId) : null, raw, JSON.stringify(payload)]
+  );
+
+  for (const pkg of packages) {
+    const loggiKey = pkg?.loggiKey || null;
+    const trackingCode = pkg?.trackingCode || null;
+    const status = pkg?.status || {};
+    const statusCode = status?.code != null ? String(status.code) : null;
+    const statusLabel = status?.highLevelStatus || null;
+    const statusDescription = status?.description || null;
+    const updatedTime = status?.updatedTime || pkg?.requestTime || "";
+
+    const shipmentRes = await pool.query(
+      `
+        select order_id
+        from shipments
+        where provider = 'loggi'
+          and (($1::text is not null and loggi_key = $1) or ($2::text is not null and tracking_code = $2))
+        order by updated_at desc, id desc
+        limit 1
+      `,
+      [loggiKey, trackingCode]
+    );
+    const orderId = shipmentRes.rows[0]?.order_id || null;
+    const packageDedupeKey = [loggiKey, trackingCode, statusCode, updatedTime].filter(Boolean).join(":") || dedupeKey;
+
+    await pool.query(
+      `
+        insert into shipment_events (
+          provider, dedupe_key, order_id, loggi_key, tracking_code, status_code,
+          status_label, status_description, action_required, raw_json
+        )
+        values ('loggi', $1, $2, $3, $4, $5, $6, $7, $8, $9)
+        on conflict (provider, dedupe_key) do nothing
+      `,
+      [
+        packageDedupeKey,
+        orderId,
+        loggiKey,
+        trackingCode,
+        statusCode,
+        statusLabel,
+        statusDescription,
+        status?.actionRequired ? JSON.stringify(status.actionRequired) : null,
+        JSON.stringify(pkg)
+      ]
+    );
+
+    await pool.query(
+      `
+        update shipments
+        set status = coalesce($3, status),
+            tracking_code = coalesce($2, tracking_code),
+            raw_json = $4,
+            updated_at = now()
+        where provider = 'loggi'
+          and (($1::text is not null and loggi_key = $1) or ($2::text is not null and tracking_code = $2))
+      `,
+      [loggiKey, trackingCode, statusLabel || statusCode || null, JSON.stringify(pkg)]
+    );
+  }
+
+  res.status(200).json({ ok: true });
 });
 
 router.post("/whatsapp", async (req, res) => {
@@ -441,6 +556,7 @@ router.post("/woovi", async (req, res) => {
 
       if (orderId && isWooviCompleted(payload)) {
         await pool.query(`update orders set status = 'paid', updated_at = now() where id = $1`, [orderId]);
+        await triggerLoggiShipment(orderId);
       } else if (orderId && isWooviExpired(payload)) {
         await pool.query(`update orders set status = 'failed', updated_at = now() where id = $1 and status <> 'paid'`, [orderId]);
       } else if (orderId && wooviStatus === "ACTIVE") {

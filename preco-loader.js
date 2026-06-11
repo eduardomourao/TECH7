@@ -1,6 +1,20 @@
 (function() {
   'use strict';
 
+  function markPricesLoading() {
+    if (!document.documentElement) return;
+    document.documentElement.classList.add('t7-prices-loading');
+    document.documentElement.classList.remove('t7-prices-ready');
+  }
+
+  function markPricesReady() {
+    if (!document.documentElement) return;
+    document.documentElement.classList.add('t7-prices-ready');
+    document.documentElement.classList.remove('t7-prices-loading');
+  }
+
+  markPricesLoading();
+
   function removeNode(node) {
     if (node && node.parentNode) node.parentNode.removeChild(node);
   }
@@ -260,10 +274,57 @@
     for (var i = 0; i < nodes.length; i++) nodes[i].textContent = text;
   }
 
+  function normalizeVisitedUrl(value) {
+    try {
+      var url = new URL(String(value || window.location.pathname || ''), window.location.href);
+      return (url.pathname || '/').replace(/\/index\.html$/i, '').replace(/\/+$/g, '') || '/';
+    } catch (_err) {
+      return String(value || window.location.pathname || '/').replace(/\/index\.html$/i, '').replace(/\/+$/g, '') || '/';
+    }
+  }
+
+  function refreshVisitedProductPrice(label) {
+    window.setTimeout(function() {
+      try {
+        var currentRoute = normalizeVisitedUrl(window.location.pathname);
+        var parsed = JSON.parse(localStorage.getItem('visitedProducts') || '[]');
+        if (!Array.isArray(parsed)) return;
+        var changed = false;
+        for (var i = 0; i < parsed.length; i++) {
+          if (!parsed[i] || normalizeVisitedUrl(parsed[i].url) !== currentRoute) continue;
+          if (parsed[i].price !== label) {
+            parsed[i].price = label;
+            changed = true;
+          }
+        }
+        if (changed) localStorage.setItem('visitedProducts', JSON.stringify(parsed));
+      } catch (_err) {}
+    }, 0);
+    window.setTimeout(function() {
+      try {
+        var currentRoute = normalizeVisitedUrl(window.location.pathname);
+        var parsed = JSON.parse(localStorage.getItem('visitedProducts') || '[]');
+        if (!Array.isArray(parsed)) return;
+        var changed = false;
+        for (var i = 0; i < parsed.length; i++) {
+          if (!parsed[i] || normalizeVisitedUrl(parsed[i].url) !== currentRoute) continue;
+          if (parsed[i].price !== label) {
+            parsed[i].price = label;
+            changed = true;
+          }
+        }
+        if (changed) localStorage.setItem('visitedProducts', JSON.stringify(parsed));
+      } catch (_err) {}
+    }, 700);
+  }
+
   function updatePrice(result) {
     var preco = result && result.price ? getNum(result.price) : 0;
     if (preco < 2) {
       updateScopedText('#product-priceBox .price-off, #form_comprar .price-off, .t7-buy-price, #product-priceBox #variacaoPreco, #form_comprar #variacaoPreco, #produto_preco #variacaoPreco', 'Preco sob consulta');
+      markPricesReady();
+      refreshVisitedProductPrice('Preco sob consulta');
+      document.dispatchEvent(new CustomEvent('tech7:price-loaded', { detail: result }));
       return result;
     }
 
@@ -293,6 +354,8 @@
       }
     }
 
+    markPricesReady();
+    refreshVisitedProductPrice(formatado);
     document.dispatchEvent(new CustomEvent('tech7:price-loaded', { detail: result }));
     return result;
   }
@@ -354,45 +417,144 @@
     return Array.from(byKey.values());
   }
 
+  var catalogPriceCache = new Map();
+  var catalogItemInflight = new Map();
+  var catalogBatchInflight = new Map();
+  var catalogSyncInflight = null;
+  var catalogSyncSignature = '';
+
+  function catalogEntryKey(entry) {
+    return [
+      normalizeProductId(entry && (entry.secao || entry.section) || ''),
+      normalizeProductId(entry && (entry.marca || entry.brand) || ''),
+      normalizeProductId(entry && entry.slug || '')
+    ].join('|');
+  }
+
+  function catalogSlugKey(entry) {
+    return 'slug|' + normalizeProductId(entry && entry.slug || '');
+  }
+
+  function catalogCacheGet(entry) {
+    return catalogPriceCache.get(catalogEntryKey(entry)) || catalogPriceCache.get(catalogSlugKey(entry));
+  }
+
+  function catalogInflightGet(entry) {
+    return catalogItemInflight.get(catalogEntryKey(entry)) || catalogItemInflight.get(catalogSlugKey(entry));
+  }
+
+  function normalizeResolvedItem(item, fallback) {
+    item = item || {};
+    var normalized = {
+      found: !!item.found,
+      section: item.section || fallback.secao || '',
+      brand: item.brand || fallback.marca || '',
+      slug: item.slug || fallback.slug || '',
+      price_cents: Number(item.price_cents || 0),
+      price_available: !!item.price_available,
+      price_status: item.price_status || ''
+    };
+    catalogPriceCache.set(catalogEntryKey(fallback), normalized);
+    if (normalized.slug) catalogPriceCache.set(catalogSlugKey(normalized), normalized);
+    if (normalized.slug) catalogPriceCache.set(catalogEntryKey({ secao: normalized.section, marca: normalized.brand, slug: normalized.slug }), normalized);
+    return normalized;
+  }
+
   function resolveCatalogPricesBatch(entries) {
-    return fetch('/api/products/resolve-prices', {
-      method: 'POST',
-      cache: 'no-store',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        items: entries.map(function(entry) {
-          return { section: entry.secao, brand: entry.marca, slug: entry.slug };
+    var requested = entries.map(function(entry) {
+      return {
+        secao: normalizeProductId(entry.secao || entry.section || ''),
+        marca: normalizeProductId(entry.marca || entry.brand || ''),
+        slug: normalizeProductId(entry.slug || '')
+      };
+    });
+    var missing = requested.filter(function(entry) {
+      var key = catalogEntryKey(entry);
+      return entry.slug && !catalogCacheGet(entry) && !catalogInflightGet(entry);
+    });
+
+    if (!missing.length) {
+      return Promise.all(requested.map(function(entry) {
+        var key = catalogEntryKey(entry);
+        var inflight = catalogInflightGet(entry);
+        if (inflight) {
+          return inflight.then(function() {
+            return catalogCacheGet(entry) || { found: false, section: entry.secao, brand: entry.marca, slug: entry.slug, price_cents: 0, price_available: false, price_status: 'consult' };
+          });
+        }
+        return catalogCacheGet(entry) || { found: false, section: entry.secao, brand: entry.marca, slug: entry.slug, price_cents: 0, price_available: false, price_status: 'consult' };
+      }));
+    }
+
+    var batchKey = missing.map(catalogEntryKey).sort().join('||');
+    if (!catalogBatchInflight.has(batchKey)) {
+      var batchPromise = fetch('/api/products/resolve-prices', {
+        method: 'POST',
+        cache: 'no-store',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          items: missing.map(function(entry) {
+            return { section: entry.secao, brand: entry.marca, slug: entry.slug };
+          })
         })
       })
-    })
-      .then(function(res) {
-        if (!res.ok) throw new Error('http_' + res.status);
-        return res.json();
-      })
-      .then(function(payload) {
-        return Array.isArray(payload && payload.items) ? payload.items : [];
+        .then(function(res) {
+          if (!res.ok) throw new Error('http_' + res.status);
+          return res.json();
+        })
+        .then(function(payload) {
+          var items = Array.isArray(payload && payload.items) ? payload.items : [];
+          for (var i = 0; i < missing.length; i++) normalizeResolvedItem(items[i], missing[i]);
+        })
+        .finally(function() {
+          for (var i = 0; i < missing.length; i++) {
+            catalogItemInflight.delete(catalogEntryKey(missing[i]));
+            catalogItemInflight.delete(catalogSlugKey(missing[i]));
+          }
+          catalogBatchInflight.delete(batchKey);
+        });
+      catalogBatchInflight.set(batchKey, batchPromise);
+      for (var i = 0; i < missing.length; i++) {
+        catalogItemInflight.set(catalogEntryKey(missing[i]), batchPromise);
+        catalogItemInflight.set(catalogSlugKey(missing[i]), batchPromise);
+      }
+    }
+
+    return catalogBatchInflight.get(batchKey).then(function() {
+      return Promise.all(requested.map(function(entry) {
+        var key = catalogEntryKey(entry);
+        var inflight = catalogInflightGet(entry);
+        if (inflight) {
+          return inflight.then(function() {
+            return catalogCacheGet(entry) || { found: false, section: entry.secao, brand: entry.marca, slug: entry.slug, price_cents: 0, price_available: false, price_status: 'consult' };
+          });
+        }
+        return catalogCacheGet(entry) || { found: false, section: entry.secao, brand: entry.marca, slug: entry.slug, price_cents: 0, price_available: false, price_status: 'consult' };
+      }));
+    }).then(function(items) {
+      return items.map(function(item, index) {
+        return item || { found: false, section: requested[index].secao, brand: requested[index].marca, slug: requested[index].slug, price_cents: 0, price_available: false, price_status: 'consult' };
       });
+    });
   }
 
   function updateCatalogPrices(root) {
     var entries = collectCatalogEntries(root);
-    if (!entries.length) return Promise.resolve({ updated: 0, total: 0 });
-
-    for (var e = 0; e < entries.length; e++) {
-      for (var p = 0; p < entries[e].nodes.length; p++) {
-        entries[e].nodes[p].textContent = 'Preco sob consulta';
-      }
-      for (var pay = 0; pay < entries[e].paymentNodes.length; pay++) {
-        entries[e].paymentNodes[pay].textContent = '';
-      }
+    if (!entries.length) {
+      markPricesReady();
+      return Promise.resolve({ updated: 0, total: 0 });
     }
+
+    var signature = entries.map(catalogEntryKey).sort().join('||');
+    if (catalogSyncInflight && signature === catalogSyncSignature) return catalogSyncInflight;
 
     var byKey = new Map();
     for (var i = 0; i < entries.length; i++) {
       byKey.set([entries[i].secao, entries[i].marca, entries[i].slug].join('|'), entries[i]);
     }
 
-    return resolveCatalogPricesBatch(entries)
+    catalogSyncSignature = signature;
+    catalogSyncInflight = resolveCatalogPricesBatch(entries)
       .then(function(items) {
         var updated = 0;
         var requested = entries.map(function(entry) { return [entry.secao, entry.marca, entry.slug].join('|'); });
@@ -427,20 +589,22 @@
           updated += match.nodes.length;
         }
 
+        markPricesReady();
         return { updated: updated, total: entries.length };
       })
       .catch(function(err) {
         console.warn('preco-loader: falha ao sincronizar precos de cards', err);
         for (var i = 0; i < entries.length; i++) {
-          for (var n = 0; n < entries[i].nodes.length; n++) {
-            entries[i].nodes[n].textContent = 'Preco sob consulta';
-          }
-          for (var pay = 0; pay < entries[i].paymentNodes.length; pay++) {
-            entries[i].paymentNodes[pay].textContent = '';
-          }
+          for (var n = 0; n < entries[i].nodes.length; n++) entries[i].nodes[n].textContent = 'Preco sob consulta';
+          for (var p = 0; p < entries[i].paymentNodes.length; p++) entries[i].paymentNodes[p].innerHTML = '';
         }
+        markPricesReady();
         return { updated: 0, total: entries.length };
+      })
+      .finally(function() {
+        catalogSyncInflight = null;
       });
+    return catalogSyncInflight;
   }
 
   var catalogSyncTimer = null;

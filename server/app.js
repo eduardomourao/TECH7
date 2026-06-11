@@ -7,8 +7,9 @@ import express from "express";
 import { requireEnv, safeJson } from "./lib/env.js";
 import { databaseEnvName, databaseUrl, pool } from "./lib/db.js";
 import { ensureSchema } from "./lib/schema.js";
-import { resolveProductRoutePath } from "./lib/product-url.js";
+import { normalizeProductSegment, resolveProductRoutePath } from "./lib/product-url.js";
 import { rowMatchesSection } from "./lib/product-filters.js";
+import { normalizePublicImageUrl } from "./lib/images.js";
 import { router as apiRouter } from "./routes/api.js";
 import { validateAdminConfig } from "./routes/admin.js";
 
@@ -104,6 +105,43 @@ function isProduction() {
   return process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production";
 }
 
+function isAdminLoginRequest(req, prefix) {
+  return req.method === "POST" && req.path === joinRoute(prefix, "/admin/login");
+}
+
+function isDatabaseConnectionError(error) {
+  const code = String(error?.code || "");
+  const message = String(error?.message || error || "").toLowerCase();
+  return Boolean(code) || /database|postgres|connection|connect|timeout|terminated|econn|enotfound|pool|ssl|schema/.test(message);
+}
+
+function sendDatabaseConnectionError(res) {
+  return res.status(503).json({
+    error: "database_connection_error",
+    message: "Falha de conexão com o banco"
+  });
+}
+
+function databaseLogContext(error) {
+  let host = "";
+  let port = "";
+  try {
+    const parsed = new URL(databaseUrl || "");
+    host = parsed.hostname;
+    port = parsed.port || "";
+  } catch {
+    host = "";
+    port = "";
+  }
+  return {
+    env: databaseEnvName || null,
+    host: host || null,
+    port: port || null,
+    code: error?.code || null,
+    message: String(error?.message || error || "").slice(0, 240)
+  };
+}
+
 function applySecurityHeaders(req, res, next) {
   res.set("X-Content-Type-Options", "nosniff");
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -173,6 +211,142 @@ function resolveLocalSearch(req, res) {
     },
     items: rows.slice(offset, offset + limit)
   });
+}
+
+function escapeHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function moneyFromCents(value) {
+  return (Number(value || 0) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function textFromHtml(value) {
+  return String(value || "").replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function imagesFromProductRow(row) {
+  const metadata = row?.metadata && typeof row.metadata === "object" ? row.metadata : {};
+  const images = Array.isArray(metadata.images) ? metadata.images : [];
+  const normalized = [row?.primary_image_url || row?.image_url, ...images]
+    .map((url) => normalizePublicImageUrl(url))
+    .filter(Boolean);
+  return Array.from(new Set(normalized.map((url) => [url.toLowerCase(), url]).map((entry) => entry[1])));
+}
+
+function dynamicProductParts(requestPath) {
+  if (path.extname(requestPath) && !/\/index\.html$/i.test(requestPath)) return null;
+  const parts = String(requestPath || "").split(/[?#]/)[0].split("/").filter(Boolean);
+  if (parts[parts.length - 1] === "index.html") parts.pop();
+  if (parts.length !== 2 && parts.length !== 3) return null;
+  if (["api", "_assets", "assets", "_custom", "admin", "busca", "carrinho", "checkout", "loja"].includes(parts[0])) return null;
+  const section = normalizeProductSegment(parts[0]);
+  const brand = parts.length === 3 ? normalizeProductSegment(parts[1]) : "";
+  const slug = normalizeProductSegment(parts[parts.length - 1]);
+  if (!section || !slug) return null;
+  return { section, brand, slug };
+}
+
+function renderDynamicProductHtml(row, requestPath) {
+  const images = imagesFromProductRow(row);
+  const image = images[0] || "/_assets/tech7/product-placeholder.svg";
+  const title = row.name || row.title || row.slug;
+  const description = row.description_text || textFromHtml(row.description_html) || `Produto TECH 7 na categoria ${row.section || ""}.`;
+  const price = moneyFromCents(row.price_cents);
+  const canonical = `/${String(requestPath || "").replace(/^\/+/, "").replace(/\/index\.html$/i, "")}`;
+  const galleryThumbs = images.map((url, index) => (
+    `<button class="produto-imagem-miniatura${index === 0 ? " selected" : ""}" type="button" data-t7-thumb="${index}" aria-label="Imagem ${index + 1}"><img src="${escapeHtml(url)}" alt="${escapeHtml(title)} ${index + 1}" loading="lazy"></button>`
+  )).join("");
+  const galleryImages = images.map((url, index) => (
+    `<div class="image-show${index === 0 ? " selected" : ""}" data-t7-image="${index}"${index === 0 ? "" : " style=\"display:none\""}><img src="${escapeHtml(url)}" data-src="${escapeHtml(url)}" alt="${escapeHtml(title)}" width="700" height="700" loading="${index === 0 ? "eager" : "lazy"}"></div>`
+  )).join("");
+
+  return `<!doctype html>
+<html class="page-product" lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${escapeHtml(title)} - TECH 7</title>
+  <meta name="description" content="${escapeHtml(description)}">
+  <meta property="og:title" content="${escapeHtml(title)}">
+  <meta property="og:description" content="${escapeHtml(description)}">
+  <meta property="og:image" content="${escapeHtml(image)}">
+  <link rel="canonical" href="${escapeHtml(canonical)}">
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="stylesheet" href="/_assets/images.tcdn.com.br/files/996644/themes/46/css/style.min__e4660e26.css">
+  <style>
+    body{background:#fff;color:#111;font-family:Roboto,Arial,sans-serif}
+    .t7-dynamic-header{border-bottom:1px solid #eee;background:#fff}.t7-dynamic-header .container{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px}.t7-dynamic-logo img{max-width:142px;height:auto}.t7-dynamic-main{padding:34px 0 52px}.t7-dynamic-product{display:grid;grid-template-columns:minmax(280px,1fr) minmax(280px,480px);gap:42px;align-items:start}.box-gallery{display:grid;grid-template-columns:82px 1fr;gap:18px}.nav-images{display:flex;flex-direction:column;gap:10px}.produto-imagem-miniatura{border:1px solid #e5e7eb;background:#fff;border-radius:6px;padding:4px;cursor:pointer}.produto-imagem-miniatura.selected{border-color:#ff6a00;box-shadow:0 0 0 3px rgba(255,106,0,.16)}.produto-imagem-miniatura img{display:block;width:68px;height:68px;object-fit:cover}.image-show{border:1px solid #eee;border-radius:8px;min-height:360px;display:flex;align-items:center;justify-content:center;background:#fff}.image-show img{display:block;max-width:100%;height:auto;max-height:680px;object-fit:contain}.product-colum-right h1{font-size:30px;line-height:1.18;margin:0 0 12px;color:#111}.t7-product-meta{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}.t7-product-meta span{font-size:12px;text-transform:uppercase;border:1px solid #e5e7eb;border-radius:999px;padding:5px 9px;color:#555}.t7-price-static{font-size:30px;line-height:1.1;font-weight:900;color:#ff6a00;margin:14px 0}.t7-description{margin-top:28px;line-height:1.65;color:#333}.t7-description h2{font-size:18px;margin:0 0 10px;color:#111}.t7-stock{font-size:13px;color:#555;margin-top:10px}@media(max-width:780px){.t7-dynamic-product{grid-template-columns:1fr}.box-gallery{grid-template-columns:1fr}.nav-images{order:2;flex-direction:row;overflow:auto}.product-colum-right h1{font-size:24px}}
+  </style>
+</head>
+<body>
+  <header class="t7-dynamic-header"><div class="container"><a class="t7-dynamic-logo" href="/"><img src="/logo.png" alt="TECH 7"></a><a href="/carrinho/">Carrinho</a></div></header>
+  <main class="t7-dynamic-main"><div class="container">
+    <nav class="breadcrumb" aria-label="breadcrumb"><a href="/">Home</a><span> &gt; </span><a href="/${escapeHtml(row.section || "")}">${escapeHtml(row.section || "")}</a><span> &gt; </span><span>${escapeHtml(title)}</span></nav>
+    <article class="t7-dynamic-product" data-product-id="${escapeHtml(row.id)}">
+      <section class="box-gallery">${galleryThumbs ? `<div class="nav-images">${galleryThumbs}</div>` : ""}<div class="t7-gallery-main">${galleryImages || `<div class="image-show selected"><img src="${escapeHtml(image)}" alt="${escapeHtml(title)}"></div>`}</div></section>
+      <section class="product-colum-right">
+        <h1 class="product-name">${escapeHtml(title)}</h1>
+        <div class="t7-product-meta"><span>${escapeHtml(row.section || "catalogo")}</span>${row.brand ? `<span>${escapeHtml(row.brand)}</span>` : ""}<span>SKU ${escapeHtml(row.id)}</span></div>
+        <div class="t7-price-static">${escapeHtml(price)}</div>
+        <form id="form_comprar"><input type="hidden" name="produto_id" value="${escapeHtml(row.id)}"></form>
+        <div id="button-buy"></div>
+        ${row.stock != null ? `<div class="t7-stock">Estoque: ${escapeHtml(row.stock)}</div>` : ""}
+      </section>
+    </article>
+    <section class="t7-description"><h2>Descrição</h2><div>${row.description_html || escapeHtml(description)}</div></section>
+  </div></main>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ listProducts: [{ idProduct: ${JSON.stringify(row.id)}, nameProduct: ${JSON.stringify(title)}, urlProduct: ${JSON.stringify(canonical)}, urlImage: ${JSON.stringify(image)}, sellPrice: ${JSON.stringify(price)}, category: ${JSON.stringify(row.section || "")}, brand: ${JSON.stringify(row.brand || "")}, slug: ${JSON.stringify(row.slug || "")} }] });
+    document.addEventListener('click', function (event) {
+      var thumb = event.target.closest('[data-t7-thumb]');
+      if (!thumb) return;
+      var idx = thumb.getAttribute('data-t7-thumb');
+      document.querySelectorAll('[data-t7-thumb]').forEach(function (el) { el.classList.toggle('selected', el === thumb); });
+      document.querySelectorAll('[data-t7-image]').forEach(function (el) { el.style.display = el.getAttribute('data-t7-image') === idx ? '' : 'none'; el.classList.toggle('selected', el.getAttribute('data-t7-image') === idx); });
+    });
+  </script>
+  <script src="/preco-loader.js"></script>
+</body>
+</html>`;
+}
+
+async function tryServeDynamicProductPage(req, res, next) {
+  if (!["GET", "HEAD"].includes(req.method)) return next();
+  const parts = dynamicProductParts(req.path);
+  if (!parts || !databaseUrl) return next();
+
+  const filters = ["lower(slug) = lower($1)", "lower(coalesce(section, '')) = lower($2)", "active = true", "coalesce(is_active, true) = true"];
+  const params = [parts.slug, parts.section];
+  if (parts.brand) {
+    params.push(parts.brand);
+    filters.push(`lower(coalesce(brand, '')) = lower($${params.length})`);
+  }
+
+  try {
+    const { rows } = await pool.query(
+      `
+        select id, slug, name, brand, section, price_cents, currency, image_url, primary_image_url,
+               active, is_active, title, description_text, description_html, stock, metadata, updated_at
+        from products
+        where ${filters.join(" and ")}
+        order by updated_at desc nulls last, created_at desc
+        limit 1
+      `,
+      params
+    );
+    if (!rows.length) return next();
+    res.set("Cache-Control", "public, max-age=0, s-maxage=300");
+    return res.type("html").send(renderDynamicProductHtml(rows[0], req.path));
+  } catch (error) {
+    return next(error);
+  }
 }
 
 function registerLocalCompatibilityRoutes(app, prefix) {
@@ -282,10 +456,31 @@ export function createApp(options = {}) {
     res.redirect(308, `/busca${params.toString() ? `?${params}` : ""}`);
   });
 
-  app.get("*", (req, res, next) => {
+  app.get(/^\/.+\/_assets\/(.+)$/, (req, res) => {
+    const assetPath = String(req.params[0] || "");
+    res.sendFile(path.join(STATIC_DIR, "_assets", ...assetPath.split("/")));
+  });
+
+  app.get(/^\/.+\/preco-loader\.js$/, (_req, res) => {
+    res.sendFile(path.join(STATIC_DIR, "preco-loader.js"));
+  });
+
+  app.get(/^\/.+\/logo\.png$/, (_req, res) => {
+    res.sendFile(path.join(STATIC_DIR, "logo.png"));
+  });
+
+  app.get(["/admin", "/admin/"], (_req, res) => {
+    res.redirect(302, "/admin.html");
+  });
+
+  app.get("/admin.html", (_req, res) => {
+    res.sendFile(path.join(STATIC_DIR, "admin.html"));
+  });
+
+  app.get("*", async (req, res, next) => {
     const apiStrippedPath = req.path.replace(/^\/api(?=\/)/, "");
     const resolved = resolveProductRoutePath(req.path) || resolveProductRoutePath(apiStrippedPath);
-    if (!resolved) return next();
+    if (!resolved) return tryServeDynamicProductPage(req, res, next);
     res.set("Cache-Control", "public, max-age=0, s-maxage=86400");
     return res.sendFile(path.join(STATIC_DIR, ...resolved.split("/")));
   });
@@ -296,7 +491,7 @@ export function createApp(options = {}) {
       next();
     });
 
-    app.get(joinRoute(prefix, "/health"), async (_req, res) => {
+    app.get(joinRoute(prefix, "/health"), async (req, res) => {
       try {
         // Lightweight DB check (optional if DATABASE_URL isn't set yet).
         if (databaseUrl) {
@@ -305,18 +500,27 @@ export function createApp(options = {}) {
         }
         res.json({ ok: true, database: databaseUrl ? "connected" : "not_configured", source: databaseEnvName || null });
       } catch (err) {
-        res.status(500).json({ ok: false, error: String(err?.message || err) });
+        // eslint-disable-next-line no-console
+        console.error("[api] database health failed:", safeJson(databaseLogContext(err)));
+        res.status(503).json({
+          ok: false,
+          error: "database_connection_error",
+          message: "Falha de conexão com o banco"
+        });
       }
     });
 
     registerLocalCompatibilityRoutes(app, prefix);
 
-    app.use(prefix || "/", async (_req, _res, next) => {
+    app.use(prefix || "/", async (req, res, next) => {
+      if (isAdminLoginRequest(req, prefix)) return next();
       try {
         await ensureSchema();
         next();
       } catch (error) {
-        next(error);
+        // eslint-disable-next-line no-console
+        console.error("[api] database schema gate failed:", safeJson(databaseLogContext(error)));
+        sendDatabaseConnectionError(res);
       }
     });
     app.use(prefix || "/", apiRouter);
@@ -356,6 +560,7 @@ export function createApp(options = {}) {
   app.use((err, _req, res, _next) => {
     // eslint-disable-next-line no-console
     console.error("[api] unhandled error:", safeJson({ error: String(err?.message || err) }));
+    if (isDatabaseConnectionError(err)) return sendDatabaseConnectionError(res);
     res.status(500).json({ error: "internal_error" });
   });
 
@@ -371,9 +576,36 @@ export function runStartupChecks() {
     if (isProduction()) {
       requireEnv(databaseEnvName || "DATABASE_URL");
       requireEnv("CORS_ORIGINS");
-      if (process.env.ENABLE_MP_WEBHOOKS === "true" || process.env.MP_ACCESS_TOKEN) requireEnv("MP_WEBHOOK_SECRET");
-      if (process.env.ENABLE_WOOVI_WEBHOOKS === "true" || process.env.WOOVI_APP_ID) requireEnv("WOOVI_WEBHOOK_AUTHORIZATION");
-      if (process.env.ENABLE_WHATSAPP_WEBHOOKS === "true" || process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || process.env.WHATSAPP_ACCESS_TOKEN) {
+      if (process.env.ENABLE_MP_WEBHOOKS === "true") requireEnv("MP_WEBHOOK_SECRET");
+      if (process.env.ENABLE_WOOVI_WEBHOOKS === "true") requireEnv("WOOVI_WEBHOOK_AUTHORIZATION");
+      if (process.env.ENABLE_LOGGI_WEBHOOKS === "true") {
+        if (process.env.LOGGI_WEBHOOK_AUTHORIZATION) requireEnv("LOGGI_WEBHOOK_AUTHORIZATION");
+        else {
+          requireEnv("LOGGI_WEBHOOK_USERNAME");
+          requireEnv("LOGGI_WEBHOOK_PASSWORD");
+        }
+      }
+    if (process.env.LOGGI_AUTO_CREATE_SHIPMENT === "true") {
+      requireEnv("LOGGI_CLIENT_ID");
+      requireEnv("LOGGI_CLIENT_SECRET");
+      requireEnv("LOGGI_COMPANY_ID");
+      requireEnv("LOGGI_EXTERNAL_SERVICE_IDS");
+      requireEnv("LOGGI_ORIGIN_ADDRESS");
+      requireEnv("LOGGI_ORIGIN_NUMBER");
+      requireEnv("LOGGI_ORIGIN_NEIGHBORHOOD");
+      requireEnv("LOGGI_ORIGIN_ZIPCODE");
+      requireEnv("LOGGI_ORIGIN_CITY");
+      requireEnv("LOGGI_ORIGIN_STATE");
+    }
+    if (process.env.ENABLE_MELHOR_ENVIO_SHIPPING === "true") {
+      requireEnv("MELHOR_ENVIO_ORIGIN_ZIPCODE");
+      if (!process.env.MELHOR_ENVIO_TOKEN) {
+        requireEnv("MELHOR_ENVIO_CLIENT_ID");
+        requireEnv("MELHOR_ENVIO_CLIENT_SECRET");
+        requireEnv("MELHOR_ENVIO_REDIRECT_URI");
+      }
+    }
+      if (process.env.ENABLE_WHATSAPP_WEBHOOKS === "true") {
         requireEnv("WHATSAPP_WEBHOOK_VERIFY_TOKEN");
         requireEnv("WHATSAPP_APP_SECRET");
       }

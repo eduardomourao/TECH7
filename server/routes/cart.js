@@ -6,6 +6,10 @@ import { productUrlFromRow } from "../lib/product-url.js";
 
 export const router = express.Router();
 
+function asyncRoute(handler) {
+  return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
+}
+
 function normalizeId(value) {
   return String(value || "")
     .toLowerCase()
@@ -30,7 +34,7 @@ function snapshotHints(productId, snapshot) {
 
 async function resolveCartProduct(productId, snapshot) {
   const direct = await pool.query(
-    `select id, slug, brand, section, price_cents from products where id = $1 and active = true limit 1`,
+    `select id, slug, brand, section, price_cents from products where id = $1 and active = true and coalesce(is_active, true) = true limit 1`,
     [productId]
   );
   if (direct.rowCount > 0) return direct.rows[0];
@@ -39,7 +43,7 @@ async function resolveCartProduct(productId, snapshot) {
   if (!hints.slug) return null;
 
   const params = [hints.slug];
-  const filters = ["slug = $1", "active = true"];
+  const filters = ["slug = $1", "active = true", "coalesce(is_active, true) = true"];
   if (hints.brand) {
     params.push(hints.brand);
     filters.push(`coalesce(brand, '') = $${params.length}`);
@@ -70,7 +74,8 @@ async function getCart(cartId) {
   if (cartRes.rowCount === 0) return null;
   const itemsRes = await pool.query(
     `
-      select ci.product_id, ci.qty, p.name, p.slug, p.brand, p.section, p.price_cents, p.currency, p.image_url
+      select ci.product_id, ci.qty, p.name, p.slug, p.brand, p.section, p.price_cents, p.currency,
+             coalesce(p.primary_image_url, p.image_url) as image_url
       from cart_items ci
       join products p on p.id = ci.product_id
       where ci.cart_id = $1
@@ -85,18 +90,18 @@ async function getCart(cartId) {
   return { ...cartRes.rows[0], items };
 }
 
-router.post("/", async (_req, res) => {
+router.post("/", asyncRoute(async (_req, res) => {
   const id = newId("cart");
   await pool.query(`insert into carts (id, status) values ($1, 'open')`, [id]);
   const cart = await getCart(id);
   res.status(201).json(cart);
-});
+}));
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", asyncRoute(async (req, res) => {
   const cart = await getCart(req.params.id);
   if (!cart) return res.status(404).json({ error: "cart_not_found" });
   res.json(cart);
-});
+}));
 
 async function upsertCartItem(req, res) {
   const cartId = req.params.id;
@@ -150,5 +155,5 @@ async function upsertCartItem(req, res) {
 }
 
 // Accept both PUT and POST for compatibility with older frontends.
-router.put("/:id/items", upsertCartItem);
-router.post("/:id/items", upsertCartItem);
+router.put("/:id/items", asyncRoute(upsertCartItem));
+router.post("/:id/items", asyncRoute(upsertCartItem));

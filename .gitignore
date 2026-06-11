@@ -36,6 +36,19 @@ npm-debug.log*
 .vibe/
 .windsurf/
 .zencoder/
+.od-skills/
+
+# Projetos de referencia locais
+/admin/
+
+# QA temporario
+.tmp-*/
+*.zip
+
+# Diarios locais de agentes
+/*-task_plan.md
+/*-findings.md
+/*-progress.md
 
 # Artefatos locais
 _validation/

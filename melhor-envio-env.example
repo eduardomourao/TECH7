@@ -1,0 +1,23 @@
+# Melhor Envio freight quote runtime configuration
+MELHOR_ENVIO_API_URL="https://sandbox.melhorenvio.com.br"
+MELHOR_ENVIO_TOKEN=""
+MELHOR_ENVIO_USER_AGENT="TECH7 (contato@tech7importados.com.br)"
+MELHOR_ENVIO_ORIGIN_ZIPCODE="30111070"
+
+# OAuth app credentials. Keep Secret only in environment variables.
+MELHOR_ENVIO_CLIENT_ID=""
+MELHOR_ENVIO_CLIENT_SECRET=""
+MELHOR_ENVIO_REDIRECT_URI="https://tech-7.vercel.app/api/shipping/melhor-envio/oauth/callback"
+MELHOR_ENVIO_SCOPES="shipping-calculate"
+
+# Service ids shown to customers: Correios SEDEX (2), Jadlog .Package (3), Loggi Ponto (34).
+MELHOR_ENVIO_SERVICE_IDS="2,3,34"
+
+# Default dimensions used only for freight calculation when products do not carry dimensions.
+MELHOR_ENVIO_DEFAULT_WEIGHT_KG="0.5"
+MELHOR_ENVIO_DEFAULT_LENGTH_CM="20"
+MELHOR_ENVIO_DEFAULT_WIDTH_CM="15"
+MELHOR_ENVIO_DEFAULT_HEIGHT_CM="8"
+
+# Optional production gate. When true, startup fails if required Melhor Envio envs are missing.
+ENABLE_MELHOR_ENVIO_SHIPPING="true"

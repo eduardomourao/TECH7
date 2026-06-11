@@ -6,6 +6,14 @@ import { normalizeWooviPhone, wooviFetch } from "../lib/woovi.js";
 
 export const router = express.Router();
 
+function asyncRoute(handler) {
+  return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
+}
+
+function isMissingEnv(error, name) {
+  return String(error?.message || error || "").includes(`Missing env var: ${name}`);
+}
+
 async function mpFetch(path, opts = {}) {
   const token = requireEnv("MP_ACCESS_TOKEN");
   const url = `https://api.mercadopago.com${path}`;
@@ -32,12 +40,12 @@ async function mpFetch(path, opts = {}) {
   return json;
 }
 
-router.post("/mercadopago", async (req, res) => {
+router.post("/mercadopago", asyncRoute(async (req, res) => {
   const { orderId } = req.body || {};
   if (!orderId || typeof orderId !== "string") return res.status(400).json({ error: "invalid_orderId" });
 
   const orderRes = await pool.query(
-    `select id, status, currency, total_cents, mp_preference_id from orders where id = $1`,
+    `select id, status, currency, total_cents, shipping_total_cents, shipping_service_label, mp_preference_id from orders where id = $1`,
     [orderId]
   );
   if (orderRes.rowCount === 0) return res.status(404).json({ error: "order_not_found" });
@@ -55,31 +63,53 @@ router.post("/mercadopago", async (req, res) => {
     [orderId]
   );
 
+  const preferenceItems = itemsRes.rows.map((it) => ({
+    title: it.name,
+    quantity: Number(it.qty),
+    currency_id: order.currency || "BRL",
+    unit_price: fromCents(it.unit_price_cents)
+  }));
+  if (Number(order.shipping_total_cents || 0) > 0) {
+    preferenceItems.push({
+      title: order.shipping_service_label || "Frete Melhor Envio",
+      quantity: 1,
+      currency_id: order.currency || "BRL",
+      unit_price: fromCents(order.shipping_total_cents)
+    });
+  }
+
   const baseUrl = process.env.BASE_URL || "";
   const notificationUrl = baseUrl ? `${baseUrl}/api/webhooks/mercadopago` : undefined;
   const successUrl = baseUrl ? `${baseUrl}/checkout/sucesso/?order=${encodeURIComponent(orderId)}` : undefined;
   const failureUrl = baseUrl ? `${baseUrl}/checkout/erro/?order=${encodeURIComponent(orderId)}` : undefined;
   const pendingUrl = baseUrl ? `${baseUrl}/checkout/pendente/?order=${encodeURIComponent(orderId)}` : undefined;
 
-  const preference = await mpFetch("/checkout/preferences", {
-    method: "POST",
-    body: JSON.stringify({
-      external_reference: orderId,
-      notification_url: notificationUrl,
-      items: itemsRes.rows.map((it) => ({
-        title: it.name,
-        quantity: Number(it.qty),
-        currency_id: order.currency || "BRL",
-        unit_price: fromCents(it.unit_price_cents)
-      })),
-      back_urls: {
-        success: successUrl,
-        failure: failureUrl,
-        pending: pendingUrl
-      },
-      auto_return: "approved"
-    })
-  });
+  let preference;
+  try {
+    preference = await mpFetch("/checkout/preferences", {
+      method: "POST",
+      body: JSON.stringify({
+        external_reference: orderId,
+        notification_url: notificationUrl,
+        items: preferenceItems,
+        back_urls: {
+          success: successUrl,
+          failure: failureUrl,
+          pending: pendingUrl
+        },
+        auto_return: "approved"
+      })
+    });
+  } catch (error) {
+    if (isMissingEnv(error, "MP_ACCESS_TOKEN")) {
+      return res.status(503).json({
+        error: "payment_provider_not_configured",
+        provider: "mercadopago",
+        message: "Mercado Pago não configurado no servidor"
+      });
+    }
+    throw error;
+  }
 
   await pool.query(`update orders set mp_preference_id = $2, updated_at = now() where id = $1`, [
     orderId,
@@ -92,7 +122,7 @@ router.post("/mercadopago", async (req, res) => {
     initPoint: preference.init_point,
     sandboxInitPoint: preference.sandbox_init_point
   });
-});
+}));
 
 function cleanText(value, max = 120) {
   return String(value || "").trim().slice(0, max);
@@ -199,14 +229,14 @@ async function findLatestWooviPayment(orderId) {
   return rowRes.rows[0];
 }
 
-router.post("/woovi", async (req, res) => {
+router.post("/woovi", asyncRoute(async (req, res) => {
   res.set("Cache-Control", "no-store");
   const { orderId, customer, regenerate } = req.body || {};
   const shouldRegenerate = !!regenerate;
   if (!orderId || typeof orderId !== "string") return res.status(400).json({ error: "invalid_orderId" });
 
   const orderRes = await pool.query(
-    `select id, status, currency, total_cents from orders where id = $1`,
+    `select id, status, currency, total_cents, shipping_total_cents, shipping_service_label from orders where id = $1`,
     [orderId]
   );
   if (orderRes.rowCount === 0) return res.status(404).json({ error: "order_not_found" });
@@ -250,15 +280,37 @@ router.post("/woovi", async (req, res) => {
           .map((item) => `${item.qty}x ${cleanText(item.name, 40)}`)
           .join("; ")
           .slice(0, 255)
-      }
-    ].filter((item) => item.value)
+      },
+      Number(order.shipping_total_cents || 0) > 0
+        ? { key: "Shipping", value: `${cleanText(order.shipping_service_label || "Frete", 40)} ${fromCents(order.shipping_total_cents).toFixed(2)}` }
+        : null
+    ].filter((item) => item && item.value)
   };
   if (wooviCustomer) payload.customer = wooviCustomer;
 
-  const result = await wooviFetch("/api/v1/charge", {
-    method: "POST",
-    body: JSON.stringify(payload)
-  });
+  let result;
+  try {
+    result = await wooviFetch("/api/v1/charge", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  } catch (error) {
+    if (isMissingEnv(error, "WOOVI_APP_ID")) {
+      return res.status(503).json({
+        error: "payment_provider_not_configured",
+        provider: "woovi",
+        message: "PIX Woovi não configurado no servidor"
+      });
+    }
+    if (String(error?.message || "").startsWith("woovi_error:")) {
+      return res.status(error.status || 502).json({
+        error: "payment_provider_error",
+        provider: "woovi",
+        message: "Falha ao gerar PIX na Woovi"
+      });
+    }
+    throw error;
+  }
 
   const envelope = extractWooviEnvelope(result);
   const providerPaymentId = String(envelope.correlationID || correlationID || orderId);
@@ -287,9 +339,9 @@ router.post("/woovi", async (req, res) => {
     expiresIn: envelope.expiresIn || payload.expiresIn,
     expiresDate: envelope.expiresDate || null
   });
-});
+}));
 
-router.get("/woovi/:orderId/status", async (req, res) => {
+router.get("/woovi/:orderId/status", asyncRoute(async (req, res) => {
   res.set("Cache-Control", "no-store");
   const orderId = String(req.params.orderId || "").trim();
   if (!orderId) return res.status(400).json({ error: "invalid_orderId" });
@@ -328,5 +380,4 @@ router.get("/woovi/:orderId/status", async (req, res) => {
     expiresDate: mapped.expiresDate || null,
     canRegenerate
   });
-});
-
+}));

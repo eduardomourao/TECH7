@@ -120,9 +120,7 @@
 
       if (price) {
         var priceEl = document.createElement("p");
-        priceEl.className = "desc";
-        priceEl.style.color = "#ffcf8a";
-        priceEl.style.fontWeight = "800";
+        priceEl.className = "price";
         priceEl.textContent = price;
         info.appendChild(priceEl);
       }

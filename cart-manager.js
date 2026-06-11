@@ -11,6 +11,7 @@
   var CART_ID_KEY = 't7_cart_id';
   var LOCAL_CHANGED_KEY = 't7_cart_local_changed_at';
   var LOCAL_CHANGE_WINDOW_MS = 5 * 60 * 1000;
+  var CART_PRICE_STATUS_EVENT = 'tech7:cart-prices-sync';
 
   /* ------------------------------------------------------------------ */
   /* Utilitários                                                         */
@@ -43,11 +44,7 @@
     };
   }
 
-  function _resolveOfficialPrice(produto) {
-    if (!produto || !global.Tech7Prices || typeof global.Tech7Prices.resolve !== 'function') {
-      return Promise.resolve(produto);
-    }
-
+  function _cartLookup(produto) {
     var slug = produto.slug || '';
     if (!slug && produto.url) {
       var path = String(produto.url).replace(/^https?:\/\/[^/]+/i, '').split('?')[0].replace(/\/+$/, '');
@@ -57,23 +54,67 @@
       if (!produto.marca && parts.length >= 3) produto.marca = parts[parts.length - 2] || '';
       if (!produto.section && !produto.secao && parts.length >= 3) produto.section = parts[parts.length - 3] || '';
     }
-
-    if (!slug) return Promise.resolve(produto);
-
-    return global.Tech7Prices.resolve({
+    return {
+      id: produto.id || produto.productId || '',
       slug: slug,
       marca: produto.marca || produto.brand || '',
       secao: produto.section || produto.secao || produto.categoria || ''
-    }).then(function (result) {
-      if (result && result.found && result.price > 0) {
-        produto.preco = result.price;
-        produto.price = result.price;
-      } else {
-        produto.preco = 0;
-        produto.price = 0;
-        console.warn('[cartManager] produto sem preco valido no backend', produto);
-      }
-      return produto;
+    };
+  }
+
+  function _applyOfficialPrice(produto, result) {
+    if (result && result.found && result.price > 0) {
+      produto.preco = result.price;
+      produto.price = result.price;
+    } else {
+      produto.preco = 0;
+      produto.price = 0;
+      console.warn('[cartManager] produto sem preco valido no backend', produto);
+    }
+    return produto;
+  }
+
+  function _resultFromResolvePayload(payload, fallback) {
+    var items = Array.isArray(payload && payload.items) ? payload.items : [];
+    var item = items[0] || {};
+    var cents = Number(item.price_cents || 0);
+    var price = Number.isFinite(cents) ? cents / 100 : 0;
+    return {
+      found: !!item.found,
+      price: price >= 2 ? price : 0,
+      secao: item.section || fallback.secao,
+      marca: item.brand || fallback.marca,
+      slug: item.slug || fallback.slug
+    };
+  }
+
+  function _resolveOfficialPrice(produto) {
+    if (!produto) return Promise.resolve(produto);
+
+    var lookup = _cartLookup(produto);
+    if (!lookup.slug && !lookup.id) return Promise.resolve(produto);
+
+    var resolver = global.Tech7Prices && typeof global.Tech7Prices.resolve === 'function'
+      ? global.Tech7Prices.resolve(lookup)
+      : _fetchJson('/api/products/resolve-prices', {
+          method: 'POST',
+          cache: 'no-store',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            items: [{
+              id: lookup.id,
+              productId: lookup.id,
+              slug: lookup.slug,
+              section: lookup.secao,
+              brand: lookup.marca
+            }]
+          })
+        }).then(function (payload) {
+          return _resultFromResolvePayload(payload, lookup);
+        });
+
+    return resolver.then(function (result) {
+      return _applyOfficialPrice(produto, result);
     }).catch(function (err) {
       produto.preco = 0;
       produto.price = 0;
@@ -95,6 +136,35 @@
 
   function _save(items) {
     try { localStorage.setItem(LS_KEY, JSON.stringify(items)); } catch (e) {}
+  }
+
+  function _setCartPriceStatus(status) {
+    global.T7_CART_PRICES_STATUS = status;
+    try {
+      document.dispatchEvent(new CustomEvent(CART_PRICE_STATUS_EVENT, { detail: { status: status }, bubbles: true }));
+    } catch (e) {}
+  }
+
+  function _refreshOfficialCartPrices() {
+    var items = _load();
+    if (!items.length) {
+      _setCartPriceStatus('ready');
+      return Promise.resolve(items);
+    }
+
+    _setCartPriceStatus('pending');
+    return Promise.all(items.map(function (item) {
+      return _resolveOfficialPrice(item);
+    })).then(function (resolved) {
+      _save(resolved);
+      _dispatch(resolved);
+      _setCartPriceStatus('ready');
+      return resolved;
+    }).catch(function (err) {
+      console.warn('[cartManager] falha ao atualizar precos oficiais do carrinho', err);
+      _setCartPriceStatus('error');
+      return items;
+    });
   }
 
   function _markLocalChanged() {
@@ -119,6 +189,11 @@
       if (id) localStorage.setItem(CART_ID_KEY, id);
       else localStorage.removeItem(CART_ID_KEY);
     } catch (e) {}
+  }
+
+  function _isLocalCartId(id) {
+    id = String(id || '');
+    return id === 'local-cart' || /^local-/i.test(id);
   }
 
   function _sanitizeCartId(value) {
@@ -199,6 +274,24 @@
     };
   }
 
+  function _localServerCart(id) {
+    return {
+      id: id || 'local-cart',
+      status: 'open',
+      items: _load().map(function (item) {
+        return {
+          product_id: String(item.id || ''),
+          name: String(item.nome || item.name || 'Produto TECH 7'),
+          qty: Math.max(1, parseInt(item.quantidade || item.qty || item.quantity || 1, 10) || 1),
+          price_cents: Math.round(_parseMoney(item.preco != null ? item.preco : item.price) * 100),
+          image_url: String(item.imagem || item.image || ''),
+          url: String(item.url || ''),
+          product_url: String(item.url || '')
+        };
+      })
+    };
+  }
+
   function _fetchJson(url, opts) {
     return fetch(url, opts).then(function (res) {
       return res.text().then(function (txt) {
@@ -250,6 +343,11 @@
     var forceServer = !!(options && options.forceServer);
     var cid = _getCartId();
     if (cid) {
+      if (_isLocalCartId(cid)) {
+        var localCart = _localServerCart(cid);
+        _syncFromServerCart(localCart, !forceServer);
+        return Promise.resolve(localCart);
+      }
       return _fetchJson('/api/cart/' + encodeURIComponent(cid), { cache: 'no-store' })
         .then(function (cart) {
           _setCartId(cart.id);
@@ -645,9 +743,14 @@
     var importedCartId = _adoptCartIdFromUrl();
     var initial = _load();
     var initialCount = initial.reduce(function (s, it) { return s + it.quantidade; }, 0);
+    _setCartPriceStatus(initial.length ? 'pending' : 'ready');
     _updateBadges(initialCount);
     _attachDropdown();
-    _ensureServerCart({ forceServer: !!importedCartId }).catch(function () {});
+    _ensureServerCart({ forceServer: !!importedCartId })
+      .then(_refreshOfficialCartPrices)
+      .catch(function () {
+        _setCartPriceStatus(initial.length ? 'error' : 'ready');
+      });
   }
 
   // Dispara em páginas carregadas via fetch/ajax também

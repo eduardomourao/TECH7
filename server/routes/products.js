@@ -19,9 +19,22 @@ function requireDatabase(res) {
 
 function mapProduct(row) {
   if (!row) return row;
+  const metadata = row.metadata && typeof row.metadata === "object" ? row.metadata : {};
+  const images = Array.isArray(metadata.images)
+    ? metadata.images.map((url) => normalizePublicImageUrl(url)).filter(Boolean)
+    : [];
+  const primary = normalizePublicImageUrl(row.primary_image_url || row.image_url);
+  const imageList = primary ? [primary, ...images.filter((url) => url !== primary)] : images;
   return {
     ...row,
-    image_url: normalizePublicImageUrl(row.image_url),
+    image_url: imageList[0] || "",
+    primary_image_url: imageList[0] || "",
+    image: imageList[0] || "",
+    images: imageList,
+    description: row.description_text || null,
+    description_text: row.description_text || null,
+    description_html: row.description_html || null,
+    stock: row.stock ?? null,
     url: productUrlFromRow(row),
     updated_at: row.updated_at || null
   };
@@ -32,6 +45,24 @@ function parseOptionalPrice(value) {
   if (!raw) return null;
   const parsed = Number(raw.replace(",", "."));
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function queryWithRetry(sql, params, attempts = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await pool.query(sql, params);
+    } catch (error) {
+      lastError = error;
+      if (attempt === attempts) break;
+      await wait(150 * attempt);
+    }
+  }
+  throw lastError;
 }
 
 async function mapProductWithCatalogPrice(row) {
@@ -82,11 +113,13 @@ router.post("/resolve-prices", asyncRoute(async (req, res) => {
   );
   if (!ids.length && !slugs.length) return res.json({ items: normalized.map(() => ({ found: false })) });
 
-  const { rows } = await pool.query(
+  const { rows } = await queryWithRetry(
     `
-      select id, slug, name, brand, section, price_cents, currency, image_url, active, updated_at
+      select id, slug, name, brand, section, price_cents, currency, image_url, primary_image_url,
+             active, is_active, description_text, description_html, stock, metadata, updated_at
       from products
       where active = true
+        and coalesce(is_active, true) = true
         and (
           id = any($1::text[])
           or lower(slug) = any($2::text[])
@@ -148,7 +181,7 @@ router.post("/resolve-prices", asyncRoute(async (req, res) => {
       price_cents: price.price_cents,
       price_available: price.price_available,
       price_status: price.price_status,
-      image_url: normalizePublicImageUrl(found.image_url),
+      image_url: normalizePublicImageUrl(found.primary_image_url || found.image_url),
       url: productUrlFromRow(found),
       updated_at: found.updated_at || null,
       found: true
@@ -163,9 +196,10 @@ router.get("/:id", asyncRoute(async (req, res) => {
 
   const { rows } = await pool.query(
     `
-      select id, slug, name, brand, section, price_cents, currency, image_url, active, updated_at
+      select id, slug, name, brand, section, price_cents, currency, image_url, primary_image_url,
+             active, is_active, description_text, description_html, stock, metadata, updated_at
       from products
-      where id = $1 and active = true
+      where id = $1 and active = true and coalesce(is_active, true) = true
       limit 1
     `,
     [String(req.params.id || "")]
@@ -188,7 +222,7 @@ router.get("/", asyncRoute(async (req, res) => {
   const priceFilterActive = (minPrice !== null && minPrice >= 0) || (maxPrice !== null && maxPrice >= 0);
 
   const params = [];
-  const filters = ["active = true"];
+  const filters = ["active = true", "coalesce(is_active, true) = true"];
 
   if (brand) {
     params.push(brand);
@@ -247,7 +281,8 @@ router.get("/", asyncRoute(async (req, res) => {
 
   const { rows } = await pool.query(
     `
-      select id, slug, name, brand, section, price_cents, currency, image_url, active, updated_at
+      select id, slug, name, brand, section, price_cents, currency, image_url, primary_image_url,
+             active, is_active, description_text, description_html, stock, metadata, updated_at
       from products
       where ${whereSql}
       order by ${orderSqlForSort(sort)}

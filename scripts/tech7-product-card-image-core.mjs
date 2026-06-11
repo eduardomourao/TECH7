@@ -214,28 +214,33 @@ function searchIndexImage(card, assetNames) {
 }
 
 function cardImageCandidate(card, lookup, assetNames, sourceFile) {
-  const product = matchingProduct(card, lookup);
-  if (product?.urlImage) {
-    const localImage = localImageForUrl(product.urlImage, assetNames);
-    if (localImage) return { image: localImage, source: 'catalog-dataLayer' };
-  }
-
   const fromProductPage = productPageImage(card, sourceFile, assetNames);
   if (fromProductPage) return { image: fromProductPage, source: 'product-page' };
 
   const fromSearchIndex = searchIndexImage(card, assetNames);
   if (fromSearchIndex) return { image: fromSearchIndex, source: 'search-index' };
 
+  const product = matchingProduct(card, lookup);
+  if (product?.urlImage) {
+    const localImage = localImageForUrl(product.urlImage, assetNames);
+    if (localImage) return { image: localImage, source: 'catalog-dataLayer' };
+  }
+
   return null;
 }
 
 function repairFirstImageTag(block, localImage) {
   return block.replace(/<img\b[^>]*>/i, (tag) =>
-    tag.replace(
-      /(\s(?:src|data-src)=["'])(?:\.{1,2}\/)*_assets\/tech7\/product-placeholder\.svg(["'])/gi,
-      `$1${localImage}$2`,
-    ),
+    tag
+      .replace(/(\ssrc=["'])([^"']*)(["'])/i, `$1${localImage}$3`)
+      .replace(/(\sdata-src=["'])([^"']*)(["'])/i, `$1${localImage}$3`),
   );
+}
+
+function cardNeedsImageRepair(card, candidate) {
+  if (!candidate?.image) return false;
+  if (!card.src || /(?:^|\/)product-placeholder\.svg(?:$|[?#])/i.test(card.src)) return true;
+  return imageKey(card.src) !== imageKey(candidate.image);
 }
 
 export function repairCatalogHtml(html, assetNames) {
@@ -243,7 +248,7 @@ export function repairCatalogHtml(html, assetNames) {
 }
 
 export function repairCatalogHtmlForFile(html, assetNames, sourceFile) {
-  if (!html.includes('catalog-content') || !html.includes('listProducts') || !html.includes(placeholderPath)) {
+  if (!html.includes('catalog-content') || !html.includes('listProducts')) {
     return { html, changes: [] };
   }
 
@@ -252,11 +257,9 @@ export function repairCatalogHtmlForFile(html, assetNames, sourceFile) {
   const changes = [];
 
   const nextHtml = html.replace(/<li class="item flex">([\s\S]*?)<\/li>/g, (full) => {
-    if (!full.includes(placeholderPath)) return full;
-
     const card = productCardData(full);
     const candidate = cardImageCandidate(card, lookup, assetNames, sourceFile);
-    if (!candidate?.image) return full;
+    if (!cardNeedsImageRepair(card, candidate)) return full;
 
     const repaired = repairFirstImageTag(full, candidate.image);
 
@@ -264,6 +267,7 @@ export function repairCatalogHtmlForFile(html, assetNames, sourceFile) {
       changes.push({
         name: card.name,
         href: card.href,
+        previousImage: card.src,
         image: candidate.image,
         source: candidate.source,
       });
@@ -306,4 +310,34 @@ export function findRepairablePlaceholdersForFile(html, assetNames, sourceFile) 
   }
 
   return repairable;
+}
+
+export function findCardImageMismatchesForFile(html, assetNames, sourceFile) {
+  if (!html.includes('catalog-content') || !html.includes('listProducts')) {
+    return [];
+  }
+
+  const products = dataLayerProductsFromHtml(html);
+  const lookup = productLookup(products);
+  const mismatches = [];
+
+  for (const match of html.matchAll(/<li class="item flex">([\s\S]*?)<\/li>/g)) {
+    const block = match[0];
+    if (!block.includes('product-name')) continue;
+
+    const card = productCardData(block);
+    const candidate = cardImageCandidate(card, lookup, assetNames, sourceFile);
+    if (!cardNeedsImageRepair(card, candidate)) continue;
+
+    mismatches.push({
+      name: card.name,
+      href: card.href,
+      cardImage: card.src,
+      expectedImage: candidate.image,
+      source: candidate.source,
+      reason: card.src ? 'card-image-differs-from-product' : 'card-image-missing',
+    });
+  }
+
+  return mismatches;
 }

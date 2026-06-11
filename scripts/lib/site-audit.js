@@ -3,7 +3,7 @@ import path from "node:path";
 
 export const root = process.cwd();
 
-const SKIP_DIRS = new Set([".git", "node_modules", ".vercel", "_validation"]);
+const SKIP_DIRS = new Set([".git", "node_modules", ".vercel", ".od-skills", "_validation"]);
 const INTERNAL_PROTOCOL = /^(mailto:|tel:|whatsapp:|javascript:|data:|blob:|sms:|viber:|skype:)/i;
 
 export function toPosix(value) {

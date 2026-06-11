@@ -44,7 +44,7 @@ router.get("/", asyncRoute(async (req, res) => {
   const words = q.split(/\s+/).filter(Boolean).slice(0, 10);
   const priceFilterActive = (minPrice !== null && minPrice >= 0) || (maxPrice !== null && maxPrice >= 0);
 
-  const filters = ["active = true"];
+  const filters = ["active = true", "coalesce(is_active, true) = true"];
   const params = [];
 
   if (brand) {
@@ -106,7 +106,8 @@ router.get("/", asyncRoute(async (req, res) => {
   params.push(limit, offset);
   const rowsRes = await pool.query(
     `
-      select id, slug, name, brand, section, price_cents, currency, image_url, updated_at
+      select id, slug, name, brand, section, price_cents, currency, image_url, primary_image_url,
+             description_text, description_html, stock, metadata, updated_at
       from products
       where ${whereSql}
       order by ${orderSqlForSort(sort)}
@@ -116,23 +117,32 @@ router.get("/", asyncRoute(async (req, res) => {
   );
 
   const pricedRows = await applyCatalogPrices(rowsRes.rows);
-  const items = pricedRows.map((row) => ({
-    id: row.id,
-    slug: row.slug,
-    title: row.name,
-    name: row.name,
-    description: null,
-    brand: row.brand,
-    category: row.section,
-    section: row.section,
-    price_cents: Number(row.price_cents || 0),
-    price_available: !!row.price_available,
-    price_status: row.price_status || "consult",
-    image: normalizePublicImageUrl(row.image_url),
-    image_url: normalizePublicImageUrl(row.image_url),
-    url: productUrlFromRow(row),
-    updated_at: row.updated_at || null
-  }));
+  const items = pricedRows.map((row) => {
+    const metadata = row.metadata && typeof row.metadata === "object" ? row.metadata : {};
+    const images = Array.isArray(metadata.images)
+      ? metadata.images.map((url) => normalizePublicImageUrl(url)).filter(Boolean)
+      : [];
+    const primary = normalizePublicImageUrl(row.primary_image_url || row.image_url);
+    const image = primary || images[0] || "";
+    return {
+      id: row.id,
+      slug: row.slug,
+      title: row.name,
+      name: row.name,
+      description: row.description_text || null,
+      brand: row.brand,
+      category: row.section,
+      section: row.section,
+      price_cents: Number(row.price_cents || 0),
+      price_available: !!row.price_available,
+      price_status: row.price_status || "consult",
+      image,
+      image_url: image,
+      images: image ? [image, ...images.filter((url) => url !== image)] : images,
+      url: productUrlFromRow(row),
+      updated_at: row.updated_at || null
+    };
+  });
 
   res.json({
     q,

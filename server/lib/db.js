@@ -37,8 +37,9 @@ function sanitizeConnectionString(url) {
 }
 
 function shouldRejectUnauthorized(url) {
-  if (process.env.PGSSL_REJECT_UNAUTHORIZED) {
-    return process.env.PGSSL_REJECT_UNAUTHORIZED !== "false";
+  const explicit = String(process.env.PGSSL_REJECT_UNAUTHORIZED || "").trim().toLowerCase();
+  if (explicit) {
+    return !["false", "0", "no", "off"].includes(explicit);
   }
 
   // Supabase pooler can present a CA chain that Node does not trust in some

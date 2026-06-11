@@ -161,7 +161,7 @@
 
     .stepper {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 12px;
       margin: 0 0 22px;
       max-width: 760px;
@@ -1057,7 +1057,7 @@
 
     .stepper {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 0;
       max-width: 680px;
       margin: 0 0 12px auto;
@@ -1526,7 +1526,7 @@
       --t7-progress-width: 24px;
       position: relative;
       width: min(100%, 520px);
-      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
       gap: 0 !important;
       isolation: isolate;
     }
@@ -1633,6 +1633,22 @@
     .checkout-step[data-step="3"] .checkout-actions .btn-primary {
       flex-basis: 230px;
     }
+    .checkout-step[data-step="3"] .checkout-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(130px, 1.35fr);
+      width: min(100%, 660px);
+      gap: 10px;
+    }
+    .checkout-step[data-step="3"] .checkout-actions .btn {
+      width: 100%;
+      min-width: 0 !important;
+      padding-inline: 12px;
+    }
+    .checkout-step[data-step="3"] .checkout-actions .btn-secondary,
+    .checkout-step[data-step="3"] .checkout-actions .btn-primary {
+      flex: initial;
+      flex-basis: auto;
+    }
     @keyframes t7-progress-back-in {
       from {
         opacity: 0;
@@ -1660,6 +1676,12 @@
       }
       .checkout-step[data-step="3"] .checkout-actions .btn-primary {
         flex-basis: 210px;
+      }
+      .checkout-step[data-step="3"] .checkout-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .checkout-step[data-step="3"] .checkout-actions .btn-primary {
+        grid-column: 1 / -1;
       }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -1717,8 +1739,9 @@
           <div class="stepper is-expanded" data-progress-step="1" aria-label="Etapas do checkout">
             <div class="step is-active" data-step-indicator="1"><span class="step-circle">1</span><span>Identificação</span></div>
             <div class="step" data-step-indicator="2"><span class="step-circle">2</span><span>Entrega</span></div>
-            <div class="step" data-step-indicator="3"><span class="step-circle">3</span><span>Revisão</span></div>
-            <div class="step" data-step-indicator="4"><span class="step-circle">4</span><span>PIX</span></div>
+            <div class="step" data-step-indicator="3"><span class="step-circle">3</span><span>Frete</span></div>
+            <div class="step" data-step-indicator="4"><span class="step-circle">4</span><span>Revisão</span></div>
+            <div class="step" data-step-indicator="5"><span class="step-circle">5</span><span>PIX</span></div>
           </div>
 
           <div class="checkout-layout">
@@ -1743,6 +1766,11 @@
                         <input id="campo-telefone" name="telefone" inputmode="tel" autocomplete="tel" placeholder="Telefone" required>
                         <div class="error-msg" id="erro-telefone"></div>
                       </div>
+                      <div class="field">
+                        <label for="campo-documento">CPF/CNPJ</label>
+                        <input id="campo-documento" name="documento" inputmode="numeric" autocomplete="off" placeholder="CPF ou CNPJ" required>
+                        <div class="error-msg" id="erro-documento"></div>
+                      </div>
                     </div>
                   </div>
                   <div class="checkout-actions">
@@ -1756,8 +1784,13 @@
                     <div class="delivery-options" role="radiogroup" aria-label="Forma de recebimento">
                       <label class="delivery-option is-selected" data-delivery-option="shipping">
                         <input type="radio" name="delivery-mode" value="shipping" checked>
+                        <span class="delivery-option-title">Entrega Melhor Envio</span>
+                        <span class="delivery-option-desc">Informe o CEP para calcular o frete antes do PIX.</span>
+                      </label>
+                      <label class="delivery-option" data-delivery-option="uber">
+                        <input type="radio" name="delivery-mode" value="uber">
                         <span class="delivery-option-title">Entrega por Uber</span>
-                        <span class="delivery-option-desc">Informe o endereco para combinarmos o envio pelo WhatsApp.</span>
+                        <span class="delivery-option-desc">Valor combinado pelo WhatsApp apos o pedido.</span>
                       </label>
                       <label class="delivery-option" data-delivery-option="pickup">
                         <input type="radio" name="delivery-mode" value="pickup">
@@ -1812,8 +1845,8 @@
                     </div>
                     </div>
                     <div class="shipping-card" id="shipping-info-card">
-                      <strong>Entrega por Uber</strong>
-                      <span>O valor da entrega será combinado após a confirmação do pedido. Nossa equipe entra em contato pelo WhatsApp informado.</span>
+                      <strong>Entrega Melhor Envio ou Uber</strong>
+                      <span>Escolha Melhor Envio com frete calculado ou Uber com valor combinado pelo WhatsApp.</span>
                     </div>
                     <div class="shipping-card" id="pickup-info-card" hidden>
                       <strong>Retirada na loja</strong>
@@ -1834,12 +1867,27 @@
                   </select>
                 </section>
 
-                <section class="checkout-step" data-step="3">
+                <section class="checkout-step" data-step="3" id="loggi-step">
+                  <h2>Frete Melhor Envio</h2>
+                  <div class="shipping-card" id="loggi-status-card">
+                    <strong id="loggi-status" role="status" aria-live="polite">Calcule o frete para continuar</strong>
+                    <span id="loggi-status-desc">Vamos buscar as opcoes disponiveis para o CEP informado.</span>
+                  </div>
+                  <div class="delivery-options" id="loggi-options" role="radiogroup" aria-label="Opcoes de frete Melhor Envio" aria-busy="false"></div>
+                  <div class="error-msg" id="erro-loggi" role="alert"></div>
+                  <div class="checkout-actions">
+                    <button class="btn btn-secondary" type="button" data-prev>Voltar</button>
+                    <button class="btn btn-secondary" id="btn-recalcular-loggi" type="button">Calcular frete</button>
+                    <button class="btn btn-primary" type="button" data-next disabled>Continuar</button>
+                  </div>
+                </section>
+
+                <section class="checkout-step" data-step="4">
                   <h2>Revisão do pedido</h2>
                   <div class="review-list" id="review-list"></div>
                   <div class="review-totals">
                     <div class="review-total-line"><span>Subtotal</span><strong id="review-subtotal">R$ 0,00</strong></div>
-                    <div class="review-total-line"><span>Frete</span><strong id="review-shipping">A combinar</strong></div>
+                    <div class="review-total-line"><span>Frete</span><strong id="review-shipping">Calcule o frete</strong></div>
                     <div class="review-total-line is-final"><span>Total final</span><strong id="review-total">R$ 0,00</strong></div>
                   </div>
                   <div class="checkout-actions">
@@ -1848,7 +1896,7 @@
                   </div>
                 </section>
 
-                <section class="checkout-step" data-step="4">
+                <section class="checkout-step" data-step="5">
                   <h2>Método de pagamento</h2>
                   <div class="payment-options" aria-label="Métodos de pagamento disponíveis">
                     <span class="payment-option is-selected"><span class="payment-dot" aria-hidden="true"></span> PIX Woovi</span>
@@ -1896,7 +1944,7 @@
                 <div class="summary-lines">
                   <div class="summary-line"><span>Subtotal</span><strong id="subtotal">R$ 0,00</strong></div>
                   <div class="summary-line"><span>Desconto</span><strong>R$ 0,00</strong></div>
-                  <div class="summary-line"><span>Entrega</span><strong id="delivery-summary">A combinar</strong></div>
+                  <div class="summary-line"><span>Entrega</span><strong id="delivery-summary">Calcule o frete</strong></div>
                   <div class="summary-line summary-total"><span>Total</span><strong id="total">R$ 0,00</strong></div>
                   <div class="summary-line"><span>Pagamento</span><strong id="payment-status">PIX</strong></div>
                 </div>
@@ -1917,28 +1965,10 @@
       </div>
     </main>
 
-    <footer class="t7-footer">
-      <div class="t7-footer-inner">
-        <div class="footer-logo">TECH7</div>
-        <div class="footer-links">
-          <span class="footer-title">Links importantes</span>
-          <a href="/como-comprar/">Como comprar</a>
-          <a href="/duvidas-trocas-e-devolucoes/">Trocas e devoluções</a>
-          <a href="/privacidade/">Política de privacidade</a>
-          <a href="/garantias-e-trocas/">Garantias</a>
-        </div>
-        <div class="footer-social">
-          <span class="footer-title">Atendimento</span>
-          <span>Shopping Oiapoque Centro, Av. Oiapoque, Nº 156 – Centro – CEP 30111-070 – Belo Horizonte – MG – Brasil</span>
-          <span>WhatsApp: (31) 99945-4848 WhatsApp</span>
-          <div class="footer-social-dots" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
-          <div class="footer-security"><span>Compra segura</span><span>SSL</span><span>Dados protegidos</span></div>
-        </div>
-      </div>
-    </footer>
+    <footer class="t7-footer"><div class="t7-footer-inner"><strong>TECH 7</strong><span>Shopping Oiapoque Centro, Av. Oiapoque, Nº 156 – Centro – CEP 30111-070 – Belo Horizonte – MG – Brasil</span><a href="https://wa.me/5531999454848" rel="noreferrer noopener" target="_blank">WhatsApp: (31) 99945-4848</a><span>Segunda a sábado: 9h às 20h</span><span>Domingo: 9h às 18h</span></div></footer>
   </div>
 
-  <script src="cart-manager.js"></script>
+  <script src="/cart-manager.js"></script>
   <script>
     (function () {
       var STORAGE_KEY = 'carrinho';
@@ -1949,10 +1979,15 @@
       var pollTimer = null;
       var pollInFlight = false;
       var deliveryMode = 'shipping';
+      var loggiQuoteId = '';
+      var loggiSelectedOption = null;
+      var loggiOptions = [];
+      var loggiState = 'idle';
       var fields = {
         nome: document.getElementById('campo-nome'),
         email: document.getElementById('campo-email'),
         telefone: document.getElementById('campo-telefone'),
+        documento: document.getElementById('campo-documento'),
         cep: document.getElementById('campo-cep'),
         logradouro: document.getElementById('campo-logradouro'),
         numero: document.getElementById('campo-numero'),
@@ -1973,6 +2008,20 @@
         var normalized = String(value).replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.');
         var parsed = Number(normalized);
         return Number.isFinite(parsed) ? parsed : 0;
+      }
+
+      function cartPriceStatus() {
+        return window.T7_CART_PRICES_STATUS || 'ready';
+      }
+
+      function cartPricesReady() {
+        return cartPriceStatus() === 'ready';
+      }
+
+      function cartPriceLabel(value) {
+        if (cartPriceStatus() === 'pending') return 'Atualizando preco';
+        if (cartPriceStatus() === 'error') return 'Preco indisponivel';
+        return formatCurrency(value);
       }
 
       function normalizeItem(item, index) {
@@ -2006,6 +2055,186 @@
         return String(value || '').replace(/\D/g, '');
       }
 
+      function shippingAmount() {
+        return deliveryMode === 'shipping' ? Number(loggiSelectedOption && loggiSelectedOption.price ? loggiSelectedOption.price : 0) : 0;
+      }
+
+      function clearLoggiQuote() {
+        loggiQuoteId = '';
+        loggiSelectedOption = null;
+        loggiOptions = [];
+        loggiState = 'idle';
+        renderLoggiOptions();
+        updateTotals();
+      }
+
+      function setLoggiState(state, message) {
+        loggiState = state;
+        var status = document.getElementById('loggi-status');
+        var desc = document.getElementById('loggi-status-desc');
+        var options = document.getElementById('loggi-options');
+        var error = document.getElementById('erro-loggi');
+        if (options) options.setAttribute('aria-busy', String(state === 'loading'));
+        if (error) error.textContent = state === 'error' ? (message || 'Nao foi possivel calcular o frete.') : '';
+        if (status) {
+          if (state === 'loading') status.textContent = 'Calculando frete Melhor Envio...';
+          else if (state === 'ready') status.textContent = deliveryMode === 'pickup' ? 'Retirada na loja' : deliveryMode === 'uber' ? 'Entrega por Uber' : 'Escolha uma opcao de frete';
+          else if (state === 'error') status.textContent = 'Frete indisponivel';
+          else status.textContent = deliveryMode === 'pickup' ? 'Retirada na loja' : deliveryMode === 'uber' ? 'Entrega por Uber' : 'Calcule o frete para continuar';
+        }
+        if (desc) {
+          if (state === 'loading') desc.textContent = 'Aguarde enquanto buscamos as opcoes para seu endereco.';
+          else if (state === 'ready') desc.textContent = deliveryMode === 'pickup'
+            ? 'Frete gratis para retirada.'
+            : deliveryMode === 'uber'
+              ? 'O valor sera combinado pelo WhatsApp e nao entra no PIX.'
+              : 'O valor selecionado sera somado ao total antes do PIX.';
+          else if (state === 'error') desc.textContent = message || 'Revise o endereco ou tente novamente.';
+          else desc.textContent = deliveryMode === 'pickup'
+            ? 'Frete gratis para retirada.'
+            : deliveryMode === 'uber'
+              ? 'O valor sera combinado pelo WhatsApp e nao entra no PIX.'
+              : 'Vamos buscar as opcoes disponiveis para o CEP informado.';
+        }
+        updateStepControls();
+      }
+
+      function buildLoggiPayload() {
+        return {
+          destination: {
+            cep: fields.cep.value.trim(),
+            logradouro: fields.logradouro.value.trim(),
+            numero: fields.numero.value.trim(),
+            complemento: fields.complemento.value.trim(),
+            bairro: fields.bairro.value.trim(),
+            cidade: fields.cidade.value.trim(),
+            estado: fields.estado.value.trim().toUpperCase()
+          },
+          items: readCart().map(function (item) {
+            return { id: item.id, productId: item.id, qty: item.qty };
+          })
+        };
+      }
+
+      function selectLoggiOption(serviceId) {
+        loggiSelectedOption = loggiOptions.find(function (option) {
+          return String(option.serviceId) === String(serviceId);
+        }) || loggiOptions[0] || null;
+        renderLoggiOptions();
+        updateTotals();
+        updateStepControls();
+      }
+
+      function renderLoggiOptions() {
+        var box = document.getElementById('loggi-options');
+        if (!box) return;
+        box.innerHTML = '';
+        if (deliveryMode === 'pickup') {
+          box.innerHTML = '<label class="delivery-option is-selected"><input type="radio" checked><span class="delivery-option-title">Retirada na loja</span><span class="delivery-option-desc">Gratis</span></label>';
+          return;
+        }
+        if (deliveryMode === 'uber') {
+          box.innerHTML = '<label class="delivery-option is-selected"><input type="radio" checked><span class="delivery-option-title">Entrega por Uber</span><span class="delivery-option-desc">Valor combinado pelo WhatsApp. Nao entra no PIX.</span></label>';
+          return;
+        }
+        loggiOptions.forEach(function (option) {
+          var selected = loggiSelectedOption && String(loggiSelectedOption.serviceId) === String(option.serviceId);
+          var label = document.createElement('label');
+          label.className = 'delivery-option' + (selected ? ' is-selected' : '');
+          label.setAttribute('data-loggi-option', option.serviceId);
+          label.innerHTML =
+            '<input type="radio" name="loggi-option" value="' + option.serviceId + '"' + (selected ? ' checked' : '') + '>' +
+            '<span class="delivery-option-title"></span>' +
+            '<span class="delivery-option-desc"></span>';
+          label.querySelector('.delivery-option-title').textContent = (option.label || 'Melhor Envio') + ' - ' + formatCurrency(option.price || 0);
+          label.querySelector('.delivery-option-desc').textContent = option.sloInDays ? 'Prazo estimado: ' + option.sloInDays + ' dia(s)' : 'Prazo informado pela transportadora';
+          label.querySelector('input').addEventListener('change', function () {
+            selectLoggiOption(option.serviceId);
+          });
+          box.appendChild(label);
+        });
+      }
+
+      async function fetchLoggiQuotes() {
+        if (deliveryMode === 'pickup' || deliveryMode === 'uber') {
+          clearLoggiQuote();
+          setLoggiState('ready');
+          return;
+        }
+        if (!validateStep(2)) return;
+        setLoggiState('loading');
+        try {
+          var data = await apiJson('/api/shipping/melhor-envio/quote', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(buildLoggiPayload())
+          });
+          loggiQuoteId = data.quoteId || '';
+          loggiOptions = Array.isArray(data.options) ? data.options : [];
+          loggiSelectedOption = loggiOptions.find(function (option) {
+            return String(option.serviceId) === String(data.selectedServiceId);
+          }) || loggiOptions[0] || null;
+          renderLoggiOptions();
+          setLoggiState(loggiSelectedOption ? 'ready' : 'error', loggiSelectedOption ? '' : 'Nao ha opcoes de frete para este endereco.');
+          updateTotals();
+        } catch (error) {
+          loggiQuoteId = '';
+          loggiSelectedOption = null;
+          loggiOptions = [];
+          renderLoggiOptions();
+          setLoggiState('error', humanizeShippingError(error));
+          updateTotals();
+        }
+      }
+
+      function humanizeShippingError(error) {
+        var message = String(error && error.message || '');
+        if (message === 'shipping_provider_not_configured') return 'Frete Melhor Envio ainda nao configurado no servidor.';
+        if (message === 'shipping_unavailable') return 'Melhor Envio nao retornou frete para este CEP.';
+        if (message === 'invalid_destination') return 'Revise o endereco antes de calcular.';
+        if (message === 'cart_empty') return 'Seu carrinho esta vazio.';
+        return 'Nao foi possivel calcular o frete agora.';
+      }
+
+      function updateTotals() {
+        var items = readCart();
+        var subtotal = cartTotal(items);
+        var freight = shippingAmount();
+        var total = subtotal + freight;
+        var hasItems = items.length > 0;
+        var ready = cartPricesReady();
+        var subtotalLabel = hasItems && !ready ? cartPriceLabel(0) : formatCurrency(subtotal);
+        var totalLabel = hasItems && !ready ? cartPriceLabel(0) : formatCurrency(total);
+        var subtotalEl = document.getElementById('subtotal');
+        var totalEl = document.getElementById('total');
+        var toggleTotal = document.getElementById('summary-toggle-total');
+        var deliverySummary = document.getElementById('delivery-summary');
+        var reviewSubtotal = document.getElementById('review-subtotal');
+        var reviewShipping = document.getElementById('review-shipping');
+        var reviewTotal = document.getElementById('review-total');
+        if (subtotalEl) subtotalEl.textContent = subtotalLabel;
+        if (totalEl) totalEl.textContent = totalLabel;
+        if (toggleTotal) toggleTotal.textContent = totalLabel;
+        if (deliverySummary) {
+          deliverySummary.textContent = deliveryMode === 'pickup'
+            ? 'Retirada na loja - Gratis'
+            : deliveryMode === 'uber'
+              ? 'Uber - A combinar'
+              : loggiSelectedOption
+                ? formatCurrency(freight)
+                : 'Calcule o frete';
+        }
+        if (reviewSubtotal) reviewSubtotal.textContent = subtotalLabel;
+        if (reviewShipping) reviewShipping.textContent = deliveryMode === 'pickup'
+          ? 'Retirada na loja - Gratis'
+          : deliveryMode === 'uber'
+            ? 'Uber - A combinar'
+            : loggiSelectedOption
+              ? formatCurrency(freight)
+              : 'Calcule o frete';
+        if (reviewTotal) reviewTotal.textContent = totalLabel;
+      }
+
       function maskPhone(value) {
         var digits = cleanDigits(value).slice(0, 11);
         if (digits.length <= 10) {
@@ -2020,6 +2249,21 @@
         return cleanDigits(value).slice(0, 8).replace(/^(\d{5})(\d{0,3}).*/, function (_, a, b) {
           return b ? a + '-' + b : a;
         });
+      }
+
+      function maskDocument(value) {
+        var digits = cleanDigits(value).slice(0, 14);
+        if (digits.length <= 11) {
+          return digits
+            .replace(/^(\d{3})(\d)/, '$1.$2')
+            .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+            .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
+        }
+        return digits
+          .replace(/^(\d{2})(\d)/, '$1.$2')
+          .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+          .replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3/$4')
+          .replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/, '$1.$2.$3/$4-$5');
       }
 
       function setError(fieldName, message) {
@@ -2056,7 +2300,7 @@
       }
 
       function setDeliveryMode(mode) {
-        deliveryMode = mode === 'pickup' ? 'pickup' : 'shipping';
+        deliveryMode = mode === 'pickup' ? 'pickup' : mode === 'uber' ? 'uber' : 'shipping';
         var isPickup = deliveryMode === 'pickup';
         var addressBlock = document.getElementById('delivery-address-fields');
         var shippingInfo = document.getElementById('shipping-info-card');
@@ -2077,10 +2321,12 @@
         }
         if (shippingInfo) shippingInfo.hidden = isPickup;
         if (pickupInfo) pickupInfo.hidden = !isPickup;
-        if (deliverySummary) deliverySummary.textContent = isPickup ? 'Retirada na loja' : 'A combinar';
+        clearLoggiQuote();
+        if (deliverySummary) deliverySummary.textContent = isPickup ? 'Retirada na loja - Gratis' : deliveryMode === 'uber' ? 'Uber - A combinar' : 'Calcule o frete';
 
         setAddressFieldsEnabled(!isPickup);
         if (isPickup) clearAddressErrors();
+        if (isPickup || deliveryMode === 'uber') setLoggiState('ready');
         renderReview();
         updateStepControls();
       }
@@ -2097,6 +2343,12 @@
           valid = requireField('telefone', 'Informe seu telefone.') && valid;
           if (fields.telefone.value && cleanDigits(fields.telefone.value).length < 10) {
             setError('telefone', 'Informe um telefone valido com DDD.');
+            valid = false;
+          }
+          valid = requireField('documento', 'Informe seu CPF ou CNPJ.') && valid;
+          var documentDigits = cleanDigits(fields.documento.value);
+          if (fields.documento.value && documentDigits.length !== 11 && documentDigits.length !== 14) {
+            setError('documento', 'Informe CPF com 11 digitos ou CNPJ com 14 digitos.');
             valid = false;
           }
         }
@@ -2117,6 +2369,14 @@
             valid = false;
           }
         }
+        if (step === 3) {
+          if (deliveryMode === 'pickup') return true;
+          if (deliveryMode === 'uber') return true;
+          if (!loggiSelectedOption || !loggiQuoteId) {
+            setLoggiState(loggiState === 'loading' ? 'loading' : 'error', 'Calcule e selecione uma opcao de frete.');
+            return false;
+          }
+        }
         return valid;
       }
 
@@ -2126,7 +2386,8 @@
             fields.nome.value.trim() &&
             fields.email.value.trim() &&
             fields.email.checkValidity() &&
-            cleanDigits(fields.telefone.value).length >= 10
+            cleanDigits(fields.telefone.value).length >= 10 &&
+            [11, 14].indexOf(cleanDigits(fields.documento.value).length) !== -1
           );
         }
         if (step === 2) {
@@ -2140,7 +2401,8 @@
             fields.estado.value.trim().length === 2
           );
         }
-        if (step === 3) return readCart().length > 0 && isStepComplete(1) && isStepComplete(2);
+        if (step === 3) return deliveryMode === 'pickup' || deliveryMode === 'uber' || Boolean(loggiSelectedOption && loggiQuoteId && loggiState === 'ready');
+        if (step === 4) return readCart().length > 0 && cartPricesReady() && isStepComplete(1) && isStepComplete(2) && isStepComplete(3);
         return true;
       }
 
@@ -2149,11 +2411,11 @@
           button.disabled = !isStepComplete(currentStep);
         });
         var confirmButton = document.getElementById('btn-confirmar-pix');
-        if (confirmButton) confirmButton.disabled = !isStepComplete(3);
+        if (confirmButton) confirmButton.disabled = !isStepComplete(4);
       }
 
       function goToStep(step) {
-        currentStep = Math.max(1, Math.min(4, step));
+        currentStep = Math.max(1, Math.min(5, step));
         document.querySelectorAll('[data-step]').forEach(function (section) {
           section.classList.toggle('is-active', Number(section.dataset.step) === currentStep);
         });
@@ -2168,7 +2430,8 @@
           stepper.setAttribute('data-progress-step', String(currentStep));
           stepper.classList.toggle('is-expanded', currentStep === 1);
         }
-        if (currentStep === 3) renderReview();
+        if (currentStep === 3 && deliveryMode === 'shipping' && !loggiSelectedOption && loggiState !== 'loading') fetchLoggiQuotes();
+        if (currentStep === 4) renderReview();
         updateStepControls();
       }
 
@@ -2190,13 +2453,11 @@
           row.children[0].querySelector('strong').textContent = item.nome;
           if (item.variacao) row.children[0].querySelector('small').textContent = item.variacao;
           row.children[1].textContent = 'Qtd. ' + item.qty;
-          row.children[2].textContent = formatCurrency(item.preco);
-          row.children[3].textContent = formatCurrency(item.preco * item.qty);
+          row.children[2].textContent = cartPriceLabel(item.preco);
+          row.children[3].textContent = cartPriceLabel(item.preco * item.qty);
           reviewList.appendChild(row);
         });
-        document.getElementById('review-subtotal').textContent = formatCurrency(subtotal);
-        document.getElementById('review-shipping').textContent = deliveryMode === 'pickup' ? 'Retirada na loja - Grátis' : 'A combinar';
-        document.getElementById('review-total').textContent = formatCurrency(subtotal);
+        updateTotals();
       }
 
       function renderSummary() {
@@ -2214,12 +2475,10 @@
             '<div class="summary-price"></div>';
           row.querySelector('.summary-name').textContent = item.nome;
           row.querySelector('.summary-qty').textContent = 'Qtd. ' + item.qty;
-          row.querySelector('.summary-price').textContent = formatCurrency(item.preco * item.qty);
+          row.querySelector('.summary-price').textContent = cartPriceLabel(item.preco * item.qty);
           summaryList.appendChild(row);
         });
-        document.getElementById('subtotal').textContent = formatCurrency(total);
-        document.getElementById('total').textContent = formatCurrency(total);
-        document.getElementById('summary-toggle-total').textContent = formatCurrency(total);
+        updateTotals();
         document.querySelectorAll('[data-cart-count]').forEach(function (badge) {
           badge.textContent = String(quantity);
         });
@@ -2260,18 +2519,21 @@
       }
 
       function montarDadosPedido() {
+        if (!cartPricesReady()) throw new Error('cart_prices_not_ready');
         var itens = readCart();
         var subtotal = cartTotal(itens);
         var isPickup = deliveryMode === 'pickup';
+        var frete = shippingAmount();
         return {
           itens: itens,
           subtotal: subtotal,
-          frete: 0,
-          total: subtotal,
+          frete: frete,
+          total: subtotal + frete,
           cliente: {
             nome: fields.nome.value.trim(),
             email: fields.email.value.trim(),
-            telefone: fields.telefone.value.trim()
+            telefone: fields.telefone.value.trim(),
+            documento: cleanDigits(fields.documento.value)
           },
           entrega: isPickup ? {
             cep: '',
@@ -2282,8 +2544,9 @@
             cidade: 'Belo Horizonte',
             estado: 'MG',
             metodo: 'retirada',
-            prazo: 'a combinar'
-          } : {
+            prazo: 'a combinar',
+            deliveryMode: 'pickup'
+          } : deliveryMode === 'uber' ? {
             cep: fields.cep.value.trim(),
             logradouro: fields.logradouro.value.trim(),
             numero: fields.numero.value.trim(),
@@ -2292,7 +2555,23 @@
             cidade: fields.cidade.value.trim(),
             estado: fields.estado.value.trim().toUpperCase(),
             metodo: 'uber',
-            prazo: 'a combinar'
+            prazo: 'a combinar',
+            deliveryMode: 'uber',
+            carrier: 'uber'
+          } : {
+            cep: fields.cep.value.trim(),
+            logradouro: fields.logradouro.value.trim(),
+            numero: fields.numero.value.trim(),
+            complemento: fields.complemento.value.trim(),
+            bairro: fields.bairro.value.trim(),
+            cidade: fields.cidade.value.trim(),
+            estado: fields.estado.value.trim().toUpperCase(),
+            metodo: 'melhor_envio',
+            prazo: loggiSelectedOption && loggiSelectedOption.sloInDays ? String(loggiSelectedOption.sloInDays) + ' dia(s)' : 'a combinar',
+            deliveryMode: 'shipping',
+            quoteId: loggiQuoteId,
+            selectedServiceId: loggiSelectedOption ? loggiSelectedOption.serviceId : '',
+            carrier: 'melhor_envio'
           },
           metodoPagamento: 'pix',
           criadoEm: new Date().toISOString()
@@ -2630,6 +2909,8 @@
         if (code === 'order_not_eligible' || code === 'order_not_pending') return 'Pedido nao elegivel para pagamento.';
         if (code === 'order_not_found') return 'Pedido nao encontrado.';
         if (code === 'invalid_orderId') return 'Pedido invalido para pagamento.';
+        if (code === 'payment_provider_not_configured') return 'PIX nao configurado no servidor.';
+        if (code === 'payment_provider_error') return 'Falha ao gerar PIX no provedor.';
         return code;
       }
 
@@ -2764,7 +3045,7 @@
         var orderId = null;
         try {
           setPaymentState('gerando_pix');
-          goToStep(4);
+          goToStep(5);
 
           if (isRegeneration) {
             var savedSession = readPixSession();
@@ -2829,7 +3110,7 @@
         var saved = readPixSession();
         if (!saved || !saved.orderId) return;
 
-        goToStep(4);
+        goToStep(5);
         renderPixPayload({
           codigoPix: saved.codigoPix || '',
           qrCodeUrl: saved.qrCodeUrl || '',
@@ -2881,19 +3162,29 @@
         fields.telefone.value = maskPhone(fields.telefone.value);
         updateStepControls();
       });
+      fields.documento.addEventListener('input', function () {
+        fields.documento.value = maskDocument(fields.documento.value);
+        updateStepControls();
+      });
       fields.cep.addEventListener('input', function () {
         fields.cep.value = maskCep(fields.cep.value);
+        clearLoggiQuote();
         updateStepControls();
       });
       fields.estado.addEventListener('input', function () {
         fields.estado.value = fields.estado.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
+        clearLoggiQuote();
         updateStepControls();
       });
       Object.keys(fields).forEach(function (fieldName) {
-        if (!fields[fieldName] || fieldName === 'telefone' || fieldName === 'cep' || fieldName === 'estado') return;
-        fields[fieldName].addEventListener('input', updateStepControls);
+        if (!fields[fieldName] || fieldName === 'telefone' || fieldName === 'documento' || fieldName === 'cep' || fieldName === 'estado') return;
+        fields[fieldName].addEventListener('input', function () {
+          if (addressFieldNames.indexOf(fieldName) !== -1) clearLoggiQuote();
+          updateStepControls();
+        });
       });
       document.getElementById('btn-buscar-cep').addEventListener('click', buscarCep);
+      document.getElementById('btn-recalcular-loggi').addEventListener('click', fetchLoggiQuotes);
       document.querySelectorAll('input[name="delivery-mode"]').forEach(function (input) {
         input.addEventListener('change', function () {
           setDeliveryMode(input.value);
@@ -2933,17 +3224,28 @@
       document.getElementById('btn-regenerar-pix').addEventListener('click', function () {
         startPixFlow(true);
       });
-      document.addEventListener('carrinhoAtualizado', renderSummary);
-      document.addEventListener('carrinho:atualizado', renderSummary);
+      document.addEventListener('carrinhoAtualizado', function () {
+        clearLoggiQuote();
+        renderSummary();
+      });
+      document.addEventListener('carrinho:atualizado', function () {
+        clearLoggiQuote();
+        renderSummary();
+      });
+      document.addEventListener('tech7:cart-prices-sync', function () {
+        clearLoggiQuote();
+        renderSummary();
+      });
       document.getElementById('checkout-form').addEventListener('submit', async function (event) {
         event.preventDefault();
         var step1Valid = validateStep(1);
         var step2Valid = validateStep(2);
-        if (!step1Valid || !step2Valid || readCart().length === 0) {
-          goToStep(!step1Valid ? 1 : 2);
+        var step3Valid = validateStep(3);
+        if (!step1Valid || !step2Valid || !step3Valid || readCart().length === 0) {
+          goToStep(!step1Valid ? 1 : !step2Valid ? 2 : 3);
           return;
         }
-        goToStep(4);
+        goToStep(5);
         await startPixFlow(false);
       });
 

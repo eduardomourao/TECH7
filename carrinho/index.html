@@ -540,16 +540,10 @@
       </div>
     </main>
 
-    <footer class="t7-footer">
-      <div class="t7-footer-inner">
-        <strong>TECH 7</strong>
-        <span>Shopping Oiapoque Centro, Av. Oiapoque, Nº 156 – Centro – CEP 30111-070 – Belo Horizonte – MG – Brasil</span>
-        <span>Atendimento: (31) 99945-4848 WhatsApp</span>
-      </div>
-    </footer>
+    <footer class="t7-footer"><div class="t7-footer-inner"><strong>TECH 7</strong><span>Shopping Oiapoque Centro, Av. Oiapoque, Nº 156 – Centro – CEP 30111-070 – Belo Horizonte – MG – Brasil</span><a href="https://wa.me/5531999454848" rel="noreferrer noopener" target="_blank">WhatsApp: (31) 99945-4848</a><span>Segunda a sábado: 9h às 20h</span><span>Domingo: 9h às 18h</span></div></footer>
   </div>
 
-  <script src="cart-manager.js"></script>
+  <script src="/cart-manager.js"></script>
   <script>
     (function () {
       var STORAGE_KEY = 'carrinho';
@@ -573,6 +567,20 @@
         var normalized = String(value).replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.');
         var parsed = Number(normalized);
         return Number.isFinite(parsed) ? parsed : 0;
+      }
+
+      function cartPriceStatus() {
+        return window.T7_CART_PRICES_STATUS || 'ready';
+      }
+
+      function cartPricesReady() {
+        return cartPriceStatus() === 'ready';
+      }
+
+      function cartPriceLabel(value) {
+        if (cartPriceStatus() === 'pending') return 'Atualizando preco';
+        if (cartPriceStatus() === 'error') return 'Preco indisponivel';
+        return formatCurrency(value);
       }
 
       function normalizeItem(item, index) {
@@ -614,11 +622,14 @@
       function updateSummary(items) {
         var quantity = items.reduce(function (sum, item) { return sum + item.qty; }, 0);
         var total = cartTotal(items);
+        var hasItems = items.length > 0;
+        var ready = cartPricesReady();
+        var totalLabel = hasItems && !ready ? cartPriceLabel(0) : formatCurrency(total);
         itemCount.textContent = quantity + (quantity === 1 ? ' item' : ' itens');
-        subtotalEl.textContent = formatCurrency(total);
-        totalEl.textContent = formatCurrency(total);
-        checkoutBtn.disabled = items.length === 0;
-        shareCartBtn.disabled = items.length === 0;
+        subtotalEl.textContent = totalLabel;
+        totalEl.textContent = totalLabel;
+        checkoutBtn.disabled = !hasItems || !ready;
+        shareCartBtn.disabled = !hasItems || !ready;
         countBadges.forEach(function (badge) { badge.textContent = String(quantity); });
       }
 
@@ -652,7 +663,7 @@
 
           article.querySelector('.cart-item-name').textContent = item.nome;
           article.querySelector('.cart-item-variant').textContent = item.variacao || 'Sem variacao selecionada';
-          article.querySelector('.unit-price').textContent = formatCurrency(item.preco);
+          article.querySelector('.unit-price').textContent = cartPriceLabel(item.preco);
           article.querySelector('input').value = item.qty;
           article.dataset.index = String(index);
           cartList.appendChild(article);
@@ -788,6 +799,7 @@
       });
 
       document.addEventListener('carrinhoAtualizado', renderCart);
+      document.addEventListener('tech7:cart-prices-sync', renderCart);
 
       renderCart();
     })();

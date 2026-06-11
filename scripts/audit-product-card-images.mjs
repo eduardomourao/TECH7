@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
+  findCardImageMismatchesForFile,
   findRepairablePlaceholdersForFile,
   listAssetNames,
   listHtmlFiles,
@@ -39,10 +40,12 @@ const report = {
     repairablePlaceholders: 0,
     unresolvedPlaceholders: 0,
     brokenLocalImages: 0,
+    mismatchedCardImages: 0,
   },
   repairablePlaceholders: [],
   unresolvedPlaceholders: [],
   brokenLocalImages: [],
+  mismatchedCardImages: [],
 };
 
 for (const file of files) {
@@ -52,6 +55,13 @@ for (const file of files) {
 
   let hasCatalogCard = false;
   const repairable = findRepairablePlaceholdersForFile(html, assetNames, file);
+  const mismatches = findCardImageMismatchesForFile(html, assetNames, file);
+  for (const mismatch of mismatches) {
+    report.mismatchedCardImages.push({
+      file: path.relative(root, file),
+      ...mismatch,
+    });
+  }
 
   for (const match of html.matchAll(/<li class="item flex">([\s\S]*?)<\/li>/g)) {
     const block = match[0];
@@ -101,6 +111,7 @@ for (const file of files) {
 report.summary.repairablePlaceholders = report.repairablePlaceholders.length;
 report.summary.unresolvedPlaceholders = report.unresolvedPlaceholders.length;
 report.summary.brokenLocalImages = report.brokenLocalImages.length;
+report.summary.mismatchedCardImages = report.mismatchedCardImages.length;
 
 const outputPath = path.join(root, '_validation', 'product-card-image-audit.json');
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });

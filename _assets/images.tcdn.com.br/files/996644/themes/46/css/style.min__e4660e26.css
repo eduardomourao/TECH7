@@ -16,3 +16,8 @@
 /* T7-HIDE-LEGACY-PRODUCT-PRICE */
 html.page-product #product-priceBox{visibility:hidden!important}
 /* /T7-HIDE-LEGACY-PRODUCT-PRICE */
+/* T7-DB-PRICE-GATE */
+html:not(.t7-prices-ready) .t7-carousel-price,html:not(.t7-prices-ready) .product-price .price-off,html:not(.t7-prices-ready) .product-price>span,html:not(.t7-prices-ready) .product-price>p,html:not(.t7-prices-ready) .t7-buy-price,html:not(.t7-prices-ready) #variacaoPreco,html:not(.t7-prices-ready) .PrecoPrincipal{position:relative!important;color:transparent!important;text-shadow:none!important}
+html:not(.t7-prices-ready) .product-payment,html:not(.t7-prices-ready) .produto-formas-pagamento{visibility:hidden!important}
+html:not(.t7-prices-ready) .t7-carousel-price:after,html:not(.t7-prices-ready) .product-price .price-off:after,html:not(.t7-prices-ready) .product-price>span:after,html:not(.t7-prices-ready) .product-price>p:after,html:not(.t7-prices-ready) .t7-buy-price:after,html:not(.t7-prices-ready) #variacaoPreco:after,html:not(.t7-prices-ready) .PrecoPrincipal:after{content:"Carregando";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#6b7280!important;font-size:.875em;font-weight:700;text-shadow:none!important;white-space:nowrap}
+/* /T7-DB-PRICE-GATE */

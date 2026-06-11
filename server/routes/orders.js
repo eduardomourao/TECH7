@@ -8,7 +8,12 @@ export const router = express.Router();
 async function getOrder(orderId) {
   const orderRes = await pool.query(
     `
-    select id, status, currency, total_cents, created_at, updated_at, mp_preference_id
+    select id, status, currency, total_cents, subtotal_cents, shipping_total_cents,
+           delivery_mode, shipping_provider, shipping_quote_id, shipping_service_id,
+           shipping_service_label, shipping_slo_days, shipping_zipcode, shipping_address,
+           shipping_number, shipping_complement, shipping_neighborhood, shipping_city,
+           shipping_state, customer_name, customer_email, customer_phone, customer_document,
+           created_at, updated_at, mp_preference_id
     from orders
     where id = $1
   `,
@@ -27,7 +32,134 @@ async function getOrder(orderId) {
     [orderId]
   );
 
-  return { ...orderRes.rows[0], items: itemsRes.rows };
+  const shipmentRes = await pool.query(
+    `
+      select status, loggi_key, tracking_code, barcode, label_url, updated_at
+      from shipments
+      where provider = 'loggi' and order_id = $1
+      order by updated_at desc
+      limit 1
+    `,
+    [orderId]
+  ).catch(() => ({ rows: [] }));
+
+  return { ...orderRes.rows[0], shipment: shipmentRes.rows[0] || null, items: itemsRes.rows };
+}
+
+function cleanText(value, max = 120) {
+  return String(value || "").trim().slice(0, max);
+}
+
+function normalizeShipping(input = {}) {
+  const raw = input || {};
+  const method = String(raw.deliveryMode || raw.metodo || raw.method || raw.carrier || "").toLowerCase();
+  const deliveryMode = method === "retirada"
+    ? "pickup"
+    : method === "pickup"
+      ? "pickup"
+      : method === "uber"
+        ? "uber"
+        : "shipping";
+  return {
+    deliveryMode,
+    quoteId: cleanText(raw.quoteId || raw.shippingQuoteId || raw.quote_id, 80),
+    selectedServiceId: cleanText(raw.selectedServiceId || raw.serviceId || raw.shipping_service_id, 120),
+    zipcode: cleanText(raw.cep || raw.zipcode, 16).replace(/\D/g, ""),
+    address: cleanText(raw.logradouro || raw.address),
+    number: cleanText(raw.numero || raw.number, 20),
+    complement: cleanText(raw.complemento || raw.complement),
+    neighborhood: cleanText(raw.bairro || raw.neighborhood, 80),
+    city: cleanText(raw.cidade || raw.city, 80),
+    state: cleanText(raw.estado || raw.state, 2).toUpperCase()
+  };
+}
+
+function normalizeCustomer(input = {}) {
+  return {
+    name: cleanText(input.nome || input.name, 120),
+    email: cleanText(input.email, 160),
+    phone: cleanText(input.telefone || input.phone, 40),
+    document: cleanText(input.documento || input.document || input.cpf || input.cnpj, 32).replace(/\D/g, "")
+  };
+}
+
+async function resolveShipping({ shipping, subtotalCents, currency }) {
+  if (shipping.deliveryMode === "pickup") {
+    return {
+      shippingTotalCents: 0,
+      provider: "pickup",
+      quoteId: null,
+      serviceId: null,
+      label: "Retirada na loja",
+      sloDays: null
+    };
+  }
+  if (shipping.deliveryMode === "uber") {
+    return {
+      shippingTotalCents: 0,
+      provider: "uber",
+      quoteId: null,
+      serviceId: null,
+      label: "Entrega por Uber",
+      sloDays: null
+    };
+  }
+  if (!shipping.quoteId) {
+    const error = new Error("shipping_quote_required");
+    error.status = 400;
+    throw error;
+  }
+  const quoteRes = await pool.query(
+    `
+      select id, provider, currency, subtotal_cents, destination_json, options_json,
+             selected_service_id, selected_price_cents, selected_label, expires_at
+      from shipping_quotes
+      where id = $1 and status = 'active'
+      limit 1
+    `,
+    [shipping.quoteId]
+  );
+  if (!quoteRes.rowCount) {
+    const error = new Error("shipping_quote_not_found");
+    error.status = 404;
+    throw error;
+  }
+  const quote = quoteRes.rows[0];
+  if (new Date(quote.expires_at).getTime() <= Date.now()) {
+    const error = new Error("shipping_quote_expired");
+    error.status = 409;
+    throw error;
+  }
+  if ((quote.currency || "BRL") !== (currency || "BRL") || Number(quote.subtotal_cents || 0) !== subtotalCents) {
+    const error = new Error("shipping_quote_mismatch");
+    error.status = 409;
+    throw error;
+  }
+  const options = Array.isArray(quote.options_json) ? quote.options_json : [];
+  const selectedServiceId = shipping.selectedServiceId || quote.selected_service_id;
+  const selected = options.find((option) => String(option.serviceId || "") === selectedServiceId) || options[0];
+  if (!selected) {
+    const error = new Error("shipping_option_not_found");
+    error.status = 409;
+    throw error;
+  }
+  const priceCents = Number(selected.priceCents ?? quote.selected_price_cents ?? 0);
+  await pool.query(
+    `
+      update shipping_quotes
+      set selected_service_id = $2, selected_price_cents = $3, selected_label = $4
+      where id = $1
+    `,
+    [quote.id, selected.serviceId, priceCents, selected.label || quote.selected_label || "Melhor Envio"]
+  );
+  return {
+    shippingTotalCents: priceCents,
+    provider: quote.provider || "melhor_envio",
+    quoteId: quote.id,
+    serviceId: selected.serviceId,
+    label: selected.label || quote.selected_label || "Melhor Envio",
+    sloDays: Number.isFinite(Number(selected.sloInDays)) ? Number(selected.sloInDays) : null
+  };
 }
 
 router.get("/:id", async (req, res) => {
@@ -65,15 +197,58 @@ router.post("/", async (req, res) => {
   }
 
   const orderId = newId("order");
+  const shipping = normalizeShipping(req.body?.shipping || {});
+  const customer = normalizeCustomer(req.body?.customer || {});
 
   await pool.query("begin");
   try {
-    let total = 0;
-    for (const r of pricedItems) total += Number(r.price_cents) * Number(r.qty);
+    let subtotal = 0;
+    for (const r of pricedItems) subtotal += Number(r.price_cents) * Number(r.qty);
+    const shippingInfo = await resolveShipping({ shipping, subtotalCents: subtotal, currency });
+    const total = subtotal + Number(shippingInfo.shippingTotalCents || 0);
 
     await pool.query(
-      `insert into orders (id, status, currency, total_cents, cart_id) values ($1, 'pending', $2, $3, $4)`,
-      [orderId, currency, total, cartId]
+      `
+        insert into orders (
+          id, status, currency, subtotal_cents, shipping_total_cents, total_cents,
+          cart_id, customer_name, customer_email, customer_phone, customer_document, delivery_mode,
+          shipping_provider, shipping_quote_id, shipping_service_id, shipping_service_label,
+          shipping_slo_days, shipping_zipcode, shipping_address, shipping_number,
+          shipping_complement, shipping_neighborhood, shipping_city, shipping_state
+        )
+        values (
+          $1, 'pending', $2, $3, $4, $5,
+          $6, $7, $8, $9, $10, $11,
+          $12, $13, $14, $15,
+          $16, $17, $18, $19,
+          $20, $21, $22, $23
+        )
+      `,
+      [
+        orderId,
+        currency,
+        subtotal,
+        shippingInfo.shippingTotalCents,
+        total,
+        cartId,
+        customer.name || "Cliente",
+        customer.email || null,
+        customer.phone || null,
+        customer.document || null,
+        shipping.deliveryMode,
+        shippingInfo.provider,
+        shippingInfo.quoteId,
+        shippingInfo.serviceId,
+        shippingInfo.label,
+        shippingInfo.sloDays,
+        shipping.zipcode || null,
+        shipping.address || null,
+        shipping.number || null,
+        shipping.complement || null,
+        shipping.neighborhood || null,
+        shipping.city || null,
+        shipping.state || null
+      ]
     );
 
     for (const r of pricedItems) {
@@ -92,6 +267,7 @@ router.post("/", async (req, res) => {
     await pool.query("commit");
   } catch (e) {
     await pool.query("rollback");
+    if (e?.status) return res.status(e.status).json({ error: e.message });
     throw e;
   }
 
