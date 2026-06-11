@@ -294,3 +294,4 @@
 - 2026-06-11: push inicial rejeitado por `non-fast-forward`; `origin/main` tinha commit remoto `711c9f92f Corrige todos os links relativos do menu (global)`.
 - 2026-06-11: tentativa de rebase gerou conflitos massivos add/add em milhares de arquivos por historicos nao relacionados; rebase abortado.
 - 2026-06-11: merge controlado `-s ours --allow-unrelated-histories origin/main` criado para manter a arvore local validada e preservar o commit remoto como ancestral antes do push.
+- 2026-06-11: push para `origin/main` concluido: `711c9f92f..19a1e6ed4 main -> main`; aguardando deploy Vercel.
