@@ -1765,23 +1765,8 @@
       "permanent": true
     },
     {
-      "source": "/display-e-lcd/:path*",
-      "destination": "/tela-display-lcd/:path*",
-      "permanent": true
-    },
-    {
       "source": "/telas-display-lcd",
       "destination": "/tela-display-lcd",
-      "permanent": true
-    },
-    {
-      "source": "/display-lcd/:path*",
-      "destination": "/tela-display-lcd/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/telas-display-lcd/:path*",
-      "destination": "/tela-display-lcd/:path*",
       "permanent": true
     },
     {

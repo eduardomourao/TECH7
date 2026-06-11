@@ -295,3 +295,6 @@
 - 2026-06-11: tentativa de rebase gerou conflitos massivos add/add em milhares de arquivos por historicos nao relacionados; rebase abortado.
 - 2026-06-11: merge controlado `-s ours --allow-unrelated-histories origin/main` criado para manter a arvore local validada e preservar o commit remoto como ancestral antes do push.
 - 2026-06-11: push para `origin/main` concluido: `711c9f92f..19a1e6ed4 main -> main`; aguardando deploy Vercel.
+- 2026-06-11: deploy Vercel do commit `246055045` ficou READY, mas smoke de produto achou 308 para `/tela-display-lcd/...` seguido de 404 em produtos que existem em `/display...`/`/display-e-lcd...`.
+- 2026-06-11: `vercel.json` corrigido removendo redirects wildcard de aliases de display com paginas reais; mantidos redirects apenas das raizes para a categoria canonica.
+- 2026-06-11: `node` parse de `vercel.json`, `npm run validate:redirects` e `npm run validate:routes` OK apos correcao dos redirects.
