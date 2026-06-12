@@ -16,17 +16,33 @@
     metrics: null,
     productsPage: 0,
     ordersPage: 0,
+    serviceOrdersPage: 0,
     products: [],
     orders: [],
+    serviceOrders: [],
     productFilters: { q: '', active: '', brand: '', category: '' },
     editingProduct: null,
     orderStatus: '',
     selectedOrderId: null,
+    serviceOrderStatus: '',
+    serviceOrderSearch: '',
+    selectedServiceOrderId: null,
+    editingServiceOrder: null,
     pricing: { cost: 45, freight: 12, tax: 8, margin: 35, adjustment: 10 },
   };
 
   const PRODUCTS_PER_PAGE = 20;
   const ORDERS_PER_PAGE = 20;
+  const SERVICE_ORDERS_PER_PAGE = 20;
+  const OS_STATUSES = [
+    ['aberta', 'Aberta'],
+    ['em_analise', 'Em análise'],
+    ['aguardando_peca', 'Aguardando peça'],
+    ['em_servico', 'Em serviço'],
+    ['pronta', 'Pronta'],
+    ['entregue', 'Entregue'],
+    ['cancelada', 'Cancelada']
+  ];
 
   function esc(value) {
     return String(value == null ? '' : value)
@@ -59,6 +75,8 @@
       name_required: 'Nome obrigatorio',
       invalid_price: 'Preco invalido'
     };
+    if (code === 'http_404') return 'Rota da API nao encontrada. Reinicie o servidor ou publique a API atual.';
+    if (code === 'order_not_found') return 'Pedido origem nao encontrado. Deixe o campo vazio para OS manual.';
     if (productErrors[code]) return productErrors[code];
     return {
       username_incorrect: 'Usuário incorreto',
@@ -107,6 +125,22 @@
     }[status] || status || '-';
   }
 
+  function serviceStatusLabel(status) {
+    const found = OS_STATUSES.find((row) => row[0] === status);
+    return found ? found[1] : status || '-';
+  }
+
+  function serviceBadge(status) {
+    const cls = status === 'entregue' || status === 'pronta'
+      ? 'badge-paid'
+      : status === 'cancelada'
+        ? 'badge-bad'
+        : status === 'aguardando_peca'
+          ? 'badge-pending'
+          : 'badge-info';
+    return '<span class="badge ' + cls + '">' + esc(serviceStatusLabel(status)) + '</span>';
+  }
+
   function badge(status) {
     const bad = ['cancelled', 'failed', 'refunded'];
     const cls = status === 'paid' ? 'badge-paid' : bad.includes(status) ? 'badge-bad' : status === 'pending' ? 'badge-pending' : 'badge-info';
@@ -136,7 +170,9 @@
       cart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h8.76a2 2 0 0 0 1.95-1.57L21 8H5.12"/></svg>',
       money: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"/></svg>',
       trend: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg>',
-      alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>'
+      alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>',
+      file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>',
+      wrench: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.4 2.4-3-3Z"/></svg>'
     };
     return icons[kind] || icons.trend;
   }
@@ -206,6 +242,63 @@
     });
   }
 
+  function renderDashboardV2() {
+    setHead('Painel de controle', 'Metricas reais de catalogo, pedidos, servicos, frete e operacao diaria.');
+    const el = document.getElementById('tab-dashboard');
+    el.innerHTML = '<div class="loading">Carregando metricas...</div>';
+    loadMetrics().then((m) => {
+      const p = m.products || {};
+      const o = m.orders || {};
+      const s = m.service_orders || {};
+      const activeRate = ratio(p.active, p.total);
+      const paidRate = ratio(o.paid, o.total);
+      const priceRate = ratio((p.total || 0) - (p.zero_price || 0), p.total);
+      const alertCount = (p.zero_price || 0) + (p.no_image || 0) + (p.low_stock || 0) + (o.pending || 0);
+
+      const metrics = '<div class="grid-4">' +
+        metric('Receita total', money((o.revenue || 0) + (s.total_revenue || 0)), 'Pedidos + OS concluidas', icon('money')) +
+        metric('Pedidos hoje', number(o.today), money(o.today_revenue) + ' hoje', icon('cart')) +
+        metric('Ticket medio', money(o.avg_ticket), 'Media das vendas concluidas', icon('trend')) +
+        metric('OS abertas', number(s.open || 0), number(s.ready || 0) + ' prontas', icon('file')) +
+        metric('Produtos ativos', number(p.active), percent(activeRate) + ' do catalogo', icon('box')) +
+        metric('Receita mao de obra', money(s.labor_revenue || 0), number(s.completed || 0) + ' servicos concluidos', icon('wrench')) +
+        metric('Receita produtos', money((o.revenue || 0) + (s.product_revenue || 0)), 'Pedidos + pecas em OS', icon('box')) +
+        metric('Alertas operacionais', number(alertCount), 'Itens que pedem acao', icon('alert')) +
+        '</div>';
+
+      const overview = panel('Visao operacional', 'Indicadores de saude do negocio',
+        '<div class="sub-grid">' +
+          '<div class="sub-card"><small>Precos invalidos</small><strong>' + number(p.zero_price) + '</strong></div>' +
+          '<div class="sub-card"><small>Sem imagem</small><strong>' + number(p.no_image || 0) + '</strong></div>' +
+          '<div class="sub-card"><small>Estoque baixo</small><strong>' + number(p.low_stock || 0) + '</strong></div>' +
+          '<div class="sub-card"><small>Produtos inativos</small><strong>' + number(p.inactive) + '</strong></div>' +
+          '<div class="sub-card"><small>Pedidos pendentes</small><strong>' + number(o.pending) + '</strong></div>' +
+          '<div class="sub-card"><small>OS abertas</small><strong>' + number(s.open || 0) + '</strong></div>' +
+          '<div class="sub-card"><small>Servicos concluidos</small><strong>' + number(s.completed || 0) + '</strong></div>' +
+          '<div class="sub-card"><small>Produtos duplicados</small><strong>' + number(p.duplicated || 0) + '</strong></div>' +
+        '</div>' +
+        progress('Catalogo ativo', activeRate, 'green') +
+        progress('Pedidos pagos', paidRate, '') +
+        progress('Produtos com preco valido', priceRate, 'yellow')
+      );
+
+      const alerts = panel('Alertas do sistema', 'Prioridades calculadas automaticamente', alertListV2(m));
+      const brands = panel('Distribuicao por marca', 'Top marcas do catalogo', bars(p.by_brand, p.total));
+      const categories = panel('Categorias mais vendidas', 'Ranking por quantidade vendida', bars(m.top_categories_sold || [], null, true));
+      const delivery = panel('Entrega e frete', 'Metodos mais usados', bars(o.by_delivery_method || [], null, true));
+      const customers = panel('Clientes recorrentes', 'Compradores com mais de um pedido', bars(o.recurring_customers || [], null, true));
+      const topProducts = panel('Produtos mais vendidos', 'Ranking por receita em vendas concluidas', renderTopProducts(m.top_products));
+      const serviceOrders = panel('Ordens de servico', 'Status e receita de servico', bars(s.by_status || [], s.total, true));
+
+      el.innerHTML = metrics + '<div class="grid-wide"><div>' + overview + '</div><div>' + alerts + '</div></div>' +
+        '<div class="grid-2"><div>' + brands + '</div><div>' + categories + '</div></div>' +
+        '<div class="grid-2"><div>' + delivery + '</div><div>' + customers + '</div></div>' +
+        '<div class="grid-2"><div>' + serviceOrders + '</div><div>' + topProducts + '</div></div>';
+    }).catch((e) => {
+      el.innerHTML = '<div class="error-state">Erro ao carregar metricas: ' + esc(e.message) + '</div>';
+    });
+  }
+
   function progress(label, value, color) {
     return '<div style="margin-top:14px"><div class="bar-row" style="grid-template-columns:1fr auto"><span>' + esc(label) + '</span><strong>' + percent(value) + '</strong></div><div class="bar-track"><div class="bar-fill ' + (color || '') + '" style="width:' + percent(value) + '"></div></div></div>';
   }
@@ -218,6 +311,21 @@
     if (m.orders.problem) alerts.push(['error', m.orders.problem + ' pedidos com falha/cancelamento', 'Revise pagamentos e atendimento.']);
     if (!alerts.length) alerts.push(['success', 'Sem alertas críticos', 'Operação em estado normal.']);
     return '<div class="bars">' + alerts.map((a) => '<div class="sub-card"><span class="badge ' + (a[0] === 'error' ? 'badge-bad' : a[0] === 'success' ? 'badge-paid' : 'badge-pending') + '">' + esc(a[0]) + '</span><strong style="margin-top:9px">' + esc(a[1]) + '</strong><small>' + esc(a[2]) + '</small></div>').join('') + '</div>';
+  }
+
+  function alertListV2(m) {
+    const p = m.products || {};
+    const o = m.orders || {};
+    const s = m.service_orders || {};
+    const alerts = [];
+    if (p.zero_price) alerts.push(['warning', p.zero_price + ' produtos sem preco valido', 'Revise itens vazios ou abaixo de R$ 2,00.']);
+    if (p.no_image) alerts.push(['warning', p.no_image + ' produtos sem imagem', 'Priorize itens ativos e mais buscados.']);
+    if (p.low_stock) alerts.push(['warning', p.low_stock + ' produtos com estoque baixo', 'Comprar ou inativar antes de vender no balcao.']);
+    if (p.duplicated) alerts.push(['warning', p.duplicated + ' grupos duplicados', 'Checar slug/marca/categoria repetidos.']);
+    if (o.pending) alerts.push(['warning', o.pending + ' pedidos pendentes', 'Acompanhar pagamento e separacao.']);
+    if (s.open) alerts.push(['info', s.open + ' OS abertas', 'Manter status atualizado para atendimento.']);
+    if (!alerts.length) alerts.push(['success', 'Sem alertas criticos', 'Operacao em estado normal.']);
+    return '<div class="bars">' + alerts.map((a) => '<div class="sub-card"><span class="badge ' + (a[0] === 'error' ? 'badge-bad' : a[0] === 'success' ? 'badge-paid' : a[0] === 'info' ? 'badge-info' : 'badge-pending') + '">' + esc(a[0]) + '</span><strong style="margin-top:9px">' + esc(a[1]) + '</strong><small>' + esc(a[2]) + '</small></div>').join('') + '</div>';
   }
 
   function renderTopProducts(rows) {
@@ -241,7 +349,7 @@
       state.products = data.items || [];
       const totalPages = Math.max(1, Math.ceil((data.total || 0) / PRODUCTS_PER_PAGE));
       el.innerHTML = panel('Catálogo (' + number(data.total || 0) + ')', 'Tabela editável com filtros e ações rápidas',
-        productToolbar(m) + productEditor() + productTable(state.products) + pagination('products', state.productsPage, totalPages)
+        productToolbar(m) + productEditor() + productTableV2(state.products) + pagination('products', state.productsPage, totalPages)
       );
       bindProductEvents();
     } catch (e) {
@@ -353,6 +461,30 @@
         '<td><button class="btn btn-sm ' + (p.active ? 'btn-green' : 'btn-outline') + '" data-toggle-active="' + esc(p.id) + '" data-active="' + p.active + '">' + (p.active ? 'Ativo' : 'Inativo') + '</button></td>' +
         '<td><div class="toolbar-group"><button class="btn btn-primary btn-sm" data-save-product="' + esc(p.id) + '">Salvar</button><button class="btn btn-outline btn-sm" data-edit-product="' + esc(p.id) + '">Editar</button><button class="btn btn-outline btn-sm" data-view-product="' + esc(p.url || '') + '">Ver</button></div></td>' +
       '</tr>').join('') + '</tbody></table></div>';
+  }
+
+  function productTableV2(items) {
+    if (!items.length) return '<div class="empty">Nenhum produto encontrado.</div>';
+    return '<div class="table-wrap"><table><thead><tr><th>ID</th><th>Nome</th><th>Marca</th><th>Categoria</th><th>Preco</th><th>Alertas</th><th>Status</th><th>Acoes</th></tr></thead><tbody>' +
+      items.map((p) => '<tr data-product-row="' + esc(p.id) + '">' +
+        '<td class="mono">' + esc((p.id || '').slice(0, 12)) + '</td>' +
+        '<td><input class="cell-input name-input" data-edit="name" value="' + esc(p.name) + '"></td>' +
+        '<td><input class="cell-input" data-edit="brand" value="' + esc(p.brand || '') + '"></td>' +
+        '<td><input class="cell-input" data-edit="category" value="' + esc(p.category || '') + '"></td>' +
+        '<td><input class="cell-input price-input" type="number" step="0.01" min="0" data-edit="price" value="' + Number(p.price || 0).toFixed(2) + '"' + (p.price_status === 'consult' ? ' title="Preco sob consulta ou abaixo de R$ 2,00"' : '') + '></td>' +
+        '<td>' + productAlerts(p) + '</td>' +
+        '<td><button class="btn btn-sm ' + (p.active ? 'btn-green' : 'btn-outline') + '" data-toggle-active="' + esc(p.id) + '" data-active="' + p.active + '">' + (p.active ? 'Ativo' : 'Inativo') + '</button></td>' +
+        '<td><div class="toolbar-group"><button class="btn btn-primary btn-sm" data-save-product="' + esc(p.id) + '">Salvar</button><button class="btn btn-outline btn-sm" data-edit-product="' + esc(p.id) + '">Editar</button><button class="btn btn-outline btn-sm" data-view-product="' + esc(p.url || '') + '">Ver</button></div></td>' +
+      '</tr>').join('') + '</tbody></table></div>';
+  }
+
+  function productAlerts(p) {
+    const alerts = [];
+    if (!p.image_url && !(p.images || []).length) alerts.push('sem imagem');
+    if (!p.price_available || Number(p.price || 0) < 2) alerts.push('sem preco');
+    if (p.stock != null && Number(p.stock) <= 2) alerts.push('estoque baixo');
+    if (!p.category) alerts.push('sem categoria');
+    return alerts.length ? alerts.map((text) => '<span class="warning-chip">' + esc(text) + '</span>').join('') : '<span class="badge badge-paid">ok</span>';
   }
 
   function bindProductEvents() {
@@ -668,7 +800,7 @@
     el.innerHTML = '<div class="loading">Carregando pedido...</div>';
     try {
       const o = await api('/orders/' + encodeURIComponent(id));
-      const detail = '<button class="btn btn-outline btn-sm" id="backOrders">Voltar</button>' +
+      const detail = '<div class="toolbar"><div class="toolbar-group"><button class="btn btn-outline btn-sm" id="backOrders">Voltar</button><button class="btn btn-primary btn-sm" id="createOsFromOrder">Criar OS deste pedido</button></div></div>' +
         '<div style="height:12px"></div>' +
         panel('Pedido ' + o.id, 'Dados e atualização de status',
           '<div class="order-detail">' +
@@ -685,6 +817,7 @@
         state.selectedOrderId = null;
         renderOrders();
       });
+      document.getElementById('createOsFromOrder')?.addEventListener('click', () => createServiceOrderFromOrder(id));
       document.getElementById('saveOrderStatus').addEventListener('click', async () => {
         const status = document.getElementById('detailStatus').value;
         try {
@@ -709,7 +842,7 @@
       const shipment = o.shipment || {};
       const trackingUrl = shipment.tracking_code ? 'https://www.loggi.com/rastreador/' + encodeURIComponent(shipment.tracking_code) : '';
       const link = (href, text) => href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + esc(text) + '</a>' : '-';
-      const detail = '<button class="btn btn-outline btn-sm" id="backOrders">Voltar</button>' +
+      const detail = '<div class="toolbar"><div class="toolbar-group"><button class="btn btn-outline btn-sm" id="backOrders">Voltar</button><button class="btn btn-primary btn-sm" id="createOsFromOrder">Criar OS deste pedido</button></div></div>' +
         '<div style="height:12px"></div>' +
         panel('Pedido ' + o.id, 'Dados e atualizacao de status',
           '<div class="order-detail">' +
@@ -736,6 +869,7 @@
         state.selectedOrderId = null;
         renderOrders();
       });
+      document.getElementById('createOsFromOrder')?.addEventListener('click', () => createServiceOrderFromOrder(id));
       document.getElementById('saveOrderStatus').addEventListener('click', async () => {
         const status = document.getElementById('detailStatus').value;
         try {
@@ -771,6 +905,258 @@
     return '<div class="table-wrap"><table><thead><tr><th>Produto</th><th>Qtd</th><th>Preço unit.</th><th>Total</th></tr></thead><tbody>' +
       items.map((it) => '<tr><td><strong>' + esc(it.product_name) + '</strong></td><td>' + number(it.quantity) + '</td><td>' + money(it.unit_price) + '</td><td><strong>' + money(it.total_price) + '</strong></td></tr>').join('') +
       '</tbody></table></div>';
+  }
+
+  function emptyServiceOrder() {
+    return { id: '', status: 'aberta', customer_name: '', customer_phone: '', customer_document: '', customer_address: '', customer_email: '', device_brand: '', device_model: '', device_color: '', device_serial: '', device_password: '', intake_condition: '', reported_issue: '', diagnosis: '', services_done: '', labor: 0, technician: '', internal_notes: '', customer_notes: '', discount: 0, payment_method: '', payment_status: 'pendente', warranty_days: 90, warranty_terms: 'Garantia sobre o servico executado, sem cobrir mau uso, queda, liquido ou violacao.', warranty_notes: '', items: [] };
+  }
+
+  async function renderServiceOrders() {
+    setHead('Ordens de servico', 'Atendimento tecnico, pecas usadas, mao de obra, garantia e PDF para cliente.');
+    const el = document.getElementById('tab-service-orders');
+    if (state.selectedServiceOrderId) return renderServiceOrderDetail(state.selectedServiceOrderId);
+    el.innerHTML = '<div class="loading">Carregando ordens de servico...</div>';
+    try {
+      const params = new URLSearchParams({ limit: SERVICE_ORDERS_PER_PAGE, offset: state.serviceOrdersPage * SERVICE_ORDERS_PER_PAGE });
+      if (state.serviceOrderStatus) params.set('status', state.serviceOrderStatus);
+      if (state.serviceOrderSearch) params.set('q', state.serviceOrderSearch);
+      const [data, m] = await Promise.all([api('/service-orders?' + params.toString()), loadMetrics()]);
+      state.serviceOrders = data.items || [];
+      const s = m.service_orders || {};
+      const totalPages = Math.max(1, Math.ceil((data.total || 0) / SERVICE_ORDERS_PER_PAGE));
+      const summary = '<div class="grid-4">' +
+        metric('OS abertas', number(s.open || 0), number(s.ready || 0) + ' prontas', icon('file')) +
+        metric('Concluidas', number(s.completed || 0), number(s.delivered || 0) + ' entregues', icon('wrench')) +
+        metric('Receita mao de obra', money(s.labor_revenue || 0), 'Servicos prontos/entregues', icon('money')) +
+        metric('Receita pecas em OS', money(s.product_revenue || 0), 'Produtos usados em OS', icon('box')) +
+        '</div>';
+      el.innerHTML = summary + panel('Fila de OS', 'Use para atendimento rapido no balcao', serviceOrderToolbar() + serviceOrderTable(state.serviceOrders) + pagination('serviceOrders', state.serviceOrdersPage, totalPages));
+      bindServiceOrderEvents();
+    } catch (e) {
+      el.innerHTML = '<div class="error-state">Erro ao carregar OS: ' + esc(e.message) + '</div>';
+    }
+  }
+
+  function serviceOrderToolbar() {
+    return '<div class="toolbar"><div class="toolbar-group">' +
+      '<input id="serviceOrderSearch" type="text" placeholder="Buscar cliente, telefone, aparelho ou defeito" value="' + esc(state.serviceOrderSearch) + '">' +
+      '<select id="serviceOrderStatus"><option value="">Todos status</option>' + OS_STATUSES.map((s) => '<option value="' + s[0] + '"' + selected(state.serviceOrderStatus, s[0]) + '>' + esc(s[1]) + '</option>').join('') + '</select>' +
+      '<button class="btn btn-primary btn-sm" id="applyServiceOrderSearch">Buscar</button><button class="btn btn-outline btn-sm" id="clearServiceOrderSearch">Limpar</button>' +
+      '</div><div class="toolbar-group"><button class="btn btn-primary btn-sm" id="newServiceOrder">Criar OS manual</button></div></div>';
+  }
+
+  function serviceOrderTable(items) {
+    if (!items.length) return '<div class="empty">Nenhuma OS encontrada.</div>';
+    return '<div class="table-wrap"><table><thead><tr><th>OS</th><th>Cliente</th><th>Telefone</th><th>Aparelho</th><th>Status</th><th>Total</th><th>Atualizada</th><th>Acoes</th></tr></thead><tbody>' +
+      items.map((o) => '<tr><td class="mono">' + esc(o.code || o.id) + '</td><td><strong>' + esc(o.customer_name || '-') + '</strong></td><td>' + esc(o.customer_phone || '-') + '</td><td>' + esc([o.device_brand, o.device_model].filter(Boolean).join(' ') || '-') + '</td><td>' + serviceBadge(o.status) + '</td><td><strong>' + money(o.total) + '</strong></td><td>' + dateStr(o.updated_at || o.created_at) + '</td><td><div class="toolbar-group"><button class="btn btn-primary btn-sm" data-view-service-order="' + esc(o.id) + '">Abrir</button><button class="btn btn-outline btn-sm" data-pdf-service-order="' + esc(o.id) + '">PDF</button></div></td></tr>').join('') +
+      '</tbody></table></div>';
+  }
+
+  function bindServiceOrderEvents() {
+    const search = document.getElementById('serviceOrderSearch');
+    search?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { state.serviceOrderSearch = search.value.trim(); state.serviceOrdersPage = 0; renderServiceOrders(); } });
+    document.getElementById('applyServiceOrderSearch')?.addEventListener('click', () => { state.serviceOrderSearch = search ? search.value.trim() : ''; state.serviceOrdersPage = 0; renderServiceOrders(); });
+    document.getElementById('clearServiceOrderSearch')?.addEventListener('click', () => { state.serviceOrderSearch = ''; state.serviceOrderStatus = ''; state.serviceOrdersPage = 0; renderServiceOrders(); });
+    document.getElementById('serviceOrderStatus')?.addEventListener('change', (e) => { state.serviceOrderStatus = e.target.value; state.serviceOrdersPage = 0; renderServiceOrders(); });
+    document.getElementById('newServiceOrder')?.addEventListener('click', () => { state.editingServiceOrder = emptyServiceOrder(); state.selectedServiceOrderId = 'new'; renderServiceOrders(); });
+    document.querySelectorAll('[data-view-service-order]').forEach((btn) => btn.addEventListener('click', () => { state.selectedServiceOrderId = btn.dataset.viewServiceOrder; renderServiceOrders(); }));
+    document.querySelectorAll('[data-pdf-service-order]').forEach((btn) => btn.addEventListener('click', () => downloadServiceOrderPdf(btn.dataset.pdfServiceOrder)));
+    bindPagination('serviceOrders');
+  }
+
+  async function renderServiceOrderDetail(id) {
+    const el = document.getElementById('tab-service-orders');
+    el.innerHTML = '<div class="loading">Carregando OS...</div>';
+    try {
+      const o = id === 'new' ? (state.editingServiceOrder || emptyServiceOrder()) : await api('/service-orders/' + encodeURIComponent(id));
+      state.editingServiceOrder = o;
+      const actions = '<div class="toolbar"><div class="toolbar-group"><button class="btn btn-outline btn-sm" id="backServiceOrders">Voltar</button>' + (o.id ? '<button class="btn btn-outline btn-sm" id="downloadServiceOrderPdf">Baixar PDF</button><button class="btn btn-outline btn-sm" id="printServiceOrderPdf">Imprimir</button><button class="btn btn-green btn-sm" id="whatsappServiceOrder">WhatsApp</button>' : '') + '</div></div>';
+      el.innerHTML = actions + serviceOrderForm(o);
+      bindServiceOrderForm(o);
+    } catch (e) {
+      el.innerHTML = '<div class="error-state">Erro ao carregar OS: ' + esc(e.message) + '</div>';
+    }
+  }
+
+  function serviceOrderForm(o) {
+    return panel(o.id ? 'Editar ' + (o.code || 'OS') : 'Criar OS manual', 'Dados salvos no Supabase e usados no PDF do cliente',
+      '<form id="serviceOrderForm" class="os-form" autocomplete="off">' +
+      '<label>Status<select id="osStatus">' + OS_STATUSES.map((s) => '<option value="' + s[0] + '"' + selected(o.status, s[0]) + '>' + esc(s[1]) + '</option>').join('') + '</select></label>' +
+      '<label>Pedido origem<input id="osOrderId" value="' + esc(o.order_id || '') + '" placeholder="opcional"></label>' +
+      '<label>Cliente<input id="osCustomerName" required value="' + esc(o.customer_name || '') + '"></label><label>Telefone/WhatsApp<input id="osCustomerPhone" value="' + esc(o.customer_phone || '') + '"></label>' +
+      '<label>CPF/CNPJ opcional<input id="osCustomerDocument" value="' + esc(o.customer_document || '') + '"></label><label>E-mail opcional<input id="osCustomerEmail" value="' + esc(o.customer_email || '') + '"></label>' +
+      '<label class="full">Endereco opcional<input id="osCustomerAddress" value="' + esc(o.customer_address || '') + '"></label>' +
+      '<label>Marca<input id="osDeviceBrand" value="' + esc(o.device_brand || '') + '"></label><label>Modelo<input id="osDeviceModel" value="' + esc(o.device_model || '') + '"></label>' +
+      '<label>Cor<input id="osDeviceColor" value="' + esc(o.device_color || '') + '"></label><label>IMEI/serial opcional<input id="osDeviceSerial" value="' + esc(o.device_serial || '') + '"></label>' +
+      '<label class="full">Senha/padrao informado opcional<input id="osDevicePassword" value="' + esc(o.device_password || '') + '"></label>' +
+      '<label class="full">Estado de entrada<textarea id="osIntakeCondition">' + esc(o.intake_condition || '') + '</textarea></label>' +
+      '<label class="full">Defeito relatado<textarea id="osReportedIssue">' + esc(o.reported_issue || '') + '</textarea></label>' +
+      '<label class="full">Diagnostico<textarea id="osDiagnosis">' + esc(o.diagnosis || '') + '</textarea></label>' +
+      '<label class="full">Servicos feitos<textarea id="osServicesDone">' + esc(o.services_done || '') + '</textarea></label>' +
+      '<label>Mao de obra (R$)<input id="osLabor" type="number" min="0" step="0.01" value="' + Number(o.labor || 0).toFixed(2) + '"></label><label>Tecnico responsavel<input id="osTechnician" value="' + esc(o.technician || '') + '"></label>' +
+      '<label>Desconto (R$)<input id="osDiscount" type="number" min="0" step="0.01" value="' + Number(o.discount || 0).toFixed(2) + '"></label><label>Forma de pagamento<input id="osPaymentMethod" value="' + esc(o.payment_method || '') + '"></label>' +
+      '<label>Status pagamento<input id="osPaymentStatus" value="' + esc(o.payment_status || 'pendente') + '"></label><label>Garantia (dias)<input id="osWarrantyDays" type="number" min="0" step="1" value="' + Number(o.warranty_days || 90) + '"></label>' +
+      '<div class="full os-product-picker">' +
+        '<label>Buscar produto do site<input id="osProductSearch" type="search" placeholder="Digite nome, marca ou codigo do produto"></label>' +
+        '<div class="toolbar-group"><button class="btn btn-primary btn-sm" type="button" id="searchOsProduct">Buscar produto</button><button class="btn btn-outline btn-sm" type="button" id="addManualOsItem">Adicionar item manual</button></div>' +
+        '<div id="osProductResults" class="os-product-results"></div>' +
+      '</div>' +
+      '<div class="full"><div class="table-wrap"><table id="osItemsTable"><thead><tr><th>Produto/peca</th><th>Qtd</th><th>Valor unit.</th><th>Total</th><th></th></tr></thead><tbody>' + serviceItemsRows(o.items || []) + '</tbody></table></div></div>' +
+      '<label class="full">Condicoes de garantia<textarea id="osWarrantyTerms">' + esc(o.warranty_terms || '') + '</textarea></label>' +
+      '<label class="full">Observacoes para cliente<textarea id="osCustomerNotes">' + esc(o.customer_notes || '') + '</textarea></label>' +
+      '<label class="full">Observacoes internas<textarea id="osInternalNotes">' + esc(o.internal_notes || '') + '</textarea></label>' +
+      '<div class="os-actions full"><button class="btn btn-primary" type="submit">Salvar OS</button><span class="badge badge-info" id="osLiveTotal">Total atual: ' + money(o.total || 0) + '</span></div></form>'
+    );
+  }
+
+  function serviceItemsRows(items) {
+    return (items || []).map((it) => serviceItemRow({
+      product_id: it.product_id || '',
+      product_name: it.product_name || it.name || 'Peca/Produto',
+      quantity: it.quantity || it.qty || 1,
+      unit_price: it.unit_price || it.price || 0
+    })).join('');
+  }
+
+  function serviceItemRow(item) {
+    const qty = Math.max(1, Number(item.quantity || item.qty || 1));
+    const unit = Math.max(0, Number(item.unit_price || item.price || 0));
+    const total = qty * unit;
+    return '<tr data-os-item data-product-id="' + esc(item.product_id || '') + '">' +
+      '<td><input class="cell-input os-item-name" value="' + esc(item.product_name || item.name || 'Peca/Produto') + '"' + (item.product_id ? ' readonly' : '') + '></td>' +
+      '<td><input class="cell-input os-item-qty" type="number" min="1" step="1" value="' + qty + '"></td>' +
+      '<td><input class="cell-input os-item-price" type="number" min="0" step="0.01" value="' + unit.toFixed(2) + '"' + (item.product_id ? ' readonly title="Preco puxado do catalogo no servidor"' : '') + '></td>' +
+      '<td><strong class="os-item-total">' + money(total) + '</strong></td>' +
+      '<td><button class="btn btn-outline btn-sm" type="button" data-remove-os-item>Remover</button></td>' +
+      '</tr>';
+  }
+
+  function addServiceOrderItem(item) {
+    const tbody = document.querySelector('#osItemsTable tbody');
+    if (!tbody) return;
+    tbody.insertAdjacentHTML('beforeend', serviceItemRow(item));
+    bindServiceItemRows();
+    updateServiceOrderLiveTotal();
+  }
+
+  function readServiceItems() {
+    return Array.from(document.querySelectorAll('[data-os-item]')).map((row) => ({
+      product_id: row.dataset.productId || '',
+      product_name: row.querySelector('.os-item-name')?.value.trim() || 'Peca/Produto',
+      quantity: Number(row.querySelector('.os-item-qty')?.value || 1),
+      unit_price: Number(row.querySelector('.os-item-price')?.value || 0)
+    })).filter((item) => item.product_name);
+  }
+
+  function updateServiceOrderLiveTotal() {
+    document.querySelectorAll('[data-os-item]').forEach((row) => {
+      const qty = Math.max(1, Number(row.querySelector('.os-item-qty')?.value || 1));
+      const unit = Math.max(0, Number(row.querySelector('.os-item-price')?.value || 0));
+      const target = row.querySelector('.os-item-total');
+      if (target) target.textContent = money(qty * unit);
+    });
+    const productTotal = readServiceItems().reduce((sum, item) => sum + Math.max(1, Number(item.quantity || 1)) * Math.max(0, Number(item.unit_price || 0)), 0);
+    const labor = Number(document.getElementById('osLabor')?.value || 0);
+    const discount = Number(document.getElementById('osDiscount')?.value || 0);
+    const total = Math.max(0, productTotal + labor - discount);
+    const badge = document.getElementById('osLiveTotal');
+    if (badge) badge.textContent = 'Total atual: ' + money(total);
+  }
+
+  function bindServiceItemRows() {
+    document.querySelectorAll('[data-remove-os-item]').forEach((btn) => {
+      btn.onclick = () => { btn.closest('[data-os-item]')?.remove(); updateServiceOrderLiveTotal(); };
+    });
+    document.querySelectorAll('.os-item-qty, .os-item-price, #osLabor, #osDiscount').forEach((input) => {
+      input.oninput = updateServiceOrderLiveTotal;
+    });
+  }
+
+  async function searchServiceOrderProducts() {
+    const input = document.getElementById('osProductSearch');
+    const results = document.getElementById('osProductResults');
+    const q = input ? input.value.trim() : '';
+    if (!results) return;
+    if (q.length < 2) {
+      results.innerHTML = '<div class="empty">Digite pelo menos 2 caracteres.</div>';
+      return;
+    }
+    results.innerHTML = '<div class="loading">Buscando produtos...</div>';
+    try {
+      const params = new URLSearchParams({ q, limit: 8, offset: 0, active: 'true' });
+      const data = await api('/products?' + params.toString());
+      const items = data.items || [];
+      results.innerHTML = items.length
+        ? '<div class="bars">' + items.map((p) => '<div class="sub-card os-product-result"><strong>' + esc(p.name) + '</strong><small>' + esc([p.brand, p.category].filter(Boolean).join(' / ')) + '</small><span>' + money(p.price || 0) + '</span><button class="btn btn-primary btn-sm" type="button" data-add-os-product="' + esc(p.id) + '">Adicionar</button></div>').join('') + '</div>'
+        : '<div class="empty">Nenhum produto encontrado.</div>';
+      items.forEach((p) => {
+        results.querySelector('[data-add-os-product="' + CSS.escape(String(p.id)) + '"]')?.addEventListener('click', () => {
+          addServiceOrderItem({ product_id: p.id, product_name: p.name, quantity: 1, unit_price: Number(p.price || 0) });
+          results.innerHTML = '';
+          if (input) input.value = '';
+          toast('Produto adicionado na OS');
+        });
+      });
+    } catch (e) {
+      results.innerHTML = '<div class="error-state">Erro ao buscar produto: ' + esc(e.message) + '</div>';
+    }
+  }
+
+  function collectServiceOrder() {
+    return {
+      order_id: document.getElementById('osOrderId')?.value.trim() || '', status: document.getElementById('osStatus')?.value || 'aberta',
+      customer_name: document.getElementById('osCustomerName')?.value.trim() || '', customer_phone: document.getElementById('osCustomerPhone')?.value.trim() || '',
+      customer_document: document.getElementById('osCustomerDocument')?.value.trim() || '', customer_address: document.getElementById('osCustomerAddress')?.value.trim() || '', customer_email: document.getElementById('osCustomerEmail')?.value.trim() || '',
+      device_brand: document.getElementById('osDeviceBrand')?.value.trim() || '', device_model: document.getElementById('osDeviceModel')?.value.trim() || '', device_color: document.getElementById('osDeviceColor')?.value.trim() || '', device_serial: document.getElementById('osDeviceSerial')?.value.trim() || '', device_password: document.getElementById('osDevicePassword')?.value.trim() || '',
+      intake_condition: document.getElementById('osIntakeCondition')?.value.trim() || '', reported_issue: document.getElementById('osReportedIssue')?.value.trim() || '', diagnosis: document.getElementById('osDiagnosis')?.value.trim() || '', services_done: document.getElementById('osServicesDone')?.value.trim() || '',
+      labor: Number(document.getElementById('osLabor')?.value || 0), technician: document.getElementById('osTechnician')?.value.trim() || '', internal_notes: document.getElementById('osInternalNotes')?.value.trim() || '', customer_notes: document.getElementById('osCustomerNotes')?.value.trim() || '',
+      discount: Number(document.getElementById('osDiscount')?.value || 0), payment_method: document.getElementById('osPaymentMethod')?.value.trim() || '', payment_status: document.getElementById('osPaymentStatus')?.value.trim() || 'pendente', warranty_days: Number(document.getElementById('osWarrantyDays')?.value || 90), warranty_terms: document.getElementById('osWarrantyTerms')?.value.trim() || '',
+      items: readServiceItems()
+    };
+  }
+
+  function bindServiceOrderForm(o) {
+    document.getElementById('backServiceOrders')?.addEventListener('click', () => { state.selectedServiceOrderId = null; state.editingServiceOrder = null; renderServiceOrders(); });
+    document.getElementById('downloadServiceOrderPdf')?.addEventListener('click', () => downloadServiceOrderPdf(o.id));
+    document.getElementById('printServiceOrderPdf')?.addEventListener('click', () => printServiceOrderPdf(o.id));
+    document.getElementById('whatsappServiceOrder')?.addEventListener('click', () => whatsappServiceOrder(o));
+    bindServiceItemRows();
+    updateServiceOrderLiveTotal();
+    document.getElementById('searchOsProduct')?.addEventListener('click', searchServiceOrderProducts);
+    document.getElementById('osProductSearch')?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        searchServiceOrderProducts();
+      }
+    });
+    document.getElementById('addManualOsItem')?.addEventListener('click', () => addServiceOrderItem({ product_name: 'Peca/Produto', quantity: 1, unit_price: 0 }));
+    document.getElementById('serviceOrderForm')?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const payload = collectServiceOrder();
+      if (!payload.customer_name) return toast('Nome do cliente obrigatorio', 'error');
+      try {
+        const saved = await api(o.id ? '/service-orders/' + encodeURIComponent(o.id) : '/service-orders', { method: o.id ? 'PUT' : 'POST', body: JSON.stringify(payload) });
+        state.metrics = null; state.selectedServiceOrderId = saved.id; state.editingServiceOrder = saved;
+        toast('OS salva'); renderServiceOrderDetail(saved.id);
+      } catch (e) { toast(e.message, 'error'); }
+    });
+  }
+
+  async function createServiceOrderFromOrder(orderId) {
+    try {
+      const saved = await api('/service-orders/from-order/' + encodeURIComponent(orderId), { method: 'POST' });
+      state.metrics = null; state.selectedOrderId = null; state.selectedServiceOrderId = saved.id;
+      switchTab('service-orders'); toast('OS criada a partir do pedido');
+    } catch (e) { toast(e.message, 'error'); }
+  }
+
+  function serviceOrderPdfUrl(id) { return API + '/service-orders/' + encodeURIComponent(id) + '/pdf'; }
+  function downloadServiceOrderPdf(id) { if (!id) return; const a = document.createElement('a'); a.href = serviceOrderPdfUrl(id); a.download = 'tech7-os-' + id + '.pdf'; a.click(); }
+  function printServiceOrderPdf(id) { if (id) window.open(serviceOrderPdfUrl(id), '_blank', 'noopener'); }
+  function whatsappServiceOrder(o) {
+    const phone = String(o.customer_phone || '').replace(/\D/g, '');
+    const msg = 'Ola ' + (o.customer_name || '') + ', sua ' + (o.code || 'OS') + ' da Tech 7 esta em status: ' + serviceStatusLabel(o.status) + '. Total: ' + money(o.total || 0) + '.';
+    window.open('https://wa.me/' + (phone ? '55' + phone.replace(/^55/, '') : '') + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
   }
 
   function renderPricing() {
@@ -873,6 +1259,26 @@
     return '<div class="pagination"><button class="btn btn-outline btn-sm" data-page="' + kind + ':prev"' + (page <= 0 ? ' disabled' : '') + '>Anterior</button><span>Página ' + (page + 1) + ' de ' + totalPages + '</span><button class="btn btn-outline btn-sm" data-page="' + kind + ':next"' + (page >= totalPages - 1 ? ' disabled' : '') + '>Próxima</button></div>';
   }
 
+  function renderSettings() {
+    setHead('Configuracoes', 'Preferencias operacionais e leitura do ambiente do painel.');
+    const el = document.getElementById('tab-settings');
+    loadMetrics().then((m) => {
+      el.innerHTML = '<div class="grid-2"><div>' +
+        panel('Fonte de verdade', 'Dados usados pelo admin', '<div class="bars">' +
+          '<div class="sub-card"><small>Banco</small><strong>Supabase via API do projeto</strong><span>ONE indisponivel nesta sessao; runtime do app foi usado como fallback.</span></div>' +
+          '<div class="sub-card"><small>Admin principal</small><strong>admin.html</strong><span>CRUD atual preservado em assets/js/admin.js e /api/admin.</span></div>' +
+          '<div class="sub-card"><small>OS</small><strong>' + number(m.service_orders?.total || 0) + '</strong><span>Ordens salvas em service_orders e service_order_items.</span></div>' +
+        '</div>') + '</div><div>' +
+        panel('Campos recomendados', 'Proximas melhorias de schema', '<div class="bars">' +
+          '<div class="sub-card"><small>Estoque</small><strong>Minimo por produto</strong><span>Hoje o alerta usa estoque <= 2.</span></div>' +
+          '<div class="sub-card"><small>Cliente</small><strong>Cadastro unificado</strong><span>Recorrencia hoje e calculada por telefone/email/nome do pedido.</span></div>' +
+          '<div class="sub-card"><small>Servicos</small><strong>Tabela de servicos padrao</strong><span>Pode acelerar OS recorrentes no balcao.</span></div>' +
+        '</div>') + '</div></div>';
+    }).catch((e) => {
+      el.innerHTML = '<div class="error-state">Erro ao carregar configuracoes: ' + esc(e.message) + '</div>';
+    });
+  }
+
   function bindPagination(kind) {
     document.querySelectorAll('[data-page]').forEach((btn) => btn.addEventListener('click', () => {
       const [target, dir] = btn.dataset.page.split(':');
@@ -880,6 +1286,9 @@
       if (kind === 'products') {
         state.productsPage = dir === 'prev' ? Math.max(0, state.productsPage - 1) : state.productsPage + 1;
         renderProducts();
+      } else if (kind === 'serviceOrders') {
+        state.serviceOrdersPage = dir === 'prev' ? Math.max(0, state.serviceOrdersPage - 1) : state.serviceOrdersPage + 1;
+        renderServiceOrders();
       } else {
         state.ordersPage = dir === 'prev' ? Math.max(0, state.ordersPage - 1) : state.ordersPage + 1;
         renderOrders();
@@ -892,11 +1301,13 @@
     document.querySelectorAll('[data-tab]').forEach((btn) => btn.classList.toggle('active', btn.dataset.tab === tab));
     document.querySelectorAll('.tab-content').forEach((el) => el.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
-    if (tab === 'dashboard') renderDashboard();
+    if (tab === 'dashboard') renderDashboardV2();
     if (tab === 'products') renderProducts();
     if (tab === 'orders') renderOrders();
+    if (tab === 'service-orders') renderServiceOrders();
     if (tab === 'pricing') renderPricing();
     if (tab === 'reports') renderReports();
+    if (tab === 'settings') renderSettings();
   }
 
   function exportCsv() {
@@ -905,8 +1316,10 @@
       rows = [['id', 'cliente', 'email', 'total', 'status', 'pagamento', 'data']].concat(state.orders.map((o) => [o.id, o.customer_name, o.customer_email, o.total, o.status, o.payment_provider, o.created_at]));
     } else if (state.tab === 'products') {
       rows = [['id', 'nome', 'marca', 'categoria', 'preco', 'ativo', 'url']].concat(state.products.map((p) => [p.id, p.name, p.brand, p.category, p.price, p.active, p.url]));
+    } else if (state.tab === 'service-orders') {
+      rows = [['id', 'codigo', 'cliente', 'telefone', 'aparelho', 'status', 'total', 'data']].concat(state.serviceOrders.map((o) => [o.id, o.code, o.customer_name, o.customer_phone, [o.device_brand, o.device_model].filter(Boolean).join(' '), o.status, o.total, o.created_at]));
     } else {
-      rows = [['metrica', 'valor'], ['produtos_total', state.metrics?.products?.total || 0], ['pedidos_total', state.metrics?.orders?.total || 0], ['receita_total', state.metrics?.orders?.revenue || 0]];
+      rows = [['metrica', 'valor'], ['produtos_total', state.metrics?.products?.total || 0], ['pedidos_total', state.metrics?.orders?.total || 0], ['os_abertas', state.metrics?.service_orders?.open || 0], ['receita_total', state.metrics?.orders?.revenue || 0]];
     }
     const csv = rows.map((r) => r.map((v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });

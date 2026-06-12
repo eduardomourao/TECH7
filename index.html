@@ -1318,6 +1318,7 @@ a[href*="app-central"] {
                 }
 
                 function setupSearchSuggestion(form) {
+                    if (window.__TECH7_HEADER_AUTOCOMPLETE__) return;
                     var input = form.querySelector('input[name="palavra_busca"], input[name="q"], .input-search');
                     if (!input || form.dataset.t7SuggestionReady) return;
                     form.dataset.t7SuggestionReady = "1";

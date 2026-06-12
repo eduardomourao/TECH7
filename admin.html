@@ -64,7 +64,7 @@
       mask-image: linear-gradient(to bottom, #000, transparent 78%);
     }
 
-    button, input, select { font: inherit; }
+    button, input, select, textarea { font: inherit; }
     button {
       cursor: pointer;
       border: 0;
@@ -145,7 +145,7 @@
       font-weight: 800;
     }
     .form-stack label { display: grid; gap: 8px; }
-    input, select {
+    input, select, textarea {
       width: 100%;
       min-height: 42px;
       padding: 9px 11px;
@@ -156,6 +156,10 @@
       font-size: 14px;
       box-shadow: inset 0 2px 5px rgba(0, 0, 0, .46);
       transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    textarea {
+      min-height: 92px;
+      resize: vertical;
     }
     input::placeholder { color: rgba(161, 161, 170, .58); }
     input:focus, select:focus {
@@ -631,6 +635,54 @@
       max-width: 116px;
       font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
     }
+    .warning-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin: 2px 4px 2px 0;
+      border: 1px solid rgba(248, 197, 106, .26);
+      border-radius: 999px;
+      padding: 3px 7px;
+      color: var(--warning);
+      background: rgba(248, 197, 106, .08);
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .os-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .os-form .full { grid-column: 1 / -1; }
+    .os-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .os-product-picker {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      gap: 10px;
+      align-items: end;
+    }
+    .os-product-results {
+      grid-column: 1 / -1;
+    }
+    .os-product-result {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 6px 10px;
+      align-items: center;
+    }
+    .os-product-result small,
+    .os-product-result span {
+      grid-column: 1;
+    }
+    .os-product-result button {
+      grid-column: 2;
+      grid-row: 1 / span 3;
+    }
 
     .badge {
       display: inline-flex;
@@ -756,7 +808,7 @@
       .side-head { padding-bottom: 12px; }
       .side-cta, .side-foot { display: none; }
       .nav {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, 1fr));
         padding: 0 14px 14px;
       }
       .nav button {
@@ -800,7 +852,14 @@
       .grid-4, .sub-grid { grid-template-columns: 1fr; }
       .order-detail { grid-template-columns: 1fr; }
       .bar-row { grid-template-columns: 1fr; gap: 6px; }
-      .nav { grid-template-columns: repeat(5, minmax(44px, 1fr)); gap: 6px; }
+      .nav { grid-template-columns: repeat(6, minmax(44px, 1fr)); gap: 6px; }
+      .os-form { grid-template-columns: 1fr; }
+      .os-product-picker,
+      .os-product-result { grid-template-columns: 1fr; }
+      .os-product-result button {
+        grid-column: 1;
+        grid-row: auto;
+      }
     }
   </style>
 </head>
@@ -847,7 +906,7 @@
           <div class="side-subtitle">Admin Terminal v4.0</div>
         </div>
 
-        <button class="side-cta" type="button" data-tab="orders">Novo Pedido</button>
+        <button class="side-cta" type="button" data-tab="service-orders">Nova OS</button>
 
         <nav class="nav">
           <button type="button" class="active" data-tab="dashboard" aria-label="Dashboard">
@@ -875,6 +934,16 @@
             </svg>
             <span>Pedidos</span>
           </button>
+          <button type="button" data-tab="service-orders" aria-label="Ordens de Servico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+              <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+              <path d="M9 15h6"/>
+              <path d="M9 11h6"/>
+              <path d="M9 19h3"/>
+            </svg>
+            <span>Ordens de Serviço</span>
+          </button>
           <button type="button" data-tab="pricing" aria-label="Motor de preços">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" x2="12" y1="2" y2="22"/>
@@ -888,6 +957,13 @@
               <path d="m19 9-5 5-4-4-3 3"/>
             </svg>
             <span>Relatórios</span>
+          </button>
+          <button type="button" data-tab="settings" aria-label="Configuracoes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.72l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span>Configurações</span>
           </button>
         </nav>
 
@@ -946,14 +1022,17 @@
             </div>
             <div class="toolbar-group">
               <button class="btn btn-outline btn-sm" type="button" data-tab="products">Abrir produtos</button>
-              <button class="btn btn-primary btn-sm" type="button" data-tab="orders">Ver pedidos</button>
+              <button class="btn btn-outline btn-sm" type="button" data-tab="orders">Ver pedidos</button>
+              <button class="btn btn-primary btn-sm" type="button" data-tab="service-orders">Nova OS</button>
             </div>
           </section>
           <div class="tab-content active" id="tab-dashboard"></div>
           <div class="tab-content" id="tab-products"></div>
           <div class="tab-content" id="tab-orders"></div>
+          <div class="tab-content" id="tab-service-orders"></div>
           <div class="tab-content" id="tab-pricing"></div>
           <div class="tab-content" id="tab-reports"></div>
+          <div class="tab-content" id="tab-settings"></div>
         </main>
       </div>
     </div>

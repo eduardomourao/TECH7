@@ -1,3 +1,49 @@
+# Plano de execucao - mobile production gate TECH7 (2026-06-12)
+
+## Objetivo
+Testar o site TECH7 rodando localmente em versao mobile antes de producao, usando navegador real, screenshots, DOM, console, network, navegacao e performance basica.
+
+## Guardrails
+- CWD: `C:\Users\Admin\Downloads\TECH7\TECH7-main`.
+- Skills usadas nesta rodada: `caveman`, `planning-with-files`, `cloudflare:web-perf`, `website-building`.
+- Ferramenta solicitada: Browser MCP. Descoberta feita via `tool_search`; Browser MCP e Chrome DevTools MCP nao expuseram comandos chamaveis de navegacao/screenshot/trace nesta sessao.
+- Fallback final permitido e registrado: Playwright com Google Chrome.
+- Corrigir somente CSS/JS necessario para bugs visuais ou navegacao mobile; nao alterar produto, preco, checkout, banco ou rotas sem necessidade clara.
+
+## Rotas alvo
+- `/`
+- `/Apple/index.html`
+- `/tela-display-lcd/index.html`
+- `/tela-display-lcd/samsung/index.html`
+- `/tampas-e-carcacas/index.html`
+- `/display/tela-display-lcd-realme-c55-rmx3710-com-aro`
+- `/display/samsung/tela-display-lcd-samsung-s20-ultra-g988-oled-com-aro`
+- `/tampas-e-carcacas/tampa-traseira-iph-12-pro-max`
+- `/busca/?palavra_busca=iphone`
+- `/busca/?palavra_busca=zzzznaoexiste`
+- `/carrinho/`
+- `/checkout/`
+
+## Viewports alvo
+- `320x568`
+- `360x640`
+- `375x667`
+- `390x844`
+- `414x896`
+- `430x932`
+- `768x1024`
+
+## Fases
+- [x] Confirmar cwd e regras do projeto.
+- [x] Tentar Browser MCP e Chrome DevTools MCP.
+- [x] Rodar auditoria mobile com screenshots, console, network, DOM, cliques e overflow.
+- [x] Corrigir bugs encontrados.
+- [x] Revalidar rotas/viewports afetadas.
+- [x] Rodar validadores npm relevantes.
+- [x] Decisao release gate: `APROVADO PARA PRODUCAO`.
+
+---
+
 # Plano de execucao - Produtos visitados imagens TECH7 (2026-06-11)
 
 ## Objetivo
@@ -26,6 +72,33 @@ Corrigir a secao `Produtos visitados` para exibir imagens reais dos produtos, pr
 - [ ] Implementar correcao compartilhada minima.
 - [ ] Validar visualmente com Chrome real desktop/mobile.
 - [ ] Rodar validadores aplicaveis.
+
+---
+
+# Plano de execucao - filtros mobile TECH7 (2026-06-12)
+
+## Objetivo
+Corrigir a tela de filtros no mobile para ficar adaptada, legivel e clicavel, preservando produtos, rotas, preco e logica de negocio.
+
+## Guardrails
+- CWD: `C:\Users\Admin\Downloads\TECH7\TECH7-main`.
+- Corrigir no runtime/CSS compartilhado; evitar editar milhares de HTMLs estaticos.
+- Browser-first: tentar `@chrome`/Browser e Chrome DevTools; se nao ficarem callable, usar Playwright Chrome fallback e registrar.
+- Sem alterar banco, produto, preco, categoria ou rota.
+
+## Fases
+- [x] Ler skills `senior-fullstack`, `caveman`, `planning-with-files`.
+- [x] Localizar markup/runtime de filtros.
+- [x] Reproduzir problema em mobile e salvar evidencia antes.
+- [x] Implementar ajuste minimo CSS/JS.
+- [x] Validar abertura/fechamento, clique em filtro, URL/lista, overflow e console.
+- [x] Rodar validadores relevantes.
+
+## Resultado
+- Causa: painel legado `.box-fixed .box-white` mantinha formato estreito/alto demais no mobile e alguns labels apontavam para ids inexistentes, reduzindo a area clicavel.
+- Correcao: `assets/js/tech7-local-runtime.js` injeta CSS mobile para drawer lateral responsivo, bloqueia scroll do body enquanto aberto, normaliza labels/inputs e preenche labels de faixas de preco vazias.
+- Evidencias: `_validation/mobile-filters/before-filters-390.json`, `before-filters-open-390.png`, `after-mobile-filters-validation.json`, `after-filters-open-final-390.png`, `after-filters-samsung-final-390.png`.
+- Validacoes: `node --check assets/js/tech7-local-runtime.js`, `npm run validate:routes`, `npm run validate:assets` OK.
 
 ---
 
@@ -65,6 +138,16 @@ Investigar e corrigir demora na exibicao de precos em cards, produto, busca, car
 - Correcao: preservar preco estatico ate a confirmacao do backend, cachear resultados por chave e slug, compartilhar requests em voo e nao apagar preco em falha de rede.
 - Evidencias: `_validation/price-performance/baseline-summary.json`, `_validation/price-performance/after-slug-cache-final-summary.json` e screenshots `after-slug-cache-final-*.png`.
 - Decisao: atraso visual corrigido para categorias, home, produto, busca e carrinho vazio; risco de dados remanescente registrado para o produto Realme C55, cujo backend retorna preco indisponivel enquanto o HTML estatico mostra `R$ 138,00`.
+
+## Reajuste Galaxy Ultra OLED - 2026-06-12
+- Escopo confirmado pelo usuario: somente telas dos modelos Galaxy S20 Ultra, Note 20 Ultra, S21 Ultra, S22 Ultra e S23 Ultra; OLED para `R$ 950,00`; Incell/Vivid para `R$ 450,00`.
+- ONE, Supabase plugin e Composio nao ficaram callable nesta sessao; fallback usado: `DATABASE_URL` do runtime local apontando para Supabase pooler `aws-1-sa-east-1.pooler.supabase.com`.
+- Produtos ativos encontrados e atualizados no banco para `price_cents=95000`: Note 20 Ultra OLED, S20 Ultra OLED com aro, S21 Ultra OLED com aro e S23 Ultra OLED com aro.
+- Nenhum produto ativo S22 Ultra OLED, Incell ou Vivid foi encontrado dentro do escopo confirmado; nada foi alterado para `R$ 450,00`.
+- HTML estatico principal alinhado nas quatro paginas `display/samsung/...`.
+- Correção adicional em `produto-comprar.js`: permitir recriar a UI de compra em pagina de produto mesmo quando o form Tray legado ja tiver sido removido antes do script local rodar.
+- Validacao final: API `/api/products/resolve-prices`, Playwright Chrome fallback em 390x844, `node --check`, `npm run validate:backend-prices`, `npm run validate:routes`, `npm run validate:assets` e `npm run validate:product-cards` OK.
+- Evidencia: `_validation/price-performance/galaxy-ultra-oled-950-validation.json` e screenshots `galaxy-ultra-oled-950-*.png`.
 
 ---
 
@@ -487,3 +570,141 @@ Impedir que qualquer pagina mostre preco antigo/estatico/cacheado antes do preco
 |------|-----------|---------------|
 | `files` maior que 15000 itens | `npx vercel deploy --prod --yes` | Usar archive ou reduzir pacote |
 | API Vercel `Internal Server` / worker timeout com pacote ~1.1GB | `npx vercel deploy --prod --yes --archive=tgz` | Investigar conteudo pesado e escolher deploy alternativo seguro |
+
+---
+
+# Plano de execucao - busca inteligente no header TECH7
+
+## Objetivo
+Adicionar autocomplete em tempo real no campo de busca do header, com imagem, nome, preco real e categoria, preservando Enter para busca tradicional.
+
+## Guardrails
+- ONE primeiro antes de mexer em produto, preco, API, busca ou Supabase.
+- Se ONE indisponivel, registrar e usar fallback local/API/env.
+- Supabase/API deve ser fonte confiavel para produtos/precos.
+- `_assets/tech7/search-index.json` apenas auxiliar, nao fonte final de preco.
+- Debounce 200-300ms, limite 6-8 sugestoes, ignorar resposta antiga.
+- Nao quebrar busca existente, menu, carrinho, mobile ou desktop.
+
+## Subagentes
+- Search Flow Analyst: mapear header e fluxo atual.
+- Data Accuracy Validator: mapear API confiavel e campos.
+- Responsive QA: mapear constraints do header/dropdown.
+- Autocomplete Implementer: execucao local no runtime apos investigacao.
+
+## Fases
+- [x] Confirmar cwd, skills e estado Git.
+- [x] Tentar ONE e registrar indisponibilidade.
+- [x] Mapear busca/header/API existente.
+- [x] Implementar endpoint/API ou reaproveitar endpoint confiavel.
+- [x] Implementar UI autocomplete desktop/mobile.
+- [x] Validar dados reais de preco/imagem/categoria.
+- [x] Rodar validacoes `node --check`, `npm run validate:product-cards`, `npm run validate:build`.
+- [x] Validar visualmente com `@chrome` ou fallback reportado.
+
+## Resultado
+- Endpoint reaproveitado: `/api/search?q=<termo>&limit=24`, com sugestoes finais limitadas a 8.
+- UI implementada no runtime compartilhado `assets/js/tech7-local-runtime.js`, com debounce de 250ms, `AbortController`, descarte por sequencia, Escape, clique fora, Enter nativo e clique na sugestao.
+- Home deixou de usar o autocomplete inline antigo quando o runtime compartilhado esta ativo.
+- Validacao visual via Playwright Chrome fallback porque `@chrome` nao ficou callable nesta sessao: `_validation/search-autocomplete/search-autocomplete-validation.json` e screenshots desktop/mobile.
+- Validacoes finais OK: `node --check assets/js/tech7-local-runtime.js`, `npm run validate:product-cards`, `npm run validate:build`.
+
+---
+
+# Plano de execucao - galeria produto mobile
+
+## Objetivo
+Corrigir a galeria de imagens em paginas de produto somente no mobile, garantindo proxima/anterior, thumbnails e swipe sem overflow horizontal e sem regressao desktop.
+
+## Guardrails
+- Corrigir runtime/CSS compartilhado, nao produto individual.
+- Inspecionar primeiro `assets/js/tech7-local-runtime.js` e `_custom/tech7-theme.css`.
+- Preservar desktop.
+- Validar Chrome mobile em 320, 375, 390 e 430px e desktop.
+- Rodar `npm run validate:build` e validacoes de galeria disponiveis.
+
+## Fases
+- [x] Ler memoria e skills obrigatorias.
+- [x] Analisar print e mapear seletores compartilhados.
+- [x] Reproduzir comportamento no Chrome mobile.
+- [x] Corrigir runtime/CSS compartilhado.
+- [x] Validar proximo/anterior, thumb e swipe em mobile.
+- [x] Validar desktop.
+- [x] Rodar validacoes npm obrigatorias.
+
+## Evidencias
+- `artifacts/product-gallery-final4-validation.json`: mobile 320/375/390/430 OK para proximo, anterior, swipe, thumbnail, uma imagem principal visivel, sem overflow e sem salto de scroll.
+- `artifacts/product-gallery-desktop-final4.png`: desktop preservado; thumbnails continuam acionando a galeria e setas mobile nao aparecem.
+- `npm run validate:product-gallery`: 25/25 galerias OK.
+- `npm run validate:gallery-selected-sync -- 40`: 40/40 OK; execucao completa sem limite excedeu 300s.
+- `npm run validate:build`: OK.
+- `npm run validate:product-images`: 26/26 imagens visiveis.
+- `npm run validate:gallery-position`: 24/24 OK.
+- `npm run validate:product-gallery-static-dedupe`: OK; simulacao sem falhas.
+- `npm run validate:product-gallery-dedupe`: excedeu 180s sem resultado.
+- 2026-06-12: `artifacts/realme-gallery-final-overlap-validation.json`: produto Realme C55 mobile em 320/375/400/430 OK; sem corte/sobreposicao, thumbs abaixo, titulo abaixo da galeria, next/prev OK e sem overflow horizontal.
+- 2026-06-12: `artifacts/realme-gallery-final-overlap-400.png`: screenshot visual da largura do print corrigida.
+- 2026-06-12: `npm run validate:product-gallery`: 25/25 galerias OK apos ajuste de sync das setas desktop.
+- 2026-06-12: `npm run validate:gallery-position`: 24/24 OK.
+- 2026-06-12: `npm run validate:build`: OK.
+- 2026-06-12: `artifacts/thumb-gallery-overlap-report.json`: Realme C35 em 320/375/390/430 sem sobreposicao de thumbnails e sem overflow horizontal.
+- 2026-06-12: `artifacts/thumb-gallery-many-overlap-report.json`: Samsung A16 com 5 thumbnails em 320/375/390/430 com scroll interno, gaps de 16px entre cards e sem overflow horizontal de pagina.
+- 2026-06-12: `artifacts/thumb-gallery-many-320.png`: captura visual da largura mais critica com miniaturas lado a lado e bordas inteiras.
+- 2026-06-12: `npm run validate:gallery-position`: 24/24 OK apos ajuste adicional de spacing dos thumbnails.
+- 2026-06-12: `npm run validate:product-gallery`: 25/25 OK apos ajuste adicional de spacing dos thumbnails.
+## Admin OS Dashboard Upgrade - 2026-06-12
+
+Goal: improve `admin.html` as the real Tech 7 admin surface, preserve existing product/order/pricing/report functions, add useful business dashboard data, add Service Orders, and generate printable/downloadable OS PDF.
+
+Rules in force:
+- Use `admin.html` + `assets/js/admin.js` as primary admin UI.
+- Preserve CRUD/products/prices/images/categories/orders/integrations.
+- ONE was searched first but is not callable in this session; use app runtime Supabase fallback and report it.
+- Supabase/runtime database remains source of truth.
+- Use npm commands and Chrome validation before final handoff.
+
+Phases:
+- [x] Confirm project structure and primary admin surface.
+- [x] Read local `caveman` and global `planning-with-files` skills.
+- [x] Discover ONE/Supabase/Chrome/Data Analytics/Creative Production tooling.
+- [x] Map current admin API and UI.
+- [x] Query runtime Supabase schema read-only.
+- [x] Add OS schema migration.
+- [x] Extend admin API with OS CRUD, order-to-OS, PDF payload, richer metrics.
+- [x] Extend `admin.html` navigation and responsive operational UI.
+- [x] Extend `assets/js/admin.js` with Dashboard, Products alerts, Orders -> OS, OS workspace, PDF generation/download/print/WhatsApp link.
+- [x] Run migration and validations.
+- [x] Validate in browser fallback and record evidence.
+
+Errors / constraints:
+- ONE MCP/plugin not found through tool discovery. Fallback: Supabase app + runtime DB via `server/lib/db.js`.
+- Supabase app project list returned only an inactive project; runtime DB is `DATABASE_URL` against Supabase pooler, so implementation uses runtime source of truth.
+- `npm run db:migrate` initially failed because `server/db/migrate.js` did not load `.env`; fixed by importing `dotenv/config`.
+- `@chrome`/Chrome DevTools tools were not callable in this session after discovery attempts. Visual validation used Playwright fallback, with screenshots under `_validation/admin-os/`.
+
+Follow-up bugfix - OS tab `http_404`:
+- [x] Reproduced local port 3000 API state: `/api/admin/service-orders` returned 404 while `/api/admin/metrics` returned expected 401 without session.
+- [x] Confirmed Supabase fallback project `lzsaaufsdcmqlasjrqck` has OS tables already migrated.
+- [x] Restarted local `node server/index.js` on port 3000 so the current admin routes are loaded.
+- [x] Verified unauthenticated OS route now returns expected 401 and authenticated route returns 200.
+- [x] Added clearer frontend message for `http_404`.
+- [x] Validated OS tab visually via Playwright fallback: no `http_404`, no load error, API status 200.
+
+Follow-up - OS manual product sale and client PDF:
+- [x] Confirmed ONE still not exposed as callable; used active Supabase plugin fallback project `lzsaaufsdcmqlasjrqck`.
+- [x] Keep OS source of truth in `service_orders` and `service_order_items`; do not create fake rows in `orders`.
+- [x] Add product search/selection inside manual OS form.
+- [x] Ensure selected product name/price are hydrated from server catalog by `product_id`, overriding browser-provided name/price.
+- [x] Count service-order products as product sales in dashboard product revenue, top products and top categories when OS is not canceled.
+- [x] Keep order-to-OS flow using order item prices as existing sale context.
+- [x] Update PDF header for client delivery with Tech 7 logo mark at top-left, store details, customer copy label, totals, warranty, client awareness text and signatures.
+- [x] Validate API, visual flow, PDF and cleanup of test OS rows.
+
+Follow-up - OS save FK bug and deploy:
+- [x] Diagnose local save error from server logs.
+- [x] Validate optional order origin before save.
+- [x] Return friendly client error for invalid order origin instead of generic DB failure.
+- [ ] Reproduce invalid/manual OS cases locally.
+- [ ] Run validation gates.
+- [ ] Commit/push to GitHub.
+- [ ] Deploy/verify Vercel.

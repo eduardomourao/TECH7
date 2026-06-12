@@ -1,9 +1,79 @@
+# Findings - mobile production gate TECH7 (2026-06-12)
+
+## Estado inicial
+- Pedido: testar todo o site localmente em mobile antes de producao, usando Browser MCP.
+- Browser MCP / Chrome DevTools MCP: ferramentas de navegacao, clique, screenshot e trace nao ficaram callable via descoberta nesta sessao.
+- Fallback final registrado: Playwright com Google Chrome (`channel: "chrome"`).
+- Evidencias desta rodada serao salvas em `_validation/mobile-production-gate/`.
+
+## Checklist aplicado
+- Overflow horizontal: `document.documentElement.scrollWidth <= window.innerWidth`.
+- Header/logo/menu/busca mobile.
+- Cards de produto: imagem, titulo, preco e CTA/link.
+- Filtros mobile em catalogos.
+- Produto individual, carrinho e checkout acessivel.
+- Footer com Instagram/WhatsApp.
+- Console/network local sem erro critico.
+- Screenshots por viewport/rota-chave.
+- Performance basica por Navigation Timing quando DevTools trace nao estiver disponivel.
+
+## Bug confirmado
+
+| Pagina | Viewport | Elemento/seletor | Causa provavel | Correcao aplicada | Evidencia final |
+|---|---:|---|---|---|---|
+| `/tela-display-lcd/samsung/index.html` redirecionando para `/display-e-lcd/samsung/` | 320x568, 375x667, 414x896 | `.page-catalog .filter__button` | CSS do drawer mobile usava `width: calc(100% + 32px)` com margem negativa, fazendo o botao final passar da largura do painel em viewports estreitas | Ajustado para `width: 100%`, `max-width: 100%`, `box-sizing: border-box`, margem sem negativo e `display:flex` | `_validation/mobile-production-gate/filter-button-after-focused.json`, screenshots `filter-button-after-*.png` |
+
+## Resultado final da auditoria
+- `_validation/mobile-production-gate/mobile-production-audit-summary.json`: 84/84 casos passaram, 0 bloqueadores, 0 erros.
+- Rotas testadas: 12.
+- Viewports testadas: 7.
+- Console local: sem erro critico na auditoria final.
+- Network local: sem 404/5xx de CSS, JS, imagem principal ou asset critico na auditoria final.
+- Overflow horizontal: `scrollWidth <= innerWidth` em todos os casos.
+- Interacoes finais: menu abre/fecha, busca com sugestao e resultado, clique de card, botao comprar, Instagram e WhatsApp.
+
+---
+
 # Findings - Produtos visitados imagens TECH7 (2026-06-11)
 
 ## Estado inicial
 - Print do usuario mostra cards de `Produtos visitados` com nome/avaliacao/preco, mas imagem de fallback `TECH 7 - Imagem indisponivel`.
 - Memoria do projeto indica que runtime compartilhado de produto/card fica em `assets/js/tech7-local-runtime.js`; evitar edicao por pagina.
 - Worktree ja possui stage grande e alteracoes locais nao relacionadas; preservar.
+
+---
+
+# Findings - filtros mobile TECH7 (2026-06-12)
+
+## Estado inicial
+- Filtros de catalogo ficam no HTML legado dentro de `.sidebar-category .box-fixed .box-white`.
+- Botao visivel para mobile/desktop: `.button-filter`.
+- Form real: `form.smart-filter`; runtime de aplicacao backend fica em `assets/js/tech7-local-runtime.js`.
+- CSS legado do tema define `.filter__list`, `.filter__title`, `.filter__item`, `.filter__label`, mas nao adapta claramente `.box-fixed/.box-white` como drawer mobile.
+- Problema estrutural encontrado no HTML legado: alguns labels de categoria usam `for="c-APPLE"` enquanto inputs têm `id="APPLE"`, reduzindo area clicavel em mobile. Correção deve normalizar labels via JS sem editar todas as paginas.
+
+## Evidencia antes
+- `_validation/mobile-filters/before-filters-390.json`: em 390x844, painel aberto tinha `.box-white` em `305x1121`, ultrapassando a viewport.
+- Primeiro label do filtro: `for="c-APPLE"` com input `id="APPLE"`.
+- Sem overflow horizontal, mas com rolagem/formato ruim por painel maior que a tela e conteudo estreito.
+
+## Correcao aplicada
+- `assets/js/tech7-local-runtime.js`:
+  - adiciona `ensureMobileCatalogFilterStyles()` com CSS mobile para `.page-catalog .box-fixed`;
+  - transforma filtro em drawer lateral de `min(92vw, 420px)`, altura `100dvh`, rolagem interna e overlay;
+  - adiciona classe `body.t7-filter-open` para bloquear scroll do fundo;
+  - aumenta area clicavel dos filtros para minimo de 44px;
+  - normaliza `label[for]` para bater com `input.id`;
+  - gera texto legivel para faixas de preco vazias, ex. `Até R$ 349,99`;
+  - preserva o backend filter existente e nao altera rotas/produtos.
+
+## Evidencia depois
+- `_validation/mobile-filters/after-mobile-filters-validation.json`:
+  - drawer aberto: `359x844` em viewport `390x844`;
+  - `overflow-y: auto`;
+  - label corrigido: `APPLE` -> `APPLE`;
+  - clique em `Samsung` marcou checkbox, atualizou URL para `?brand=samsung` e renderizou 100 cards filtrados;
+  - sem overflow horizontal, sem erro de console e sem erro local de network.
 
 ---
 
@@ -53,6 +123,27 @@
   - `npm run validate:backend-prices`: OK.
   - `npm run validate:product-cards`: OK.
   - Browser fallback Playwright Chrome: `/display/tela-display-lcd-realme-c55-rmx3710-com-aro` mostra `R$ 150,00`, botao `Comprar` habilitado e `scrollWidth=innerWidth=390`. Evidencias: `_validation/price-performance/realme-c55-150-final.json` e `_validation/price-performance/realme-c55-150-final.png`.
+
+## Reajuste Galaxy Ultra OLED - 2026-06-12
+- Escopo confirmado antes de alterar: somente telas OLED/Incell/Vivid dos modelos S20 Ultra, Note 20 Ultra, S21 Ultra, S22 Ultra e S23 Ultra.
+- ONE, Supabase plugin e Composio nao ficaram callable via descoberta de ferramentas; fallback foi o runtime local com `DATABASE_URL`.
+- Projeto Supabase inferido pelo host/usuario do runtime: pooler `aws-1-sa-east-1.pooler.supabase.com`, usuario `postgres.lzsaaufsdcmqlasjrqck`.
+- Atualizados no banco para `price_cents=95000`:
+  - `tela-display-lcd-samsung-note-20-ultra-n986-oled`
+  - `tela-display-lcd-samsung-s20-ultra-g988-oled-com-aro`
+  - `tela-display-lcd-samsung-s21-ultra-original-nacional-com-aro`
+  - `tela-display-lcd-samsung-s23-ultra-5g-s918-oled-com-aro`
+- Nenhum produto ativo S22 Ultra OLED foi encontrado no banco; a pagina estatica `display/apple/tela-display-lcd-samsung-s22-ultra-5g-s908-oled-com-aro/index.html` esta fora do escopo ativo e foi preservada.
+- Nenhum produto ativo Incell/Vivid foi encontrado dentro dos modelos confirmados; nenhum item foi atualizado para `R$ 450,00`.
+- API `/api/products/resolve-prices` retornou `price_cents=95000`, `price_status=available` e `found=true` para os quatro produtos.
+- Bug visual/compra encontrado no Note 20 Ultra: o form Tray legado podia desaparecer antes de `produto-comprar.js` recriar a UI; resultado era pagina sem preco principal/botao local em algumas execucoes.
+- Correção aplicada em `produto-comprar.js`: detectar pagina de produto por shell `.page-product`/`.fixed-info` alem do form legado, permitindo inserir `.t7-buy-wrapper` com preco e botao mesmo se o form ja tiver sido removido.
+- Validacao visual final por Playwright Chrome fallback em 390x844:
+  - quatro paginas com `R$ 950,00` em `.t7-buy-wrapper .t7-buy-price`;
+  - botao `.btn-comprar` habilitado;
+  - sem overflow horizontal;
+  - sem erro local de console/network; apenas warning legado `JQMIGRATE`.
+- Evidencias: `_validation/price-performance/galaxy-ultra-oled-950-validation.json` e screenshots `galaxy-ultra-oled-950-note20ultra.png`, `galaxy-ultra-oled-950-s20ultra.png`, `galaxy-ultra-oled-950-s21ultra.png`, `galaxy-ultra-oled-950-s23ultra.png`.
 
 ---
 
@@ -259,3 +350,68 @@
 - Validacao Chrome real pos-fix: home abriu com `html.t7-prices-ready` e cards com precos finais do banco; evidencia `_validation/price-source/home-price-after-fix-chrome.png`.
 - Validacoes controladas com atraso artificial da API confirmaram que preco antigo fica transparente e o texto visivel e `Carregando`; depois entra o preco do banco.
 - Validacao de carrinho/checkout com item propositalmente stale em `localStorage` confirmou estado inicial `Atualizando preco`, botoes bloqueados, e final `R$ 1.300,00` apos revalidacao.
+
+---
+
+# Findings - galeria produto mobile
+
+- A galeria compartilhada da pagina de produto fica em `assets/js/tech7-local-runtime.js`; a correcao nao exigiu editar paginas/produtos individuais.
+- No mobile, a coluna de thumbnails herdava comportamento de desktop: `.nav-images` ficava parcialmente fora do viewport, exemplo reproduzido em 390px com `left=-120` e `right=0`.
+- A rota testada nao carregava `_custom/tech7-theme.css`, entao o CSS sozinho nao resolveria o problema; o runtime agora aplica inline os estilos criticos no breakpoint mobile.
+- A solucao mobile reposiciona os thumbnails abaixo da imagem principal, cria setas acessiveis sobre a imagem, mantem o indice ativo sincronizado e adiciona swipe horizontal com tolerancia para scroll vertical.
+- `setActiveGalleryIndex` preserva o scroll no mobile para evitar salto ao clicar em seta/thumb e mantém o desktop fora do caminho mobile.
+- Desktop continua sem setas mobile e com thumbnails funcionando; comportamento novo fica limitado ao `max-width: 767px`.
+- O Chrome/plugin `@chrome` nao ficou callable nesta sessao; a validacao visual foi executada com Playwright usando `channel: chrome`.
+- Validacao mobile final em 320/375/390/430 confirmou proximo, anterior, swipe, thumbnail, setas visiveis, uma imagem principal visivel e ausencia de overflow horizontal.
+- A regressao visual do print em 2026-06-12 vinha de dois pontos combinados: CSS mobile original ainda carregado em `style.min__e4660e26.css` jogava `.nav-images` para fora do fluxo, e o runtime precisava travar largura/altura dos slides principais em px no mobile para impedir uma imagem vazar sobre a outra.
+- `_custom/tech7-theme.css` nao e carregado na rota Realme C55; por isso o override tambem foi aplicado em `_assets/images.tcdn.com.br/files/996644/themes/46/css/style.min__e4660e26.css`, que e o CSS efetivo da pagina.
+- As setas desktop tinham risco separado: em alguns cenarios ficavam parcialmente fora do viewport ou presas em `swiper-button-disabled` apos chamadas diretas de `mainSwiper.slideTo`. A solucao foi dar area clicavel real ao controle e sincronizar estado via eventos do Swiper principal.
+- Validacao final: produto Realme C55 em 320/375/400/430 sem corte/sobreposicao, `validate:product-gallery` 25/25, `validate:gallery-position` 24/24 e `validate:build` OK.
+- O problema residual dos thumbnails vinha da rail mobile nao reservar uma area propria suficiente para cada slide/card depois do Swiper aplicar medidas. A correcao final fixa o fluxo horizontal com flex sem wrap, gap explicito, slide de 78px, card de 72px, margin zerada e overflow lateral apenas dentro de `.nav-images .list`.
+- No produto com 5 miniaturas, a rail agora tem scroll interno (`navScrollWidth=438` em 320px) sem aumentar `documentElement.scrollWidth`; os pares adjacentes mantiveram 16px de separacao entre bordas.
+
+---
+
+# Findings - busca inteligente no header TECH7
+
+- Campo alvo: `form.search-header[data-search="suggestion"]` com `input[name="palavra_busca"][data-input="suggestion"]`, presente no header das paginas estaticas.
+- Endpoint confiavel para sugestoes: `/api/search`, montado em `server/routes/search.js`; ele consulta produtos ativos no banco/API, aplica `applyCatalogPrices`, retorna `price_cents`, imagem normalizada e URL canonica.
+- `_assets/tech7/search-index.json` nao deve ser usado como fonte final de preco porque nao possui preco confiavel; serve apenas como apoio interno de rota/imagem no backend.
+- Havia uma logica inline antiga de autocomplete na home, sem debounce/abort e interceptando eventos com `stopImmediatePropagation`; ela foi neutralizada quando o runtime novo esta ativo para evitar comportamento duplo.
+- Correcao aplicada no runtime compartilhado: debounce 250ms, `AbortController`, sequencia para ignorar respostas antigas, ranking leve no cliente, dedupe por id/url/slug, limite de 8 sugestoes e estado `Nenhum produto encontrado`.
+- O Enter permanece como submit tradicional para `/busca/index.html`, e clique em sugestao navega para o produto.
+- Layout validado sem scroll horizontal: desktop 1366 (`scrollWidth=clientWidth=1366`) e mobile 390 (`scrollWidth=clientWidth=390`).
+- `@chrome` nao ficou callable nesta sessao; validacao visual foi feita por Playwright usando canal Chrome/fallback, com evidencias em `_validation/search-autocomplete/`.
+## Admin OS Dashboard Upgrade - Findings - 2026-06-12
+
+- Primary admin surface confirmed: root `admin.html`; `admin/` folder exists but was not treated as the main surface.
+- Current admin JS: `assets/js/admin.js`.
+- Current admin API: `server/routes/admin.js`, mounted under `/api/admin`.
+- Current admin functions include login/session/logout, product list/detail/create/update/deactivate, bulk price update, order list/detail/status, metrics, CSV export, dashboard/products/orders/pricing/reports tabs.
+- Runtime DB source: `DATABASE_URL` loaded by `server/lib/db.js`; host is Supabase pooler `aws-1-sa-east-1.pooler.supabase.com` with password masked in logs.
+- ONE unavailable in current tool surface. Direct Supabase app is available, but project discovery returned one inactive project, so runtime DB is the reliable source for this checkout.
+- Real public tables include `products`, `orders`, `order_items`, `payments`, `carts`, `cart_items`, `shipments`, `shipping_quotes`, `product_images`, `product_variants`, `categories`, `product_categories` plus CRM/OLX tables.
+- Current counts from runtime DB: `products` 2472, `orders` 25, `order_items` 25, `payments` 6, `carts` 339, `cart_items` 53, `shipments` 5, `shipping_quotes` 12.
+- Existing metrics cover product counts, active/inactive, invalid price, brand/category distribution, order revenue, ticket, status, payments, top products.
+- Missing metrics requiring new work: product image alerts from metadata/image fields, low stock, delivery/freight usage, recurring customers, service order status, labor revenue, products revenue split.
+- OS requires new schema because no `service_orders` table exists in current runtime DB.
+- PDF visual direction from Creative Production: white printable document, Tech 7 black/orange accents, dense readable sections, clear totals, warranty, and signature lines; avoid dark PDF backgrounds and landing-page styling.
+- New migration `005_service_orders.sql` creates `service_orders` and `service_order_items`.
+- New OS API surface: list/detail/create/update/create-from-order/pdf under `/api/admin/service-orders`.
+- PDF is generated server-side as `application/pdf` without adding npm dependencies.
+- Test OS created through API returned `OS-00001`, total `15`, PDF `application/pdf` with 4016 bytes; test OS was deleted after validation.
+- Playwright visual fallback created an OS through UI, saved screenshots, then deleted the UI test OS. One console 401 was from the expected pre-login session check.
+- Data Analytics artifact validated after schema corrections and rendered as `Tech 7 Admin Metrics Baseline`.
+- Order-to-OS flow works with a real order: `order_329222f2e6ae78184be6bdad8da3b9bc` created `OS-00003` with one item and PDF output; the validation OS was deleted afterward.
+- Reported OS tab error `Erro ao carregar OS: http_404` was caused by the local port 3000 process serving an older route set. The current `server/routes/admin.js` already had `/api/admin/service-orders`, and after restarting `node server/index.js`, unauthenticated `/api/admin/service-orders` changed from 404 to expected 401.
+- Supabase plugin fallback is active and confirmed project `lzsaaufsdcmqlasjrqck`; `public.service_orders` and `public.service_order_items` exist with 0 rows, so the bug was not a missing migration.
+- Authenticated validation with provided admin credentials returned 200 for `/api/admin/service-orders?limit=20&offset=0`, with `total=0`.
+- UI validation fallback saved `_validation/admin-os/os-tab-after-404-fix.png`; the OS tab loaded without `http_404` or `Erro ao carregar OS`.
+- Manual OS now supports selecting a real catalog product from `products` through the admin product API. UI sends `product_id`, and the server hydrates final `product_name` and `unit_price_cents` from the catalog via `applyCatalogPrices`, so altered browser price/name are not trusted.
+- Products used in non-canceled OS now count as product sales in dashboard product revenue, top products and top categories. This avoids fake `orders` rows while still reflecting counter/service sales.
+- Order-to-OS keeps order item prices from the original order by calling the normalizer with `useCatalogPrices: false`; this preserves historical sold price from the actual order.
+- Client PDF was updated with a Tech 7 logo mark at the upper-left, store contact block, `VIA DO CLIENTE`, cleaner product/totals section, warranty, awareness text and signature lines.
+- Validation forced a payload with wrong product name and R$ 1 unit price for product `display-samsung-lcd-sam-s20-ultra-g988-origret`; saved OS used catalog name `LCD Samsung S20 Ultra G988 Original Retirada`, unit price R$ 1.500,00, qty 2, product total R$ 3.000,00, labor R$ 50,00, discount R$ 10,00, final total R$ 3.040,00.
+- Visual/API evidence saved under `_validation/admin-os/os-manual-product-flow.json`, `os-manual-product-picker.png`, `os-manual-product-saved.png`, and `os-manual-product-client.pdf`; test OS rows were deleted after validation.
+
+- OS save screenshot root cause: optional Pedido origem had/kept a non-existing order id. Postgres raised service_orders_order_id_fkey; app middleware mapped it to database_connection_error. Fix: validate order_id before insert/update and return friendly order_not_found, while empty order origin remains null for manual OS.

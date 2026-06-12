@@ -546,6 +546,16 @@ export function createApp(options = {}) {
       return next();
     });
 
+    app.use((req, res, next) => {
+      if (
+        req.path === "/assets/js/tech7-local-runtime.js" ||
+        req.path === "/_assets/images.tcdn.com.br/files/996644/themes/46/css/style.min__e4660e26.css"
+      ) {
+        res.set("Cache-Control", "no-store, max-age=0");
+      }
+      next();
+    });
+
     // Serve static site.
     app.use(express.static(STATIC_DIR, { extensions: ["html"] }));
 
@@ -560,6 +570,12 @@ export function createApp(options = {}) {
   app.use((err, _req, res, _next) => {
     // eslint-disable-next-line no-console
     console.error("[api] unhandled error:", safeJson({ error: String(err?.message || err) }));
+    if (err?.statusCode) {
+      return res.status(err.statusCode).json({
+        error: err.code || "request_failed",
+        message: err.message || "Falha na requisicao"
+      });
+    }
     if (isDatabaseConnectionError(err)) return sendDatabaseConnectionError(res);
     res.status(500).json({ error: "internal_error" });
   });

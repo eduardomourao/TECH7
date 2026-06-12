@@ -15,6 +15,16 @@ const SESSION_TTL_MS = 1000 * 60 * 60 * 8;
 const SESSION_COOKIE = "tech7_admin_session";
 const MAX_TEXT = 12000;
 const COMPLETED_ORDER_STATUS_SQL = "('paid', 'completed')";
+const SERVICE_ORDER_STATUSES = new Set(["aberta", "em_analise", "aguardando_peca", "em_servico", "pronta", "entregue", "cancelada"]);
+const SERVICE_ORDER_STATUS_LABELS = {
+  aberta: "Aberta",
+  em_analise: "Em analise",
+  aguardando_peca: "Aguardando peca",
+  em_servico: "Em servico",
+  pronta: "Pronta",
+  entregue: "Entregue",
+  cancelada: "Cancelada"
+};
 
 function asyncRoute(handler) {
   return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
@@ -207,6 +217,356 @@ function parseStock(value, fallback = null) {
   if (value == null || value === "") return fallback;
   const n = Number(value);
   return Number.isInteger(n) && n >= 0 ? Math.min(n, 999999) : fallback;
+}
+
+function parseMoneyCents(value, fallback = 0) {
+  if (value == null || value === "") return fallback;
+  const n = Number(String(value).replace(",", "."));
+  return Number.isFinite(n) ? Math.max(0, Math.round(n * 100)) : fallback;
+}
+
+function centsToMoney(value) {
+  return Number((Number(value || 0) / 100).toFixed(2));
+}
+
+function serviceOrderSelectSql() {
+  return `
+    id, os_number, order_id, status, customer_name, customer_phone, customer_document,
+    customer_address, customer_email, device_brand, device_model, device_color,
+    device_serial, device_password, intake_condition, reported_issue, diagnosis,
+    services_done, labor_cents, technician, internal_notes, customer_notes,
+    product_total_cents, discount_cents, total_cents, payment_method, payment_status,
+    warranty_days, warranty_terms, warranty_notes, metadata, created_at, updated_at,
+    completed_at
+  `;
+}
+
+function mapServiceOrder(row, items = []) {
+  return {
+    id: row.id,
+    number: Number(row.os_number || 0),
+    code: `OS-${String(row.os_number || 0).padStart(5, "0")}`,
+    order_id: row.order_id || "",
+    status: row.status || "aberta",
+    status_label: SERVICE_ORDER_STATUS_LABELS[row.status] || row.status || "Aberta",
+    customer_name: row.customer_name || "",
+    customer_phone: row.customer_phone || "",
+    customer_document: row.customer_document || "",
+    customer_address: row.customer_address || "",
+    customer_email: row.customer_email || "",
+    device_brand: row.device_brand || "",
+    device_model: row.device_model || "",
+    device_color: row.device_color || "",
+    device_serial: row.device_serial || "",
+    device_password: row.device_password || "",
+    intake_condition: row.intake_condition || "",
+    reported_issue: row.reported_issue || "",
+    diagnosis: row.diagnosis || "",
+    services_done: row.services_done || "",
+    labor: centsToMoney(row.labor_cents),
+    technician: row.technician || "",
+    internal_notes: row.internal_notes || "",
+    customer_notes: row.customer_notes || "",
+    product_total: centsToMoney(row.product_total_cents),
+    discount: centsToMoney(row.discount_cents),
+    total: centsToMoney(row.total_cents),
+    payment_method: row.payment_method || "",
+    payment_status: row.payment_status || "pendente",
+    warranty_days: Number(row.warranty_days || 0),
+    warranty_terms: row.warranty_terms || "",
+    warranty_notes: row.warranty_notes || "",
+    created_at: row.created_at || null,
+    updated_at: row.updated_at || null,
+    completed_at: row.completed_at || null,
+    items: items.map((it) => ({
+      id: it.id,
+      product_id: it.product_id || "",
+      product_name: it.product_name || "",
+      quantity: Number(it.qty || 0),
+      unit_price: centsToMoney(it.unit_price_cents),
+      total_price: centsToMoney(it.line_total_cents)
+    }))
+  };
+}
+
+async function hydrateServiceOrderCatalogItems(items) {
+  const ids = Array.from(new Set((items || []).map((item) => item.product_id).filter(Boolean)));
+  if (!ids.length) return items;
+  const { rows } = await pool.query(`select ${productSelectSql()} from products where id = any($1::text[])`, [ids]);
+  const pricedRows = await applyCatalogPrices(rows);
+  const byId = new Map(pricedRows.map((row) => [row.id, row]));
+  return items.map((item) => {
+    const product = byId.get(item.product_id);
+    if (!product) return item;
+    const unit = Math.max(0, Number(product.price_cents || 0));
+    return {
+      ...item,
+      product_name: cleanText(product.name || item.product_name || "Produto", 300),
+      unit_price_cents: unit,
+      line_total_cents: item.qty * unit
+    };
+  });
+}
+
+async function resolveServiceOrderOrderId(input, existing = null) {
+  const raw = Object.prototype.hasOwnProperty.call(input || {}, "order_id")
+    ? input?.order_id
+    : existing?.order_id;
+  const orderId = cleanText(raw || "", 160) || null;
+  if (!orderId) return null;
+  const { rows } = await pool.query("select id from orders where id = $1 limit 1", [orderId]);
+  if (!rows.length) {
+    const error = new Error("Pedido origem nao encontrado. Deixe o campo vazio para OS manual.");
+    error.statusCode = 400;
+    error.code = "order_not_found";
+    throw error;
+  }
+  return orderId;
+}
+
+async function normalizeServiceOrderPayload(input, existing = null, options = {}) {
+  const status = String(input?.status || existing?.status || "aberta").trim();
+  if (!SERVICE_ORDER_STATUSES.has(status)) {
+    throw Object.assign(new Error("Status de OS invalido"), { statusCode: 400, code: "invalid_service_order_status" });
+  }
+
+  let items = Array.isArray(input?.items) ? input.items.map((item) => {
+    const qty = Math.max(1, Math.min(999, Math.round(Number(item?.quantity ?? item?.qty ?? 1) || 1)));
+    const unit = parseMoneyCents(item?.unit_price ?? item?.unitPrice ?? item?.price, 0);
+    return {
+      product_id: cleanText(item?.product_id || item?.productId || "", 120) || null,
+      product_name: cleanText(item?.product_name || item?.name || "Peca/Produto", 300),
+      qty,
+      unit_price_cents: unit,
+      line_total_cents: qty * unit
+    };
+  }).filter((item) => item.product_name) : null;
+
+  if (items && options.useCatalogPrices !== false) {
+    items = await hydrateServiceOrderCatalogItems(items);
+  }
+
+  const productTotal = items
+    ? items.reduce((sum, item) => sum + item.line_total_cents, 0)
+    : Number(existing?.product_total_cents || 0);
+  const labor = parseMoneyCents(input?.labor, Number(existing?.labor_cents || 0));
+  const discount = parseMoneyCents(input?.discount, Number(existing?.discount_cents || 0));
+  const total = Math.max(0, productTotal + labor - discount);
+  const completedStatus = ["pronta", "entregue"].includes(status);
+  const orderId = await resolveServiceOrderOrderId(input, existing);
+
+  return {
+    values: {
+      order_id: orderId,
+      status,
+      customer_name: cleanText(input?.customer_name || existing?.customer_name || "", 260),
+      customer_phone: cleanText(input?.customer_phone || existing?.customer_phone || "", 80),
+      customer_document: cleanText(input?.customer_document || existing?.customer_document || "", 80),
+      customer_address: cleanText(input?.customer_address || existing?.customer_address || "", 600),
+      customer_email: cleanText(input?.customer_email || existing?.customer_email || "", 260),
+      device_brand: cleanText(input?.device_brand || existing?.device_brand || "", 120),
+      device_model: cleanText(input?.device_model || existing?.device_model || "", 180),
+      device_color: cleanText(input?.device_color || existing?.device_color || "", 80),
+      device_serial: cleanText(input?.device_serial || existing?.device_serial || "", 160),
+      device_password: cleanText(input?.device_password || existing?.device_password || "", 160),
+      intake_condition: cleanText(input?.intake_condition || existing?.intake_condition || "", 1800),
+      reported_issue: cleanText(input?.reported_issue || existing?.reported_issue || "", 1800),
+      diagnosis: cleanText(input?.diagnosis || existing?.diagnosis || "", 1800),
+      services_done: cleanText(input?.services_done || existing?.services_done || "", 2400),
+      labor_cents: labor,
+      technician: cleanText(input?.technician || existing?.technician || "", 160),
+      internal_notes: cleanText(input?.internal_notes || existing?.internal_notes || "", 2400),
+      customer_notes: cleanText(input?.customer_notes || existing?.customer_notes || "", 2400),
+      product_total_cents: productTotal,
+      discount_cents: discount,
+      total_cents: total,
+      payment_method: cleanText(input?.payment_method || existing?.payment_method || "", 120),
+      payment_status: cleanText(input?.payment_status || existing?.payment_status || "pendente", 80),
+      warranty_days: Math.max(0, Math.min(3650, Math.round(Number(input?.warranty_days ?? existing?.warranty_days ?? 90) || 0))),
+      warranty_terms: cleanText(input?.warranty_terms || existing?.warranty_terms || "Garantia sobre o servico executado, sem cobrir mau uso, queda, liquido ou violacao.", 1800),
+      warranty_notes: cleanText(input?.warranty_notes || existing?.warranty_notes || "", 1800),
+      completed_at: completedStatus ? (existing?.completed_at || new Date()) : null
+    },
+    items
+  };
+}
+
+function pdfEscape(value) {
+  return String(value == null ? "" : value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\x20-\x7E]/g, "")
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
+}
+
+function wrapPdfText(value, max = 82) {
+  const words = String(value || "-").replace(/\s+/g, " ").trim().split(" ");
+  const lines = [];
+  let line = "";
+  for (const word of words) {
+    if ((line + " " + word).trim().length > max) {
+      if (line) lines.push(line);
+      line = word;
+    } else {
+      line = (line + " " + word).trim();
+    }
+  }
+  if (line) lines.push(line);
+  return lines.length ? lines : ["-"];
+}
+
+function buildServiceOrderPdf(order) {
+  const pageWidth = 595;
+  const pageHeight = 842;
+  const margin = 42;
+  const content = [];
+  let y = 800;
+
+  const color = {
+    black: "0.05 0.06 0.06",
+    dark: "0.10 0.12 0.12",
+    gray: "0.42 0.44 0.48",
+    light: "0.92 0.93 0.94",
+    orange: "1 0.37 0",
+    white: "1 1 1"
+  };
+  const text = (x, yy, value, size = 9, font = "F1", fill = color.dark) => {
+    content.push(`${fill} rg BT /${font} ${size} Tf ${x} ${yy} Td (${pdfEscape(value)}) Tj ET`);
+  };
+  const line = (x1, y1, x2, y2, stroke = color.light) => content.push(`${stroke} RG ${x1} ${y1} m ${x2} ${y2} l S`);
+  const rect = (x, yy, w, h, stroke = color.light) => content.push(`${stroke} RG ${x} ${yy} ${w} ${h} re S`);
+  const fillRect = (x, yy, w, h, fill) => content.push(`${fill} rg ${x} ${yy} ${w} ${h} re f`);
+  const section = (title) => {
+    y -= 18;
+    text(margin, y, title, 10, "F2", color.black);
+    line(margin, y - 5, pageWidth - margin, y - 5, color.orange);
+    y -= 18;
+  };
+  const kv = (label, value, x = margin, width = 246) => {
+    text(x, y, label, 7, "F2", color.gray);
+    text(x, y - 12, value || "-", 9, "F1", color.dark);
+    rect(x - 4, y - 20, width, 30);
+  };
+  const paragraph = (label, value) => {
+    text(margin, y, label, 8, "F2", color.black);
+    y -= 12;
+    for (const row of wrapPdfText(value, 96).slice(0, 5)) {
+      text(margin, y, row, 8, "F1", color.dark);
+      y -= 10;
+    }
+    y -= 4;
+  };
+
+  fillRect(0, 800, pageWidth, 42, color.black);
+  fillRect(margin, 785, 66, 44, color.orange);
+  fillRect(margin + 34, 785, 32, 44, color.black);
+  text(margin + 8, 798, "7", 34, "F2", color.white);
+  text(margin + 78, 813, "TECH 7", 22, "F2", color.orange);
+  text(margin + 79, 799, "Pecas e Servicos para Celulares", 8, "F2", color.dark);
+  text(386, 813, "ORDEM DE SERVICO", 14, "F2", color.black);
+  text(430, 797, order.code, 13, "F2", color.orange);
+  text(430, 784, `Emissao: ${new Date(order.created_at || Date.now()).toLocaleDateString("pt-BR")}`, 8, "F1", color.gray);
+  y = 760;
+  text(margin, y, "Tech 7 - Shopping Oiapoque Centro, Av. Oiapoque, 156 - Centro - Belo Horizonte/MG", 8, "F1", color.dark);
+  text(margin, y - 11, "WhatsApp: (31) 99945-4848 | E-mail: suportehubtech7@gmail.com", 8, "F1", color.dark);
+  fillRect(430, y - 18, 122, 20, color.orange);
+  text(455, y - 12, "VIA DO CLIENTE", 8, "F2", color.white);
+  y -= 26;
+  text(margin, y, "Documento pronto para envio ao cliente: atendimento, pecas, mao de obra, totais, garantia e assinaturas.", 8, "F1", color.gray);
+
+  section("Cliente");
+  kv("Nome", order.customer_name, margin, 246);
+  kv("WhatsApp", order.customer_phone, 306, 246);
+  y -= 38;
+  kv("CPF/CNPJ", order.customer_document || "Opcional", margin, 246);
+  kv("E-mail", order.customer_email || "Opcional", 306, 246);
+  y -= 38;
+  kv("Endereco", order.customer_address || "Opcional", margin, 510);
+
+  section("Aparelho");
+  kv("Marca", order.device_brand, margin, 120);
+  kv("Modelo", order.device_model, 170, 170);
+  kv("Cor", order.device_color, 370, 80);
+  kv("IMEI/Serial", order.device_serial || "Opcional", 462, 90);
+  y -= 42;
+  paragraph("Estado de entrada", order.intake_condition);
+  paragraph("Defeito relatado", order.reported_issue);
+
+  section("Servico");
+  paragraph("Diagnostico", order.diagnosis);
+  paragraph("Servicos feitos", order.services_done);
+  kv("Tecnico", order.technician || "-", margin, 160);
+  kv("Status", order.status_label, 220, 150);
+  kv("Pagamento", `${order.payment_status || "-"} ${order.payment_method ? "- " + order.payment_method : ""}`, 390, 160);
+  y -= 44;
+
+  section("Produtos e totais");
+  fillRect(margin - 4, y - 5, 514, 16, color.black);
+  text(margin, y, "Produto/Peca", 8, "F2", color.white);
+  text(370, y, "Qtd", 8, "F2", color.white);
+  text(420, y, "Unit.", 8, "F2", color.white);
+  text(492, y, "Total", 8, "F2", color.white);
+  y -= 12;
+  for (const item of (order.items || []).slice(0, 8)) {
+    text(margin, y, String(item.product_name || "-").slice(0, 58), 8, "F1", color.dark);
+    text(374, y, String(item.quantity || 0), 8, "F1", color.dark);
+    text(420, y, `R$ ${Number(item.unit_price || 0).toFixed(2)}`, 8, "F1", color.dark);
+    text(492, y, `R$ ${Number(item.total_price || 0).toFixed(2)}`, 8, "F1", color.dark);
+    line(margin - 4, y - 4, pageWidth - margin, y - 4, color.light);
+    y -= 11;
+  }
+  if (!(order.items || []).length) {
+    text(margin, y, "Sem pecas registradas.", 8, "F1", color.dark);
+    y -= 12;
+  }
+  y -= 8;
+  kv("Produtos", `R$ ${Number(order.product_total || 0).toFixed(2)}`, margin, 120);
+  kv("Mao de obra", `R$ ${Number(order.labor || 0).toFixed(2)}`, 176, 120);
+  kv("Desconto", `R$ ${Number(order.discount || 0).toFixed(2)}`, 310, 100);
+  fillRect(426, y - 22, 130, 34, color.orange);
+  kv("Total final", `R$ ${Number(order.total || 0).toFixed(2)}`, 430, 122);
+  y -= 44;
+
+  section("Garantia e observacoes");
+  paragraph("Garantia", `${order.warranty_days || 0} dias. ${order.warranty_terms || ""}`);
+  paragraph("Observacoes ao cliente", order.customer_notes || order.warranty_notes || "-");
+  paragraph("Termo de ciencia", "Cliente declara estar ciente do estado de entrada, servicos executados, pecas usadas, valores, condicoes de garantia e prazo combinado para retirada.");
+
+  y = Math.max(y, 98);
+  line(margin, y, 250, y);
+  line(344, y, 553, y);
+  text(84, y - 14, "Assinatura do cliente", 8, "F1", color.gray);
+  text(380, y - 14, "Assinatura Tech 7 / tecnico", 8, "F1", color.gray);
+  text(margin, 42, "Obrigado pela preferencia. Guarde esta OS para retirada, garantia e conferencia do servico.", 7, "F1", color.gray);
+
+  const stream = content.join("\n");
+  const objects = [];
+  const add = (body) => {
+    objects.push(body);
+    return objects.length;
+  };
+  const pagesId = add("");
+  const fontId = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+  const boldId = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
+  const contentId = add(`<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`);
+  const pageId = add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontId} 0 R /F2 ${boldId} 0 R >> >> /Contents ${contentId} 0 R >>`);
+  objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageId} 0 R] /Count 1 >>`;
+  const catalogId = add(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+  objects.forEach((body, index) => {
+    offsets.push(Buffer.byteLength(pdf));
+    pdf += `${index + 1} 0 obj\n${body}\nendobj\n`;
+  });
+  const xref = Buffer.byteLength(pdf);
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  offsets.slice(1).forEach((offset) => {
+    pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
+  });
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  return Buffer.from(pdf);
 }
 
 function productSelectSql() {
@@ -666,9 +1026,16 @@ router.get("/metrics", adminAuth, asyncRoute(async (_req, res) => {
     statusRows,
     paymentRows,
     topProductRows,
-    recentOrders
+    recentOrders,
+    productIssueRows,
+    duplicateProductRows,
+    deliveryRows,
+    recurringRows,
+    serviceSummaryRows,
+    serviceStatusRows,
+    topCategorySoldRows
   ] = await Promise.all([
-    pool.query(`select id, slug, name, brand, section, price_cents, active from products`),
+    pool.query(`select id, slug, name, brand, section, price_cents, active, stock, image_url, primary_image_url, metadata from products`),
     pool.query(`
       select
         count(*)::int as total,
@@ -716,11 +1083,21 @@ router.get("/metrics", adminAuth, asyncRoute(async (_req, res) => {
       limit 8
     `),
     pool.query(`
-      select p.id, p.name, p.brand, coalesce(sum(oi.qty), 0)::int as qty, coalesce(sum(oi.line_total_cents), 0)::bigint as revenue_cents
-      from order_items oi
-      join products p on p.id = oi.product_id
-      join orders o on o.id = oi.order_id
-      where o.status in ${COMPLETED_ORDER_STATUS_SQL}
+      with sold_items as (
+        select oi.product_id, oi.qty, oi.line_total_cents
+        from order_items oi
+        join orders o on o.id = oi.order_id
+        where o.status in ${COMPLETED_ORDER_STATUS_SQL}
+        union all
+        select soi.product_id, soi.qty, soi.line_total_cents
+        from service_order_items soi
+        join service_orders so on so.id = soi.service_order_id
+        where soi.product_id is not null
+          and so.status <> 'cancelada'
+      )
+      select p.id, p.name, p.brand, coalesce(sum(si.qty), 0)::int as qty, coalesce(sum(si.line_total_cents), 0)::bigint as revenue_cents
+      from sold_items si
+      join products p on p.id = si.product_id
       group by p.id, p.name, p.brand
       order by revenue_cents desc, qty desc
       limit 8
@@ -733,6 +1110,83 @@ router.get("/metrics", adminAuth, asyncRoute(async (_req, res) => {
         select provider from payments where order_id = o.id order by created_at desc limit 1
       ) p on true
       order by o.created_at desc
+      limit 8
+    `),
+    pool.query(`
+      select
+        count(*) filter (where coalesce(stock, 0) <= 2 and coalesce(active, true) = true)::int as low_stock,
+        count(*) filter (
+          where coalesce(nullif(primary_image_url, ''), nullif(image_url, ''), nullif(metadata->>'images', '[]'), '') = ''
+        )::int as no_image,
+        count(*) filter (where coalesce(section, '') not in ('display-e-lcd','baterias-celular','pecas-e-componentes','tampas-e-carcacas','touchs-e-visores','maquinas-e-ferramentas'))::int as out_of_category
+      from products
+    `),
+    pool.query(`
+      select count(*)::int as duplicated
+      from (
+        select lower(coalesce(slug, '')) as slug, lower(coalesce(section, '')) as section, lower(coalesce(brand, '')) as brand
+        from products
+        group by 1, 2, 3
+        having count(*) > 1
+      ) d
+    `),
+    pool.query(`
+      select coalesce(nullif(shipping_service_label, ''), nullif(shipping_provider, ''), delivery_mode, 'Sem entrega') as label,
+             count(*)::int as value,
+             coalesce(sum(shipping_total_cents), 0)::bigint as revenue_cents
+      from orders
+      group by 1
+      order by value desc, label asc
+      limit 8
+    `),
+    pool.query(`
+      select coalesce(nullif(customer_phone, ''), nullif(customer_email, ''), customer_name, 'Cliente') as label,
+             count(*)::int as value,
+             coalesce(sum(total_cents), 0)::bigint as revenue_cents
+      from orders
+      group by 1
+      having count(*) > 1
+      order by value desc, revenue_cents desc
+      limit 8
+    `),
+    pool.query(`
+      select
+        count(*)::int as total,
+        count(*) filter (where status not in ('entregue', 'cancelada'))::int as open,
+        count(*) filter (where status = 'entregue')::int as delivered,
+        count(*) filter (where status = 'pronta')::int as ready,
+        count(*) filter (where status in ('pronta', 'entregue'))::int as completed,
+        coalesce(sum(labor_cents) filter (where status in ('pronta', 'entregue')), 0)::bigint as labor_revenue_cents,
+        coalesce(sum(product_total_cents) filter (where status <> 'cancelada'), 0)::bigint as product_revenue_cents,
+        coalesce(sum(total_cents) filter (where status in ('pronta', 'entregue')), 0)::bigint as total_revenue_cents
+      from service_orders
+    `),
+    pool.query(`
+      select status as label, count(*)::int as value, coalesce(sum(total_cents), 0)::bigint as revenue_cents
+      from service_orders
+      group by status
+      order by value desc, label asc
+    `),
+    pool.query(`
+      with sold_items as (
+        select oi.product_id, oi.qty, oi.line_total_cents
+        from order_items oi
+        join orders o on o.id = oi.order_id
+        where o.status in ${COMPLETED_ORDER_STATUS_SQL}
+        union all
+        select soi.product_id, soi.qty, soi.line_total_cents
+        from service_order_items soi
+        join service_orders so on so.id = soi.service_order_id
+        where soi.product_id is not null
+          and so.status <> 'cancelada'
+      )
+      select coalesce(nullif(p.section, ''), 'Sem categoria') as label,
+             coalesce(sum(si.qty), 0)::int as value,
+             coalesce(sum(si.line_total_cents), 0)::bigint as revenue_cents
+      from sold_items si
+      join products p on p.id = si.product_id
+      group by 1
+      order by revenue_cents desc, value desc
       limit 8
     `)
   ]);
@@ -749,6 +1203,10 @@ router.get("/metrics", adminAuth, asyncRoute(async (_req, res) => {
     active: pricedProducts.filter((p) => !!p.active).length,
     inactive: pricedProducts.filter((p) => !p.active).length,
     zero_price: pricedProducts.filter((p) => !isValidPriceCents(p.price_cents)).length,
+    low_stock: Number(productIssueRows.rows[0]?.low_stock || 0),
+    no_image: Number(productIssueRows.rows[0]?.no_image || 0),
+    duplicated: Number(duplicateProductRows.rows[0]?.duplicated || 0),
+    out_of_category: Number(productIssueRows.rows[0]?.out_of_category || 0),
     avg_price_cents: avgPriceCents,
     min_price_cents: validPrices.length ? Math.min(...validPrices) : 0,
     max_price_cents: validPrices.length ? Math.max(...validPrices) : 0
@@ -761,6 +1219,10 @@ router.get("/metrics", adminAuth, asyncRoute(async (_req, res) => {
       active: Number(product.active || 0),
       inactive: Number(product.inactive || 0),
       zero_price: Number(product.zero_price || 0),
+      low_stock: Number(product.low_stock || 0),
+      no_image: Number(product.no_image || 0),
+      duplicated: Number(product.duplicated || 0),
+      out_of_category: Number(product.out_of_category || 0),
       avg_price: Number((Number(product.avg_price_cents || 0) / 100).toFixed(2)),
       min_price: Number((Number(product.min_price_cents || 0) / 100).toFixed(2)),
       max_price: Number((Number(product.max_price_cents || 0) / 100).toFixed(2)),
@@ -788,6 +1250,16 @@ router.get("/metrics", adminAuth, asyncRoute(async (_req, res) => {
         value: Number(r.value || 0),
         revenue: Number((Number(r.revenue_cents || 0) / 100).toFixed(2))
       })),
+      by_delivery_method: deliveryRows.rows.map((r) => ({
+        label: r.label,
+        value: Number(r.value || 0),
+        revenue: Number((Number(r.revenue_cents || 0) / 100).toFixed(2))
+      })),
+      recurring_customers: recurringRows.rows.map((r) => ({
+        label: r.label,
+        value: Number(r.value || 0),
+        revenue: Number((Number(r.revenue_cents || 0) / 100).toFixed(2))
+      })),
       recent: recentOrders.rows.map((o) => ({
         id: o.id,
         status: o.status,
@@ -796,14 +1268,341 @@ router.get("/metrics", adminAuth, asyncRoute(async (_req, res) => {
         created_at: o.created_at
       }))
     },
+    service_orders: {
+      total: Number(serviceSummaryRows.rows[0]?.total || 0),
+      open: Number(serviceSummaryRows.rows[0]?.open || 0),
+      ready: Number(serviceSummaryRows.rows[0]?.ready || 0),
+      delivered: Number(serviceSummaryRows.rows[0]?.delivered || 0),
+      completed: Number(serviceSummaryRows.rows[0]?.completed || 0),
+      labor_revenue: Number((Number(serviceSummaryRows.rows[0]?.labor_revenue_cents || 0) / 100).toFixed(2)),
+      product_revenue: Number((Number(serviceSummaryRows.rows[0]?.product_revenue_cents || 0) / 100).toFixed(2)),
+      total_revenue: Number((Number(serviceSummaryRows.rows[0]?.total_revenue_cents || 0) / 100).toFixed(2)),
+      by_status: serviceStatusRows.rows.map((r) => ({
+        label: SERVICE_ORDER_STATUS_LABELS[r.label] || r.label,
+        value: Number(r.value || 0),
+        revenue: Number((Number(r.revenue_cents || 0) / 100).toFixed(2))
+      }))
+    },
     top_products: topProductRows.rows.map((p) => ({
       id: p.id,
       name: p.name,
       brand: p.brand,
       qty: Number(p.qty || 0),
       revenue: Number((Number(p.revenue_cents || 0) / 100).toFixed(2))
+    })),
+    top_categories_sold: topCategorySoldRows.rows.map((r) => ({
+      label: r.label,
+      value: Number(r.value || 0),
+      revenue: Number((Number(r.revenue_cents || 0) / 100).toFixed(2))
     }))
   });
+}));
+
+router.get("/service-orders", adminAuth, asyncRoute(async (req, res) => {
+  const limit = Math.max(1, Math.min(200, Number(req.query.limit || 20)));
+  const offset = Math.max(0, Number(req.query.offset || 0));
+  const status = String(req.query.status || "").trim();
+  const q = String(req.query.q || "").trim();
+
+  const params = [];
+  const filters = ["1=1"];
+  if (status) {
+    params.push(status);
+    filters.push(`status = $${params.length}`);
+  }
+  if (q) {
+    params.push(`%${q}%`);
+    filters.push(`(customer_name ilike $${params.length} or customer_phone ilike $${params.length} or device_model ilike $${params.length} or reported_issue ilike $${params.length})`);
+  }
+
+  const countRes = await pool.query(`select count(*)::int as total from service_orders where ${filters.join(" and ")}`, params);
+  params.push(limit, offset);
+  const { rows } = await pool.query(
+    `
+      select ${serviceOrderSelectSql()}
+      from service_orders
+      where ${filters.join(" and ")}
+      order by updated_at desc, created_at desc
+      limit $${params.length - 1} offset $${params.length}
+    `,
+    params
+  );
+  res.json({
+    total: countRes.rows[0]?.total || 0,
+    limit,
+    offset,
+    items: rows.map((row) => mapServiceOrder(row))
+  });
+}));
+
+router.get("/service-orders/:id", adminAuth, asyncRoute(async (req, res) => {
+  const id = String(req.params.id || "");
+  const { rows } = await pool.query(`select ${serviceOrderSelectSql()} from service_orders where id = $1 limit 1`, [id]);
+  if (!rows.length) return res.status(404).json({ error: "service_order_not_found", message: "OS nao encontrada" });
+  const items = await pool.query(
+    `select id, product_id, product_name, qty, unit_price_cents, line_total_cents from service_order_items where service_order_id = $1 order by id asc`,
+    [id]
+  );
+  return res.json(mapServiceOrder(rows[0], items.rows));
+}));
+
+router.post("/service-orders", adminAuth, asyncRoute(async (req, res) => {
+  const payload = await normalizeServiceOrderPayload(req.body || {});
+  if (!payload.values.customer_name) return res.status(400).json({ error: "customer_name_required", message: "Nome do cliente obrigatorio" });
+
+  const id = newId("os");
+  await pool.query("begin");
+  try {
+    const { rows } = await pool.query(
+      `
+        insert into service_orders (
+          id, order_id, status, customer_name, customer_phone, customer_document,
+          customer_address, customer_email, device_brand, device_model, device_color,
+          device_serial, device_password, intake_condition, reported_issue, diagnosis,
+          services_done, labor_cents, technician, internal_notes, customer_notes,
+          product_total_cents, discount_cents, total_cents, payment_method, payment_status,
+          warranty_days, warranty_terms, warranty_notes, completed_at, created_at, updated_at
+        )
+        values (
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
+          $21,$22,$23,$24,$25,$26,$27,$28,$29,$30,now(),now()
+        )
+        returning ${serviceOrderSelectSql()}
+      `,
+      [
+        id,
+        payload.values.order_id,
+        payload.values.status,
+        payload.values.customer_name,
+        payload.values.customer_phone,
+        payload.values.customer_document,
+        payload.values.customer_address,
+        payload.values.customer_email,
+        payload.values.device_brand,
+        payload.values.device_model,
+        payload.values.device_color,
+        payload.values.device_serial,
+        payload.values.device_password,
+        payload.values.intake_condition,
+        payload.values.reported_issue,
+        payload.values.diagnosis,
+        payload.values.services_done,
+        payload.values.labor_cents,
+        payload.values.technician,
+        payload.values.internal_notes,
+        payload.values.customer_notes,
+        payload.values.product_total_cents,
+        payload.values.discount_cents,
+        payload.values.total_cents,
+        payload.values.payment_method,
+        payload.values.payment_status,
+        payload.values.warranty_days,
+        payload.values.warranty_terms,
+        payload.values.warranty_notes,
+        payload.values.completed_at
+      ]
+    );
+    for (const item of payload.items || []) {
+      await pool.query(
+        `
+          insert into service_order_items (service_order_id, product_id, product_name, qty, unit_price_cents, line_total_cents)
+          values ($1,$2,$3,$4,$5,$6)
+        `,
+        [id, item.product_id, item.product_name, item.qty, item.unit_price_cents, item.line_total_cents]
+      );
+    }
+    const itemRows = await pool.query(`select id, product_id, product_name, qty, unit_price_cents, line_total_cents from service_order_items where service_order_id = $1 order by id asc`, [id]);
+    await pool.query("commit");
+    return res.status(201).json(mapServiceOrder(rows[0], itemRows.rows));
+  } catch (error) {
+    await pool.query("rollback");
+    throw error;
+  }
+}));
+
+router.post("/service-orders/from-order/:orderId", adminAuth, asyncRoute(async (req, res) => {
+  const orderId = String(req.params.orderId || "");
+  const ordRes = await pool.query(
+    `
+      select id, customer_name, customer_email, customer_phone, customer_document,
+             shipping_address, shipping_number, shipping_complement, shipping_neighborhood,
+             shipping_city, shipping_state
+      from orders
+      where id = $1
+      limit 1
+    `,
+    [orderId]
+  );
+  if (!ordRes.rows.length) return res.status(404).json({ error: "order_not_found", message: "Pedido nao encontrado" });
+  const existing = await pool.query(`select id from service_orders where order_id = $1 order by created_at desc limit 1`, [orderId]);
+  if (existing.rows.length) {
+    const current = await pool.query(`select ${serviceOrderSelectSql()} from service_orders where id = $1`, [existing.rows[0].id]);
+    const currentItems = await pool.query(`select id, product_id, product_name, qty, unit_price_cents, line_total_cents from service_order_items where service_order_id = $1 order by id asc`, [existing.rows[0].id]);
+    return res.json(mapServiceOrder(current.rows[0], currentItems.rows));
+  }
+
+  const order = ordRes.rows[0];
+  const itemRes = await pool.query(
+    `
+      select oi.product_id, p.name as product_name, oi.qty, oi.unit_price_cents, oi.line_total_cents
+      from order_items oi
+      join products p on p.id = oi.product_id
+      where oi.order_id = $1
+      order by oi.created_at asc
+    `,
+    [orderId]
+  );
+  const address = [
+    order.shipping_address,
+    order.shipping_number,
+    order.shipping_complement,
+    order.shipping_neighborhood,
+    order.shipping_city,
+    order.shipping_state
+  ].filter(Boolean).join(", ");
+
+  const seed = {
+    order_id: order.id,
+    status: "aberta",
+    customer_name: order.customer_name || "Cliente",
+    customer_phone: order.customer_phone || "",
+    customer_document: order.customer_document || "",
+    customer_email: order.customer_email || "",
+    customer_address: address,
+    reported_issue: "OS criada a partir do pedido. Completar defeito relatado no atendimento.",
+    intake_condition: "Aguardando entrada/conferencia do aparelho.",
+    warranty_days: 90,
+    items: itemRes.rows.map((it) => ({
+      product_id: it.product_id,
+      product_name: it.product_name,
+      quantity: Number(it.qty || 1),
+      unit_price: centsToMoney(it.unit_price_cents)
+    }))
+  };
+  const payload = await normalizeServiceOrderPayload(seed, null, { useCatalogPrices: false });
+  const id = newId("os");
+  await pool.query("begin");
+  try {
+    const { rows } = await pool.query(
+      `
+        insert into service_orders (
+          id, order_id, status, customer_name, customer_phone, customer_document,
+          customer_address, customer_email, device_brand, device_model, device_color,
+          device_serial, device_password, intake_condition, reported_issue, diagnosis,
+          services_done, labor_cents, technician, internal_notes, customer_notes,
+          product_total_cents, discount_cents, total_cents, payment_method, payment_status,
+          warranty_days, warranty_terms, warranty_notes, completed_at, created_at, updated_at
+        )
+        values (
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
+          $21,$22,$23,$24,$25,$26,$27,$28,$29,$30,now(),now()
+        )
+        returning ${serviceOrderSelectSql()}
+      `,
+      [
+        id,
+        payload.values.order_id,
+        payload.values.status,
+        payload.values.customer_name,
+        payload.values.customer_phone,
+        payload.values.customer_document,
+        payload.values.customer_address,
+        payload.values.customer_email,
+        payload.values.device_brand,
+        payload.values.device_model,
+        payload.values.device_color,
+        payload.values.device_serial,
+        payload.values.device_password,
+        payload.values.intake_condition,
+        payload.values.reported_issue,
+        payload.values.diagnosis,
+        payload.values.services_done,
+        payload.values.labor_cents,
+        payload.values.technician,
+        payload.values.internal_notes,
+        payload.values.customer_notes,
+        payload.values.product_total_cents,
+        payload.values.discount_cents,
+        payload.values.total_cents,
+        payload.values.payment_method,
+        payload.values.payment_status,
+        payload.values.warranty_days,
+        payload.values.warranty_terms,
+        payload.values.warranty_notes,
+        payload.values.completed_at
+      ]
+    );
+    for (const item of payload.items || []) {
+      await pool.query(
+        `
+          insert into service_order_items (service_order_id, product_id, product_name, qty, unit_price_cents, line_total_cents)
+          values ($1,$2,$3,$4,$5,$6)
+        `,
+        [id, item.product_id, item.product_name, item.qty, item.unit_price_cents, item.line_total_cents]
+      );
+    }
+    const itemRows = await pool.query(`select id, product_id, product_name, qty, unit_price_cents, line_total_cents from service_order_items where service_order_id = $1 order by id asc`, [id]);
+    await pool.query("commit");
+    return res.status(201).json(mapServiceOrder(rows[0], itemRows.rows));
+  } catch (error) {
+    await pool.query("rollback");
+    throw error;
+  }
+}));
+
+router.put("/service-orders/:id", adminAuth, asyncRoute(async (req, res) => {
+  const id = String(req.params.id || "");
+  const current = await pool.query(`select ${serviceOrderSelectSql()} from service_orders where id = $1 limit 1`, [id]);
+  if (!current.rows.length) return res.status(404).json({ error: "service_order_not_found", message: "OS nao encontrada" });
+  const payload = await normalizeServiceOrderPayload(req.body || {}, current.rows[0]);
+  if (!payload.values.customer_name) return res.status(400).json({ error: "customer_name_required", message: "Nome do cliente obrigatorio" });
+
+  await pool.query("begin");
+  try {
+    const columns = Object.keys(payload.values);
+    const values = Object.values(payload.values);
+    values.push(id);
+    const assignments = columns.map((column, index) => `${column} = $${index + 1}`);
+    const { rows } = await pool.query(
+      `
+        update service_orders
+        set ${assignments.join(", ")}, updated_at = now()
+        where id = $${values.length}
+        returning ${serviceOrderSelectSql()}
+      `,
+      values
+    );
+    if (payload.items) {
+      await pool.query(`delete from service_order_items where service_order_id = $1`, [id]);
+      for (const item of payload.items) {
+        await pool.query(
+          `
+            insert into service_order_items (service_order_id, product_id, product_name, qty, unit_price_cents, line_total_cents)
+            values ($1,$2,$3,$4,$5,$6)
+          `,
+          [id, item.product_id, item.product_name, item.qty, item.unit_price_cents, item.line_total_cents]
+        );
+      }
+    }
+    const items = await pool.query(`select id, product_id, product_name, qty, unit_price_cents, line_total_cents from service_order_items where service_order_id = $1 order by id asc`, [id]);
+    await pool.query("commit");
+    return res.json(mapServiceOrder(rows[0], items.rows));
+  } catch (error) {
+    await pool.query("rollback");
+    throw error;
+  }
+}));
+
+router.get("/service-orders/:id/pdf", adminAuth, asyncRoute(async (req, res) => {
+  const id = String(req.params.id || "");
+  const { rows } = await pool.query(`select ${serviceOrderSelectSql()} from service_orders where id = $1 limit 1`, [id]);
+  if (!rows.length) return res.status(404).json({ error: "service_order_not_found", message: "OS nao encontrada" });
+  const items = await pool.query(`select id, product_id, product_name, qty, unit_price_cents, line_total_cents from service_order_items where service_order_id = $1 order by id asc`, [id]);
+  const order = mapServiceOrder(rows[0], items.rows);
+  const pdf = buildServiceOrderPdf(order);
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `inline; filename="${order.code}.pdf"`);
+  return res.send(pdf);
 }));
 
 router.get("/orders/:id", adminAuth, async (req, res) => {

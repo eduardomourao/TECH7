@@ -599,9 +599,12 @@
     // Verifica se estamos numa pÃ¡gina de produto (tem og:title diferente do index)
     var pathParts = window.location.pathname.split('/').filter(Boolean);
     if (pathParts[pathParts.length - 1] === 'index.html' || pathParts[pathParts.length - 1] === 'index.htm') pathParts.pop();
+    var hasLegacyBuySurface = !!document.querySelector('#form_comprar, [data-app="product.buy-form"], #bt_comprar, #button-buy');
+    var hasProductShell = document.documentElement.classList.contains('page-product') ||
+      !!document.querySelector('.fixed-info, .product-colum-right, .product-right, .box-col-product');
     var isProductPage = !!document.querySelector('meta[property="og:title"]') &&
       pathParts.length >= 2 &&
-      !!document.querySelector('#form_comprar, [data-app="product.buy-form"], #bt_comprar, #button-buy');
+      (hasLegacyBuySurface || hasProductShell);
     if (!isProductPage) return;
 
     // 2. Remove form Tray

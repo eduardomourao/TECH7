@@ -1,3 +1,23 @@
+# Progresso - mobile production gate TECH7 (2026-06-12)
+
+- CWD confirmado: `C:\Users\Admin\Downloads\TECH7\TECH7-main`.
+- Skills usadas: `caveman`, `planning-with-files`, `cloudflare:web-perf`, `website-building`.
+- Browser MCP solicitado; descoberta de ferramentas nao retornou comandos de navegador para navegar/clicar/screenshot.
+- Chrome DevTools MCP tambem nao retornou comandos de `navigate_page`, trace ou snapshot.
+- Fallback final assumido: Playwright com Google Chrome, com registro explicito no relatorio final.
+- Pasta de evidencias: `_validation/mobile-production-gate/`.
+- Auditoria inicial Playwright Chrome fallback: 84 casos, 78 passaram, 6 bloqueados pelo runner.
+- Bloqueio real confirmado: `.filter__button` do drawer de filtros ultrapassava a largura do painel em viewports estreitas por largura calculada com margem negativa.
+- Falso positivo tecnico: `assets/js/tech7-local-runtime.js` apareceu como `net::ERR_ABORTED` em rotas que redirecionam; teste focado confirmou que a pagina final carregou o runtime com HTTP 200.
+- Correcao aplicada em `assets/js/tech7-local-runtime.js`: botao final do filtro agora fica com `width:100%`, `max-width:100%`, `box-sizing:border-box`, margem sem valor negativo e area clicavel preservada.
+- Revalidacao focada OK: `_validation/mobile-production-gate/filter-button-after-focused.json` confirmou botao dentro do painel em `320x568`, `375x667` e `414x896`.
+- Auditoria final OK: `_validation/mobile-production-gate/mobile-production-audit-summary.json` com 84/84 passados, 0 bloqueadores e 0 erros.
+- Interacoes reais OK: `_validation/mobile-production-gate/final-social-search-focused-390x844.json` confirmou busca com sugestoes, Instagram e WhatsApp clicaveis; `final-interactions-390x844.json` confirmou menu, busca submetida, card, comprar e carrinho.
+- Validacoes OK: `node --check assets/js/tech7-local-runtime.js`, `node --check _validation/mobile-production-gate/mobile-production-audit.mjs`, `npm run validate:assets`, `npm run validate:routes`, `npm run validate:product-cards`.
+- Decisao release-gatekeeper: `APROVADO PARA PRODUCAO`.
+
+---
+
 # Progresso - Produtos visitados imagens TECH7 (2026-06-11)
 
 - CWD confirmado: `C:\Users\Admin\Downloads\TECH7\TECH7-main`.
@@ -5,6 +25,26 @@
 - Print de referencia carregado e problema visual confirmado: cards renderizam texto/preco, imagens caem no placeholder.
 - Memoria consultada: priorizar `assets/js/tech7-local-runtime.js`, `_custom/tech7-theme.css`, validar com Chrome real quando possivel.
 - Estado Git observado: stage grande preexistente; `assets/js/tech7-local-runtime.js` em estado `MM`.
+
+---
+
+# Progresso - filtros mobile TECH7 (2026-06-12)
+
+- Skills usadas: `senior-fullstack`, `caveman`, `planning-with-files`.
+- Memoria consultada para regras TECH7: Chrome-first/fallback e padrao de evidencias/arquivos de acompanhamento.
+- Servidor local confirmado em `http://127.0.0.1:3000`, banco conectado por `DATABASE_URL`.
+- Implementacao localizada em `assets/js/tech7-local-runtime.js`; CSS base em `_assets/images.tcdn.com.br/files/996644/themes/46/css/style.min__e4660e26.css`.
+- Markup do filtro em paginas de catalogo usa `.button-filter`, `.box-fixed`, `.box-white`, `form.smart-filter`, `.filter__block`, `.filter__list` e `.filter__item`.
+- Achado inicial: labels inconsistentes (`for` sem id real) e painel legado sem drawer mobile robusto.
+- Browser MCP / `@chrome` nao ficou callable; Chrome DevTools retornou apenas ferramenta de thread, nao navegador. Fallback final usado: Playwright com Google Chrome.
+- Evidencia antes salva em `_validation/mobile-filters/before-filters-390.json`, `before-filters-closed-390.png`, `before-filters-open-390.png`.
+- Patch aplicado em `assets/js/tech7-local-runtime.js`: drawer mobile responsivo para filtros, labels corrigidos, faixas de preco legiveis e classe `t7-filter-open` no body.
+- Validacao final salva em `_validation/mobile-filters/after-mobile-filters-validation.json`: drawer `359x844` em viewport `390x844`, `overflow-y:auto`, clique em Samsung filtra via backend, `?brand=samsung`, 100 cards, sem overflow, sem console/network local error.
+- Evidencias visuais finais: `_validation/mobile-filters/after-filters-open-final-390.png` e `_validation/mobile-filters/after-filters-samsung-final-390.png`.
+- Validacoes OK: `node --check assets/js/tech7-local-runtime.js`, `npm run validate:routes`, `npm run validate:assets`.
+- Continuidade 2026-06-12: tentativa de regressao ampla em lote estourou timeout; abordagem alterada para casos menores.
+- Regressao extra OK em `/tela-display-lcd/index.html`: viewports `320x568` e `430x932`, drawer dentro da viewport, item 44px, `overflow-y:auto`, labels OK, sem overflow e sem console error.
+- Regressao cruzada OK em `/tampas-e-carcacas/index.html` `390x844`; evidencia `_validation/mobile-filters/mobile-filters-cross-route-regression.json` e screenshot `regression-tampas-390.png`.
 
 ---
 
@@ -46,6 +86,15 @@
 - 2026-06-11: corrigido `produto-comprar.js` para inserir a UI customizada de compra no container estavel `.fixed-info`, antes do bloco de frete, em vez de inserir em container removido.
 - 2026-06-11: validacao Playwright Chrome fallback: produto mostra `R$ 150,00`, botao `Comprar` habilitado, sem overflow horizontal em 390px; evidencias `_validation/price-performance/realme-c55-150-final.json` e `_validation/price-performance/realme-c55-150-final.png`.
 - 2026-06-11: validacoes finais OK: `node --check produto-comprar.js`, `node --check preco-loader.js`, `npm run validate:backend-prices`, `npm run validate:routes`, `npm run validate:product-cards`.
+- 2026-06-12: usuario confirmou escopo do reajuste Galaxy Ultra: somente telas OLED/Incell/Vivid dos modelos S20 Ultra, Note 20 Ultra, S21 Ultra, S22 Ultra e S23 Ultra.
+- 2026-06-12: ONE, Supabase plugin e Composio novamente nao ficaram callable; fallback usado foi `DATABASE_URL` do servidor, host `aws-1-sa-east-1.pooler.supabase.com`, projeto/ref inferido `lzsaaufsdcmqlasjrqck`.
+- 2026-06-12: banco atualizado para `price_cents=95000` em quatro produtos ativos: Note 20 Ultra OLED, S20 Ultra OLED com aro, S21 Ultra OLED com aro e S23 Ultra OLED com aro.
+- 2026-06-12: nenhum produto ativo S22 Ultra OLED, Incell ou Vivid encontrado dentro do escopo; nenhum update para `R$ 450,00` aplicado.
+- 2026-06-12: HTML estatico principal alinhado em quatro paginas `display/samsung/...`.
+- 2026-06-12: corrigido `produto-comprar.js` para detectar pagina de produto por shell `.page-product`/`.fixed-info` quando o form Tray legado ja nao existe; isso restaurou preco/botao no Note 20 Ultra.
+- 2026-06-12: API `/api/products/resolve-prices` confirmou os quatro produtos com `price_cents=95000`, `price_status=available`, `found=true`.
+- 2026-06-12: validacao visual por Playwright Chrome fallback em 390x844 passou nos quatro produtos: `R$ 950,00`, botao `Comprar`, sem overflow e sem erro local de console/network; evidencias `_validation/price-performance/galaxy-ultra-oled-950-validation.json` e screenshots `galaxy-ultra-oled-950-*.png`.
+- 2026-06-12: validacoes finais OK: `node --check produto-comprar.js`, `node --check preco-loader.js`, `npm run validate:backend-prices`, `npm run validate:routes`, `npm run validate:assets`, `npm run validate:product-cards`.
 
 ---
 
@@ -298,3 +347,93 @@
 - 2026-06-11: deploy Vercel do commit `246055045` ficou READY, mas smoke de produto achou 308 para `/tela-display-lcd/...` seguido de 404 em produtos que existem em `/display...`/`/display-e-lcd...`.
 - 2026-06-11: `vercel.json` corrigido removendo redirects wildcard de aliases de display com paginas reais; mantidos redirects apenas das raizes para a categoria canonica.
 - 2026-06-11: `node` parse de `vercel.json`, `npm run validate:redirects` e `npm run validate:routes` OK apos correcao dos redirects.
+
+---
+
+# Progresso - busca inteligente no header TECH7
+
+- 2026-06-12: cwd confirmado em `C:\Users\Admin\Downloads\TECH7\TECH7-main`.
+- 2026-06-12: skills obrigatorias `caveman` e `planning-with-files` lidas.
+- 2026-06-12: worktree ja estava sujo antes desta tarefa; preservar alteracoes existentes e nao reverter.
+- 2026-06-12: ONE buscado via `tool_search`; ferramenta ONE nao disponivel nesta sessao.
+- 2026-06-12: Supabase direto tambem nao apareceu no `tool_search`; fallback sera runtime local/API/env do projeto, documentado.
+- 2026-06-12: subagentes read-only iniciados para Search Flow Analyst, Data Accuracy Validator e Responsive QA.
+- 2026-06-12: `/api/search?q=samsung&limit=3` respondeu com produtos ativos, imagem, `price_cents` e URL; primeiro item validado com `price_cents=95000`.
+- 2026-06-12: autocomplete implementado em `assets/js/tech7-local-runtime.js`, usando `/api/search`, debounce de 250ms, limite visual de 8 itens, cancelamento/ignorar respostas antigas, estado vazio e fechamento por Escape/clique fora.
+- 2026-06-12: `index.html` ajustado para nao acionar o autocomplete inline antigo quando o runtime compartilhado esta ativo.
+- 2026-06-12: validacao visual feita por Playwright Chrome fallback porque `@chrome` nao ficou callable: desktop 1366 e mobile 390 exibiram 8 sugestoes, imagem real, categoria, `R$ 950,00`, Enter para `/busca/index.html`, Escape fecha e clique abre produto.
+- 2026-06-12: evidencia salva em `_validation/search-autocomplete/search-autocomplete-validation.json`, `desktop-1366-suggestions.png`, `desktop-1366-no-results.png`, `mobile-390-suggestions.png` e `mobile-390-no-results.png`.
+- 2026-06-12: validacoes finais OK: `node --check assets/js/tech7-local-runtime.js`, `npm run validate:product-cards`, `npm run validate:build`.
+
+---
+
+# Progresso - galeria produto mobile
+
+- 2026-06-11: skills obrigatorias `caveman` e `planning-with-files` lidas; memoria TECH7 consultada para validar gates e fallback de navegador.
+- 2026-06-11: print do problema inspecionado; galeria mobile exibia imagens lado a lado e controles/thumbs ficavam presos fora da area util.
+- 2026-06-11: investigacao focada em `assets/js/tech7-local-runtime.js` e `_custom/tech7-theme.css`; confirmada solucao em runtime/CSS compartilhado, sem edicao produto por produto.
+- 2026-06-11: rota local usada para QA: `/display/tela-display-lcd-realme-c55-rmx3710-com-aro/`.
+- 2026-06-11: `@chrome`/Chrome plugin nao ficou callable via descoberta de ferramentas; validacao visual feita com Playwright usando canal `chrome`, conforme fallback do projeto.
+- 2026-06-11: bug reproduzido em 390px: `.nav-images` ficava de `left=-120` a `right=0`, controles fora do viewport e clique em next inviavel.
+- 2026-06-11: `assets/js/tech7-local-runtime.js` ajustado para, somente no mobile, reposicionar thumbs abaixo da imagem, adicionar setas sobre a imagem, sincronizar indice ativo, preservar scroll e habilitar swipe horizontal.
+- 2026-06-11: `_custom/tech7-theme.css` recebeu bloco mobile equivalente; durante QA foi confirmado que a rota testada nao carrega esse CSS, entao o runtime aplica estilos criticos inline.
+- 2026-06-11: `node --check assets/js/tech7-local-runtime.js` OK.
+- 2026-06-11: validacao Chrome fallback mobile em 320/375/390/430 OK: proxima, anterior, swipe, thumbnail, setas visiveis, somente uma imagem principal visivel, sem overflow e sem salto de scroll; evidencia `artifacts/product-gallery-final4-validation.json`.
+- 2026-06-11: validacao desktop 1440px OK: thumbnails continuam mudando a imagem, nav visivel e setas mobile ausentes; evidencia `artifacts/product-gallery-desktop-final4.png`.
+- 2026-06-11: `npm run validate:product-gallery` OK: 25/25 galerias.
+- 2026-06-11: `npm run validate:gallery-selected-sync` completo excedeu 300s; amostra `npm run validate:gallery-selected-sync -- 40` OK: 40/40.
+- 2026-06-11: `npm run validate:build` OK.
+- 2026-06-11: `npm run validate:product-images` OK: 26/26 imagens visiveis.
+- 2026-06-11: `npm run validate:gallery-position` OK: 24/24.
+- 2026-06-11: `npm run validate:product-gallery-static-dedupe` OK; `npm run validate:product-gallery-dedupe` excedeu 180s.
+- 2026-06-12: ajuste pos-print aplicado para impedir corte/sobreposicao na galeria mobile do produto Realme C55; `style.min__e4660e26.css` tambem recebeu override porque e o CSS carregado pela pagina.
+- 2026-06-12: validacao mobile do produto `/display/tela-display-lcd-realme-c55-rmx3710-com-aro/` em 320/375/400/430 OK: imagem principal com altura estavel, thumbnails abaixo, titulo abaixo da galeria, next/prev funcionando e sem overflow; evidencia `artifacts/realme-gallery-final-overlap-validation.json`.
+- 2026-06-12: desktop estabilizado: setas da galeria ganharam area clicavel real e sync com eventos do Swiper para evitar estado `swiper-button-disabled` antigo apos `slideTo` externo.
+- 2026-06-12: `node --check assets/js/tech7-local-runtime.js` OK.
+- 2026-06-12: `npm run validate:product-gallery` OK: 25/25 galerias.
+- 2026-06-12: `npm run validate:gallery-position` OK: 24/24.
+- 2026-06-12: `npm run validate:build` OK.
+- 2026-06-12: ajuste adicional aplicado para thumbnails mobile sem sobreposicao: cada miniatura agora usa slide `78px`, card `72px`, `gap:10px`, scroll horizontal interno e `box-sizing:border-box` no CSS efetivo e no runtime.
+- 2026-06-12: QA mobile por Playwright Chrome fallback em 320/375/390/430 OK no Realme C35 e no Samsung A16 com 5 thumbs; gaps medidos de 16px entre bordas dos cards, sem overflow horizontal de pagina. Evidencias: `artifacts/thumb-gallery-overlap-report.json`, `artifacts/thumb-gallery-many-overlap-report.json` e `artifacts/thumb-gallery-many-320.png`.
+- 2026-06-12: validacoes especificas apos ajuste de thumbnails OK: `npm run validate:gallery-position` 24/24 e `npm run validate:product-gallery` 25/25.
+## Admin OS Dashboard Upgrade - Progress - 2026-06-12
+
+- Started in `C:\Users\Admin\Downloads\TECH7\TECH7-main`.
+- Confirmed `AGENTS.md` instructions and root `admin.html`.
+- Read `skills/caveman/SKILL.md` and `C:\Users\Admin\.codex\skills\planning-with-files\SKILL.md`.
+- Tool discovery:
+  - ONE: not callable.
+  - Supabase: callable through `mcp__codex_apps__supabase`.
+  - Data Analytics: `mcp__datascienceWidgets` available.
+  - Creative Production: `mcp__creative_production_mcp` available and used for PDF visual direction.
+  - Product Design: no dedicated static-page generator exposed; applying operational admin UX guidance directly.
+- Read current `package.json`, `admin.html`, `assets/js/admin.js`, `server/routes/admin.js`, DB migrations, `server/lib/db.js`, and `server/db/migrate.js`.
+- Ran read-only runtime DB schema/count inspection using Node + `dotenv/config` + app pool.
+- Planning files updated with current scope and constraints.
+- Added `server/db/migrations/005_service_orders.sql`.
+- Updated `server/routes/admin.js` with OS CRUD, order-to-OS creation, richer metrics, and server-side PDF generation.
+- Updated `admin.html` navigation/styles for Dashboard, Produtos, Pedidos, Ordens de Serviço, Preços, Relatórios and Configurações.
+- Updated `assets/js/admin.js` with dashboard V2, product alert chips, OS list/form/PDF/print/WhatsApp, settings tab, CSV support and pagination.
+- Fixed `server/db/migrate.js` to load `.env`.
+- Ran `npm run db:migrate`; applied `005_service_orders.sql`.
+- Ran `npm run validate:build`; passed.
+- Ran `node --check` for `assets/js/admin.js`, `server/routes/admin.js`, and `server/db/migrate.js`; passed.
+- API smoke on temporary local admin credentials: login 200, metrics 200, OS create 201, PDF 200 `application/pdf`, test OS deleted.
+- Visual fallback with Playwright saved `_validation/admin-os/dashboard-desktop.png`, `os-form-desktop.png`, `os-saved-desktop.png`, `dashboard-mobile.png`, and `_validation/admin-os/evidence.json`; UI test OS deleted.
+- Data Analytics artifact validated and rendered.
+- Re-ran `npm run validate:build` after final UI/API changes; passed.
+- Tested `POST /api/admin/service-orders/from-order/:orderId` against real order `order_329222f2e6ae78184be6bdad8da3b9bc`: returned 201, created `OS-00003`, detail endpoint returned 200, PDF returned 200 `application/pdf` with 4163 bytes, then test OS was deleted. Final `service_orders` count after cleanup: 0.
+- 2026-06-12 16:56: fixed reported OS tab `http_404` on local port 3000. Root cause: running `node server/index.js` process was serving an older route set; current file already had `/api/admin/service-orders`. Restarted the project server on port 3000, verified unauthenticated route changed from 404 to expected 401, then authenticated with provided admin credentials and verified `/api/admin/service-orders?limit=20&offset=0` returned 200 with `total=0`.
+- Supabase fallback confirmed active project `lzsaaufsdcmqlasjrqck` has `public.service_orders` and `public.service_order_items` with 0 rows.
+- Added clearer frontend message for `http_404`: API route not found; restart server or publish current API.
+- Visual fallback validation passed with Playwright because `@chrome`/DevTools tools were not exposed in this session: `_validation/admin-os/os-tab-after-404-fix.png` and `_validation/admin-os/os-tab-after-404-fix.json`. OS tab loaded with no `http_404`; service-orders API response was 200.
+- `npm run validate:build` was retried with a 300s timeout and hung in `scripts/validate-product-cards.mjs`; the leftover validation processes were stopped. Focused checks passed afterward: `node --check server/routes/admin.js`, `node --check assets/js/admin.js`, `node --check server/db/migrate.js`, `node scripts/validate-endpoints.js`, and `node scripts/validate-api-security.mjs`.
+- 2026-06-12: implemented manual OS product picker and catalog price hydration. Files changed: `assets/js/admin.js`, `admin.html`, `server/routes/admin.js`.
+- Backend now hydrates OS items by `product_id` from `products` using `applyCatalogPrices`, overriding submitted product name/unit price for catalog products.
+- Dashboard metrics now merge `order_items` and `service_order_items` for top products/top categories, and include non-canceled OS product totals in service product revenue.
+- PDF OS header updated for client sending: Tech 7 logo mark at top-left, store data, `VIA DO CLIENTE`, better product/totals section, warranty, awareness text and signatures.
+- API validation: manual OS with product `display-samsung-lcd-sam-s20-ultra-g988-origret`, qty 2, submitted fake name and R$ 1.00 price; server saved catalog name, unit price R$ 1,500.00, product total R$ 3,000.00, labor R$ 50.00, discount R$ 10.00, final R$ 3,040.00. Test OS deleted.
+- Visual fallback validation: `_validation/admin-os/os-manual-product-picker.png`, `_validation/admin-os/os-manual-product-saved.png`, `_validation/admin-os/os-manual-product-flow.json`, `_validation/admin-os/os-manual-product-client.pdf`. Console had expected pre-login 401 only. Test OS cleanup count 0.
+- Latest focused checks passed: `node --check server/routes/admin.js`, `node --check assets/js/admin.js`, `node scripts/validate-endpoints.js`, `node scripts/validate-api-security.mjs`, authenticated `/api/admin/metrics`.
+
+- 2026-06-12: OS save bug diagnosed from local server log: invalid manual order_id violated service_orders_order_id_fkey and was shown as generic database failure. Added backend preflight validation for optional order origin and global error middleware now returns explicit statusCode errors before database fallback.
