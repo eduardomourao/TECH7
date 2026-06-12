@@ -568,14 +568,14 @@ export function createApp(options = {}) {
   }
 
   app.use((err, _req, res, _next) => {
-    // eslint-disable-next-line no-console
-    console.error("[api] unhandled error:", safeJson({ error: String(err?.message || err) }));
     if (err?.statusCode) {
       return res.status(err.statusCode).json({
         error: err.code || "request_failed",
         message: err.message || "Falha na requisicao"
       });
     }
+    // eslint-disable-next-line no-console
+    console.error("[api] unhandled error:", safeJson({ error: String(err?.message || err) }));
     if (isDatabaseConnectionError(err)) return sendDatabaseConnectionError(res);
     res.status(500).json({ error: "internal_error" });
   });
