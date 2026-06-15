@@ -307,14 +307,14 @@
 
       const overview = panel('Visao operacional', 'Indicadores de saude do negocio',
         '<div class="sub-grid">' +
-          '<div class="sub-card"><small>Precos invalidos</small><strong>' + number(p.zero_price) + '</strong></div>' +
-          '<div class="sub-card"><small>Sem imagem</small><strong>' + number(p.no_image || 0) + '</strong></div>' +
-          '<div class="sub-card"><small>Estoque baixo</small><strong>' + number(p.low_stock || 0) + '</strong></div>' +
-          '<div class="sub-card"><small>Produtos inativos</small><strong>' + number(p.inactive) + '</strong></div>' +
-          '<div class="sub-card"><small>Pedidos pendentes</small><strong>' + number(o.pending) + '</strong></div>' +
-          '<div class="sub-card"><small>OS abertas</small><strong>' + number(s.open || 0) + '</strong></div>' +
-          '<div class="sub-card"><small>Servicos concluidos</small><strong>' + number(s.completed || 0) + '</strong></div>' +
-          '<div class="sub-card"><small>Produtos duplicados</small><strong>' + number(p.duplicated || 0) + '</strong></div>' +
+          dashboardCard('invalid_prices', 'Precos invalidos', p.zero_price, 'Filtrar produtos sem preco valido') +
+          dashboardCard('missing_images', 'Sem imagem', p.no_image || 0, 'Filtrar produtos sem imagem') +
+          dashboardCard('low_stock', 'Estoque baixo', p.low_stock || 0, 'Filtrar produtos com estoque baixo') +
+          dashboardCard('inactive_products', 'Produtos inativos', p.inactive, 'Filtrar produtos inativos') +
+          dashboardCard('pending_orders', 'Pedidos pendentes', o.pending, 'Abrir pedidos pendentes') +
+          dashboardCard('open_service_orders', 'OS abertas', s.open || 0, 'Abrir OS em andamento') +
+          dashboardCard('completed_services', 'Servicos concluidos', s.completed || 0, 'Abrir OS concluidas') +
+          dashboardCard('duplicate_products', 'Produtos duplicados', p.duplicated || 0, 'Filtrar produtos duplicados') +
         '</div>' +
         progress('Catalogo ativo', activeRate, 'green') +
         progress('Pedidos pagos', paidRate, '') +
@@ -333,9 +333,70 @@
         '<div class="grid-2"><div>' + brands + '</div><div>' + categories + '</div></div>' +
         '<div class="grid-2"><div>' + delivery + '</div><div>' + customers + '</div></div>' +
         '<div class="grid-2"><div>' + serviceOrders + '</div><div>' + topProducts + '</div></div>';
+      bindDashboardCards();
     }).catch((e) => {
       el.innerHTML = '<div class="error-state">Erro ao carregar metricas: ' + esc(e.message) + '</div>';
     });
+  }
+
+  function dashboardCard(action, label, value, hint) {
+    return '<button class="sub-card dashboard-card" type="button" data-dashboard-action="' + esc(action) + '" title="' + esc(hint || '') + '">' +
+      '<small>' + esc(label) + '</small><strong>' + number(value || 0) + '</strong></button>';
+  }
+
+  function bindDashboardCards() {
+    document.querySelectorAll('[data-dashboard-action]').forEach((card) => {
+      card.addEventListener('click', () => openDashboardTarget(card.dataset.dashboardAction));
+    });
+  }
+
+  function resetProductFilters(overrides) {
+    state.productFilters = { q: '', active: '', brand: '', category: '', alert: '', sort: 'updated_desc', ...(overrides || {}) };
+    state.productsPage = 0;
+    state.editingProduct = null;
+  }
+
+  function openDashboardTarget(action) {
+    if (action === 'invalid_prices') {
+      resetProductFilters({ alert: 'missing_price' });
+      return switchTab('products');
+    }
+    if (action === 'missing_images') {
+      resetProductFilters({ alert: 'missing_image' });
+      return switchTab('products');
+    }
+    if (action === 'low_stock') {
+      resetProductFilters({ alert: 'low_stock' });
+      return switchTab('products');
+    }
+    if (action === 'inactive_products') {
+      resetProductFilters({ active: 'false' });
+      return switchTab('products');
+    }
+    if (action === 'duplicate_products') {
+      resetProductFilters({ alert: 'duplicate' });
+      return switchTab('products');
+    }
+    if (action === 'pending_orders') {
+      state.orderStatus = 'pending';
+      state.ordersPage = 0;
+      state.selectedOrderId = null;
+      return switchTab('orders');
+    }
+    if (action === 'open_service_orders') {
+      state.serviceOrderStatus = 'open';
+      state.serviceOrderSearch = '';
+      state.serviceOrdersPage = 0;
+      state.selectedServiceOrderId = null;
+      return switchTab('service-orders');
+    }
+    if (action === 'completed_services') {
+      state.serviceOrderStatus = 'completed';
+      state.serviceOrderSearch = '';
+      state.serviceOrdersPage = 0;
+      state.selectedServiceOrderId = null;
+      return switchTab('service-orders');
+    }
   }
 
   function progress(label, value, color) {
@@ -405,7 +466,7 @@
       '<select id="productActive"><option value="">Todos status</option><option value="true"' + selected(state.productFilters.active, 'true') + '>Ativos</option><option value="false"' + selected(state.productFilters.active, 'false') + '>Inativos</option></select>' +
       '<select id="productBrand"><option value="">Todas marcas</option>' + options(m.products.by_brand, state.productFilters.brand) + '</select>' +
       '<select id="productCategory"><option value="">Todas categorias</option>' + categoryOptions(state.productFilters.category, true) + '</select>' +
-      '<select id="productAlertStatus"><option value="">Todos alertas</option><option value="ok"' + selected(state.productFilters.alert, 'ok') + '>Sem alerta</option><option value="missing_image"' + selected(state.productFilters.alert, 'missing_image') + '>Sem imagem</option><option value="missing_price"' + selected(state.productFilters.alert, 'missing_price') + '>Sem preco</option><option value="low_stock"' + selected(state.productFilters.alert, 'low_stock') + '>Estoque baixo</option><option value="missing_category"' + selected(state.productFilters.alert, 'missing_category') + '>Sem categoria</option></select>' +
+      '<select id="productAlertStatus"><option value="">Todos alertas</option><option value="ok"' + selected(state.productFilters.alert, 'ok') + '>Sem alerta</option><option value="missing_image"' + selected(state.productFilters.alert, 'missing_image') + '>Sem imagem</option><option value="missing_price"' + selected(state.productFilters.alert, 'missing_price') + '>Sem preco</option><option value="low_stock"' + selected(state.productFilters.alert, 'low_stock') + '>Estoque baixo</option><option value="missing_category"' + selected(state.productFilters.alert, 'missing_category') + '>Sem categoria</option><option value="duplicate"' + selected(state.productFilters.alert, 'duplicate') + '>Duplicados</option></select>' +
       '<select id="productSort"><option value="updated_desc"' + selected(state.productFilters.sort, 'updated_desc') + '>Mais recentes</option><option value="price_asc"' + selected(state.productFilters.sort, 'price_asc') + '>Preco menor</option><option value="price_desc"' + selected(state.productFilters.sort, 'price_desc') + '>Preco maior</option><option value="name_asc"' + selected(state.productFilters.sort, 'name_asc') + '>Nome A-Z</option><option value="name_desc"' + selected(state.productFilters.sort, 'name_desc') + '>Nome Z-A</option></select>' +
       '<button class="btn btn-primary btn-sm" id="applyProductSearch">Buscar</button>' +
       '<button class="btn btn-outline btn-sm" id="clearProductFilters">Limpar</button>' +
@@ -1093,7 +1154,7 @@
   function serviceOrderToolbar() {
     return '<div class="toolbar"><div class="toolbar-group">' +
       '<input id="serviceOrderSearch" type="text" placeholder="Buscar cliente, telefone, aparelho ou defeito" value="' + esc(state.serviceOrderSearch) + '">' +
-      '<select id="serviceOrderStatus"><option value="">Todos status</option>' + OS_STATUSES.map((s) => '<option value="' + s[0] + '"' + selected(state.serviceOrderStatus, s[0]) + '>' + esc(s[1]) + '</option>').join('') + '</select>' +
+      '<select id="serviceOrderStatus"><option value="">Todos status</option><option value="open"' + selected(state.serviceOrderStatus, 'open') + '>OS abertas</option><option value="completed"' + selected(state.serviceOrderStatus, 'completed') + '>Concluidas</option>' + OS_STATUSES.map((s) => '<option value="' + s[0] + '"' + selected(state.serviceOrderStatus, s[0]) + '>' + esc(s[1]) + '</option>').join('') + '</select>' +
       '<button class="btn btn-primary btn-sm" id="applyServiceOrderSearch">Buscar</button><button class="btn btn-outline btn-sm" id="clearServiceOrderSearch">Limpar</button>' +
       '</div><div class="toolbar-group"><button class="btn btn-primary btn-sm" id="newServiceOrder">Criar OS manual</button></div></div>';
   }

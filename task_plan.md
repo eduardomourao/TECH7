@@ -22,6 +22,12 @@
 - [x] Atualizar textos da UI para exclusao definitiva.
 - [x] Validar sintaxe/endpoints e push GitHub.
 
+### Ajuste solicitado - cards operacionais clicaveis - 2026-06-15
+- [x] Transformar cards da visao operacional em botoes clicaveis.
+- [x] Mapear cada card para filtro/aba correta.
+- [x] Adicionar filtros backend faltantes para duplicados e OS agregadas.
+- [x] Validar JS/API e navegador.
+
 ## Remover logo errada do site/admin - 2026-06-15
 - [x] Localizar origem da logo errada mostrada na aba/Admin.
 - [x] Identificar logo correta TECH 7 no projeto.

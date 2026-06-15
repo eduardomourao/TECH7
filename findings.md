@@ -18,6 +18,9 @@
 - Para hard delete funcionar, API precisa apagar `cart_items` e `order_items` do produto antes de apagar `products`; demais dependencias seguem regras FK.
 - Endpoint admin alterado para hard delete real em transacao. Observacao: linhas de `order_items` daquele produto sao removidas; totais agregados do pedido em `orders` permanecem.
 - UI separa status e exclusao: botao `Ativo/Inativo` usa `PATCH`; botao vermelho `Excluir definitivo` usa `DELETE`.
+- Cards de `Visao operacional` agora sao botoes: precos invalidos, sem imagem, estoque baixo, produtos inativos e duplicados levam para Produtos com filtro aplicado; pedidos pendentes leva para Pedidos; OS abertas/concluidas levam para Ordens de Servico.
+- API admin ganhou filtro `alert=duplicate` em produtos e `status=open|completed` em OS para suportar os atalhos.
+- Evidencia Chrome fallback: `_validation/admin-panel-release/dashboard-card-shortcuts-after.json` confirmou todos os filtros esperados.
 
 ## Remover logo errada do site/admin - 2026-06-15
 - O print indica icone errado na aba do navegador em `/Admin`, nao logo de conteudo.

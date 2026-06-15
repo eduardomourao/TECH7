@@ -22,6 +22,10 @@
 - Botao de status `Ativo/Inativo` voltou a usar `PATCH`, para nao apagar produto por acidente.
 - Validacoes OK: `node --check server/routes/admin.js`, `node --check assets/js/admin.js`, `npm run validate:endpoints`.
 - Chrome fallback validou: status chama `PATCH`, excluir definitivo chama `DELETE`, linha sai da tabela. Evidencias: `_validation/admin-panel-release/product-hard-delete-ui-after.json` e `product-hard-delete-label-after.json`.
+- Usuario pediu cards clicaveis na `Visao operacional`.
+- Implementado: cards viraram botoes com `data-dashboard-action`; cada clique muda aba e aplica filtro real.
+- Mapeamentos validados: `alert=missing_price`, `alert=missing_image`, `alert=low_stock`, `active=false`, `alert=duplicate`, `orders status=pending`, `service-orders status=open`, `service-orders status=completed`.
+- Validacoes OK: `node --check assets/js/admin.js`, `node --check server/routes/admin.js`, `npm run validate:endpoints`, Chrome fallback.
 
 - 2026-06-15: usuario reportou logo errada aparecendo na aba/Admin de `tech-7.vercel.app`.
 - Inspecao: `favicon.png` de raiz e producao ja sao TECH 7 correto; `admin.html` nao tinha links de favicon e podia cair em cache/fallback antigo.

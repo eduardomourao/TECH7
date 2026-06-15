@@ -863,6 +863,17 @@ router.get("/products", adminAuth, async (req, res) => {
     filters.push(`stock is not null and stock <= 2`);
   } else if (alert === "missing_category") {
     filters.push(`coalesce(section, '') = ''`);
+  } else if (alert === "duplicate") {
+    filters.push(`
+      exists (
+        select 1
+        from products p2
+        where lower(coalesce(p2.slug, '')) = lower(coalesce(products.slug, ''))
+          and lower(coalesce(p2.section, '')) = lower(coalesce(products.section, ''))
+          and lower(coalesce(p2.brand, '')) = lower(coalesce(products.brand, ''))
+          and p2.id <> products.id
+      )
+    `);
   } else if (alert === "ok") {
     filters.push(`coalesce(nullif(primary_image_url, ''), nullif(image_url, ''), '') <> ''`);
     filters.push(`coalesce(price_cents, 0) >= 200`);
@@ -1419,7 +1430,11 @@ router.get("/service-orders", adminAuth, asyncRoute(async (req, res) => {
 
   const params = [];
   const filters = ["1=1"];
-  if (status) {
+  if (status === "open") {
+    filters.push(`status not in ('entregue', 'cancelada')`);
+  } else if (status === "completed") {
+    filters.push(`status in ('pronta', 'entregue')`);
+  } else if (status) {
     params.push(status);
     filters.push(`status = $${params.length}`);
   }
