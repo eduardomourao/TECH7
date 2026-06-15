@@ -10,6 +10,9 @@
 - Advisor Supabase anterior apontou RLS desabilitado em tabelas sensiveis como `orders` e `service_orders`; fora do escopo aplicar politica agora.
 - Validacao visual/funcional local: Google Chrome via Playwright `channel: "chrome"` testou produtos, filtros, ordenacao, salvar todas alteracoes sem reload, excluir produto, excluir pedido, excluir OS e alternar tema. Evidencia: `_validation/admin-panel-release/admin-ui-validation.json` e `admin-products-after.png`.
 - Limitacao: sem senha admin em texto no `.env`, a validacao de painel autenticado usou respostas mockadas no navegador. Supabase foi usado para confirmar estrutura/dados reais antes da implementacao.
+- Bug pos-commit reportado pelo usuario: aba Produtos em `/Admin` mostrava `Erro ao carregar produtos: http_404`.
+- Causa confirmada localmente: processo dev antigo ainda estava servindo sem `GET /api/admin/categories`; a Promise de produtos falhava quando categorias retornava 404.
+- Correcao adicional: `loadCategories()` agora tem fallback local e nao bloqueia render de produtos se o endpoint de categorias falhar. Servidor local foi reiniciado; `/api/admin/categories` agora retorna 401 sem sessao, confirmando rota existente.
 
 ## Remover logo errada do site/admin - 2026-06-15
 - O print indica icone errado na aba do navegador em `/Admin`, nao logo de conteudo.

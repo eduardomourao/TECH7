@@ -11,6 +11,10 @@
 - `@chrome` direto nao expos comandos de navegacao nesta sessao; validacao feita com Google Chrome via Playwright `channel: "chrome"` pelo `node_repl`, com evidencias em `_validation/admin-panel-release/admin-ui-validation.json` e `admin-products-after.png`.
 - Resultado da validacao Chrome fallback: salvar sem reload `true`, 1 chamada de save, 1 delete produto, 1 delete pedido, 1 delete OS, tema claro/escuro alternando, sem overflow, sem console/network errors.
 - Commit/push GitHub concluido na branch `main`: `b93c2566c` (`Improve admin panel controls`).
+- Usuario reportou `Erro ao carregar produtos: http_404` em `/Admin`.
+- Confirmado: servidor local antigo respondia 404 em `/api/admin/categories`; apos reinicio, a mesma rota responde 401 sem sessao, indicando que existe e exige auth.
+- Fallback implementado em `assets/js/admin.js`: erro no carregamento de categorias nao derruba a aba Produtos.
+- Evidencia adicional: `_validation/admin-panel-release/products-load-fallback-after.json` e `products-load-fallback-after.png`.
 
 - 2026-06-15: usuario reportou logo errada aparecendo na aba/Admin de `tech-7.vercel.app`.
 - Inspecao: `favicon.png` de raiz e producao ja sao TECH 7 correto; `admin.html` nao tinha links de favicon e podia cair em cache/fallback antigo.

@@ -206,8 +206,19 @@
 
   async function loadCategories(force) {
     if (state.categoriesLoaded && !force) return state.categories;
-    const data = await api('/categories');
-    state.categories = data.items || [];
+    try {
+      const data = await api('/categories');
+      state.categories = data.items || [];
+    } catch (_) {
+      state.categories = [
+        { slug: 'display-e-lcd', name: 'Display e LCD' },
+        { slug: 'baterias-celular', name: 'Baterias celular' },
+        { slug: 'pecas-e-componentes', name: 'Pecas e componentes' },
+        { slug: 'tampas-e-carcacas', name: 'Tampas e carcacas' },
+        { slug: 'touchs-e-visores', name: 'Touchs e visores' },
+        { slug: 'maquinas-e-ferramentas', name: 'Maquinas e ferramentas' }
+      ];
+    }
     state.categoriesLoaded = true;
     return state.categories;
   }
