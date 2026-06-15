@@ -10,6 +10,7 @@
 - Validacoes OK: `node --check assets/js/admin.js`, `node --check server/routes/admin.js`, `npm run validate:assets`, `npm run validate:routes`, `npm run validate:endpoints`.
 - `@chrome` direto nao expos comandos de navegacao nesta sessao; validacao feita com Google Chrome via Playwright `channel: "chrome"` pelo `node_repl`, com evidencias em `_validation/admin-panel-release/admin-ui-validation.json` e `admin-products-after.png`.
 - Resultado da validacao Chrome fallback: salvar sem reload `true`, 1 chamada de save, 1 delete produto, 1 delete pedido, 1 delete OS, tema claro/escuro alternando, sem overflow, sem console/network errors.
+- Commit/push GitHub concluido na branch `main`: `b93c2566c` (`Improve admin panel controls`).
 
 - 2026-06-15: usuario reportou logo errada aparecendo na aba/Admin de `tech-7.vercel.app`.
 - Inspecao: `favicon.png` de raiz e producao ja sao TECH 7 correto; `admin.html` nao tinha links de favicon e podia cair em cache/fallback antigo.

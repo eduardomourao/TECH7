@@ -8,7 +8,7 @@
 - [x] Implementar UI admin: filtros, ordenacao, salvar tudo, exclusoes, tema e categorias por select.
 - [x] Rodar validacoes npm e sintaxe JS.
 - [x] Validar navegador com Chrome; se ferramenta nao expor comandos, registrar fallback.
-- [ ] Commit e push para GitHub apos validacao.
+- [x] Commit e push para GitHub apos validacao.
 
 ### Guardrails Admin
 - Alterar somente `admin.html`, `assets/js/admin.js`, `server/routes/admin.js` e arquivos de acompanhamento.
