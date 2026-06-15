@@ -30,6 +30,8 @@
 - Implementado em `admin.html` e `assets/js/admin.js`: hero executivo, metricas compactas, graficos circulares, barras empilhadas e layout responsivo.
 - Funcoes atuais preservadas: cards operacionais seguem clicaveis e filtros continuam funcionando.
 - Validacao Chrome fallback final: desktop `1366x980` e mobile `390x844` sem overflow e sem console errors.
+- Deploy via GitHub solicitado. Workflow encontrado: `.github/workflows/pages.yml`, dispara em push para `main` e publica GitHub Pages.
+- Validacoes pre-deploy GitHub OK: `npm run validate:assets`, `npm run validate:routes`, `npm run validate:endpoints`.
 
 - 2026-06-15: usuario reportou logo errada aparecendo na aba/Admin de `tech-7.vercel.app`.
 - Inspecao: `favicon.png` de raiz e producao ja sao TECH 7 correto; `admin.html` nao tinha links de favicon e podia cair em cache/fallback antigo.
