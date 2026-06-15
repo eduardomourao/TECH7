@@ -477,7 +477,7 @@
       '<label><input id="editFeatured" type="checkbox"' + (p.featured ? ' checked' : '') + '> Destaque</label>' +
       '<label><input id="editLaunch" type="checkbox"' + (p.launch ? ' checked' : '') + '> Lancamento</label>' +
       '<div class="toolbar-group" style="grid-column:1/-1"><button class="btn btn-primary" type="submit">Salvar produto</button>' +
-      (p.id ? '<button class="btn btn-outline" type="button" id="deactivateProduct">Desativar</button>' : '') +
+      (p.id ? '<button class="btn btn-red" type="button" id="deactivateProduct">Excluir definitivamente</button>' : '') +
       '<button class="btn btn-outline" type="button" id="previewProductPage">Preview pagina</button></div>' +
       '</form>' +
       '<div class="grid-2" style="margin-top:16px"><div><h3>Preview card</h3><div class="sub-card"><img id="previewCardImage" src="' + esc(previewImage) + '" alt="" style="width:100%;max-height:190px;object-fit:contain;background:#fff;border-radius:8px"><strong id="previewCardName" style="display:block;margin-top:10px">' + esc(p.name || 'Nome do produto') + '</strong><small id="previewCardMeta">' + esc((p.category || '') + ' / ' + (p.brand || '')) + '</small><div id="previewCardPrice" style="margin-top:8px;color:#ff6a00;font-weight:900">' + money(p.price || 0) + '</div></div></div>' +
@@ -510,7 +510,7 @@
         '<td><select class="cell-input category-input" data-edit="category">' + categoryOptions(p.category || p.section, true) + '</select></td>' +
         '<td><input class="cell-input price-input" type="number" step="0.01" min="0" data-edit="price" value="' + Number(p.price || 0).toFixed(2) + '"' + (p.price_status === 'consult' ? ' title="Preço sob consulta ou abaixo de R$ 2,00"' : '') + '></td>' +
         '<td><button class="btn btn-sm ' + (p.active ? 'btn-green' : 'btn-outline') + '" data-toggle-active="' + esc(p.id) + '" data-active="' + p.active + '">' + (p.active ? 'Ativo' : 'Inativo') + '</button></td>' +
-        '<td><div class="toolbar-group"><button class="btn btn-primary btn-sm" data-save-product="' + esc(p.id) + '">Salvar</button><button class="btn btn-outline btn-sm" data-edit-product="' + esc(p.id) + '">Editar</button><button class="btn btn-outline btn-sm" data-view-product="' + esc(p.url || '') + '">Ver</button><button class="btn btn-red btn-sm" data-delete-product="' + esc(p.id) + '">Excluir</button></div></td>' +
+        '<td><div class="toolbar-group"><button class="btn btn-primary btn-sm" data-save-product="' + esc(p.id) + '">Salvar</button><button class="btn btn-outline btn-sm" data-edit-product="' + esc(p.id) + '">Editar</button><button class="btn btn-outline btn-sm" data-view-product="' + esc(p.url || '') + '">Ver</button><button class="btn btn-red btn-sm" data-delete-product="' + esc(p.id) + '">Excluir definitivo</button></div></td>' +
       '</tr>').join('') + '</tbody></table></div>';
   }
 
@@ -525,7 +525,7 @@
         '<td><input class="cell-input price-input" type="number" step="0.01" min="0" data-edit="price" value="' + Number(p.price || 0).toFixed(2) + '"' + (p.price_status === 'consult' ? ' title="Preco sob consulta ou abaixo de R$ 2,00"' : '') + '></td>' +
         '<td>' + productAlerts(p) + '</td>' +
         '<td><button class="btn btn-sm ' + (p.active ? 'btn-green' : 'btn-outline') + '" data-toggle-active="' + esc(p.id) + '" data-active="' + p.active + '">' + (p.active ? 'Ativo' : 'Inativo') + '</button></td>' +
-        '<td><div class="toolbar-group"><button class="btn btn-primary btn-sm" data-save-product="' + esc(p.id) + '">Salvar</button><button class="btn btn-outline btn-sm" data-edit-product="' + esc(p.id) + '">Editar</button><button class="btn btn-outline btn-sm" data-view-product="' + esc(p.url || '') + '">Ver</button><button class="btn btn-red btn-sm" data-delete-product="' + esc(p.id) + '">Excluir</button></div></td>' +
+        '<td><div class="toolbar-group"><button class="btn btn-primary btn-sm" data-save-product="' + esc(p.id) + '">Salvar</button><button class="btn btn-outline btn-sm" data-edit-product="' + esc(p.id) + '">Editar</button><button class="btn btn-outline btn-sm" data-view-product="' + esc(p.url || '') + '">Ver</button><button class="btn btn-red btn-sm" data-delete-product="' + esc(p.id) + '">Excluir definitivo</button></div></td>' +
       '</tr>').join('') + '</tbody></table></div>';
   }
 
@@ -737,11 +737,11 @@
   async function deactivateProduct() {
     const id = state.editingProduct?.id;
     if (!id) return;
-    if (!confirm('Desativar este produto? Ele saira da vitrine, busca e filtros.')) return;
+    if (!confirm('Excluir definitivamente este produto do banco de dados? Esta acao nao pode ser desfeita.')) return;
     try {
       state.editingProduct = await api('/products/' + encodeURIComponent(id), { method: 'DELETE' });
       state.metrics = null;
-      toast('Produto desativado');
+      toast('Produto excluido do banco');
       renderProducts();
     } catch (e) {
       toast(e.message, 'error');
@@ -825,14 +825,14 @@
 
   async function deleteProduct(id) {
     if (!id) return;
-    if (!confirm('Inativar este produto? Ele saira da vitrine, busca e filtros.')) return;
+    if (!confirm('Excluir definitivamente este produto do banco de dados? Esta acao nao pode ser desfeita.')) return;
     try {
       await api('/products/' + encodeURIComponent(id), { method: 'DELETE' });
       state.metrics = null;
       state.products = state.products.filter((p) => String(p.id) !== String(id));
       document.querySelector('[data-product-row="' + CSS.escape(id) + '"]')?.remove();
       state.dirtyProducts.delete(id);
-      toast('Produto inativado');
+      toast('Produto excluido do banco');
     } catch (e) {
       toast(e.message, 'error');
     }
@@ -840,9 +840,7 @@
 
   async function toggleProduct(id, active) {
     try {
-      await api('/products/' + encodeURIComponent(id), active
-        ? { method: 'PATCH', body: JSON.stringify({ active: true }) }
-        : { method: 'DELETE' });
+      await api('/products/' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify({ active }) });
       state.metrics = null;
       toast(active ? 'Produto ativado' : 'Produto inativado');
       renderProducts();

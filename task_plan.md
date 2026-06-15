@@ -16,6 +16,12 @@
 - Pedidos e OS sem coluna `deleted_at`: exclusao no admin deve cancelar status, preservando historico e FKs.
 - Categoria no admin deve vir de `categories` do banco, nao campo livre.
 
+### Ajuste solicitado - produto delete real - 2026-06-15
+- [x] Confirmar FKs no Supabase antes de alterar exclusao de produto.
+- [x] Alterar DELETE admin de produto para remover linha de `products` do banco.
+- [x] Atualizar textos da UI para exclusao definitiva.
+- [x] Validar sintaxe/endpoints e push GitHub.
+
 ## Remover logo errada do site/admin - 2026-06-15
 - [x] Localizar origem da logo errada mostrada na aba/Admin.
 - [x] Identificar logo correta TECH 7 no projeto.

@@ -1019,17 +1019,32 @@ router.patch("/products/:id", adminAuth, updateProduct);
 
 router.delete("/products/:id", adminAuth, async (req, res) => {
   const id = String(req.params.id || "");
-  const { rows } = await pool.query(
-    `
-      update products
-      set active = false, is_active = false, availability = 'NO', updated_at = now()
-      where id = $1
-      returning ${productSelectSql()}
-    `,
-    [id]
-  );
-  if (!rows.length) return res.status(404).json({ error: "product_not_found", message: "Produto não encontrado" });
-  return res.json(mapAdminProduct(rows[0]));
+  await pool.query("begin");
+  try {
+    const existing = await pool.query(`select ${productSelectSql()} from products where id = $1 limit 1`, [id]);
+    if (!existing.rows.length) {
+      await pool.query("rollback");
+      return res.status(404).json({ error: "product_not_found", message: "Produto nao encontrado" });
+    }
+
+    const cartItems = await pool.query(`delete from cart_items where product_id = $1`, [id]);
+    const orderItems = await pool.query(`delete from order_items where product_id = $1`, [id]);
+    const deleted = await pool.query(`delete from products where id = $1 returning id`, [id]);
+    await pool.query("commit");
+    return res.json({
+      ok: true,
+      deleted: true,
+      id: deleted.rows[0]?.id || id,
+      removed_cart_items: cartItems.rowCount || 0,
+      removed_order_items: orderItems.rowCount || 0
+    });
+  } catch (error) {
+    await pool.query("rollback");
+    return res.status(500).json({
+      error: "product_delete_failed",
+      message: "Falha ao excluir produto do banco"
+    });
+  }
 });
 
 router.post("/prices/bulk", adminAuth, async (req, res) => {

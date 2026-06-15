@@ -15,6 +15,13 @@
 - Confirmado: servidor local antigo respondia 404 em `/api/admin/categories`; apos reinicio, a mesma rota responde 401 sem sessao, indicando que existe e exige auth.
 - Fallback implementado em `assets/js/admin.js`: erro no carregamento de categorias nao derruba a aba Produtos.
 - Evidencia adicional: `_validation/admin-panel-release/products-load-fallback-after.json` e `products-load-fallback-after.png`.
+- Usuario exigiu que `Excluir produto` remova o registro do banco.
+- Supabase consultado antes da mudanca: FKs bloqueantes em `cart_items` e `order_items`; cascatas/set-null nas demais dependencias.
+- Implementado hard delete de produto no admin: transacao apaga `cart_items`, apaga `order_items` do produto e depois apaga `products`; cascatas removem imagens/variantes/categorias/OLX e OS fica com `product_id` null pelo FK.
+- UI atualizada: botao vermelho agora mostra `Excluir definitivo`; confirmacao avisa que a acao nao pode ser desfeita.
+- Botao de status `Ativo/Inativo` voltou a usar `PATCH`, para nao apagar produto por acidente.
+- Validacoes OK: `node --check server/routes/admin.js`, `node --check assets/js/admin.js`, `npm run validate:endpoints`.
+- Chrome fallback validou: status chama `PATCH`, excluir definitivo chama `DELETE`, linha sai da tabela. Evidencias: `_validation/admin-panel-release/product-hard-delete-ui-after.json` e `product-hard-delete-label-after.json`.
 
 - 2026-06-15: usuario reportou logo errada aparecendo na aba/Admin de `tech-7.vercel.app`.
 - Inspecao: `favicon.png` de raiz e producao ja sao TECH 7 correto; `admin.html` nao tinha links de favicon e podia cair em cache/fallback antigo.

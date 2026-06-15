@@ -13,6 +13,11 @@
 - Bug pos-commit reportado pelo usuario: aba Produtos em `/Admin` mostrava `Erro ao carregar produtos: http_404`.
 - Causa confirmada localmente: processo dev antigo ainda estava servindo sem `GET /api/admin/categories`; a Promise de produtos falhava quando categorias retornava 404.
 - Correcao adicional: `loadCategories()` agora tem fallback local e nao bloqueia render de produtos se o endpoint de categorias falhar. Servidor local foi reiniciado; `/api/admin/categories` agora retorna 401 sem sessao, confirmando rota existente.
+- Novo pedido: botao `Excluir` de produto deve remover dados do banco, nao inativar.
+- Supabase FKs para `products`: `cart_items.product_id` e `order_items.product_id` usam `NO ACTION`; `service_order_items.product_id` usa `SET NULL`; `product_images`, `product_categories`, `product_variants`, `olx_ads`, `olx_category_mappings` usam `CASCADE`.
+- Para hard delete funcionar, API precisa apagar `cart_items` e `order_items` do produto antes de apagar `products`; demais dependencias seguem regras FK.
+- Endpoint admin alterado para hard delete real em transacao. Observacao: linhas de `order_items` daquele produto sao removidas; totais agregados do pedido em `orders` permanecem.
+- UI separa status e exclusao: botao `Ativo/Inativo` usa `PATCH`; botao vermelho `Excluir definitivo` usa `DELETE`.
 
 ## Remover logo errada do site/admin - 2026-06-15
 - O print indica icone errado na aba do navegador em `/Admin`, nao logo de conteudo.
