@@ -28,6 +28,12 @@
 - [x] Adicionar filtros backend faltantes para duplicados e OS agregadas.
 - [x] Validar JS/API e navegador.
 
+### Ajuste solicitado - dashboard admin visual e graficos - 2026-06-15
+- [x] Melhorar layout da pagina Dashboard no `/Admin`.
+- [x] Preservar cards clicaveis e funcoes atuais.
+- [x] Adicionar graficos/resumos visuais usando metricas existentes.
+- [x] Validar sintaxe e navegador.
+
 ## Remover logo errada do site/admin - 2026-06-15
 - [x] Localizar origem da logo errada mostrada na aba/Admin.
 - [x] Identificar logo correta TECH 7 no projeto.

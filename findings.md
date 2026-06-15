@@ -21,6 +21,8 @@
 - Cards de `Visao operacional` agora sao botoes: precos invalidos, sem imagem, estoque baixo, produtos inativos e duplicados levam para Produtos com filtro aplicado; pedidos pendentes leva para Pedidos; OS abertas/concluidas levam para Ordens de Servico.
 - API admin ganhou filtro `alert=duplicate` em produtos e `status=open|completed` em OS para suportar os atalhos.
 - Evidencia Chrome fallback: `_validation/admin-panel-release/dashboard-card-shortcuts-after.json` confirmou todos os filtros esperados.
+- Dashboard admin recebeu faixa executiva, 4 metricas compactas, 4 graficos ring, barras empilhadas para catalogo/pedidos e layout visual mais forte sem remover atalhos existentes.
+- Validacao visual final: `_validation/admin-panel-release/dashboard-improved-final-validation.json` confirmou desktop e mobile sem overflow, 8 cards clicaveis, 4 rings e 7 barras empilhadas, sem erros de console.
 
 ## Remover logo errada do site/admin - 2026-06-15
 - O print indica icone errado na aba do navegador em `/Admin`, nao logo de conteudo.

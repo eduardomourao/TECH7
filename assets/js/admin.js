@@ -239,6 +239,10 @@
     }).join('') + '</div>';
   }
 
+  function compactMetric(label, value, hint) {
+    return '<div class="compact-metric"><small>' + esc(label) + '</small><strong>' + esc(value) + '</strong><span>' + esc(hint || '') + '</span></div>';
+  }
+
   function renderDashboard() {
     setHead('Painel de controle', 'Métricas reais do catálogo, pedidos, pagamentos e preços da TECH 7.');
     const el = document.getElementById('tab-dashboard');
@@ -293,17 +297,26 @@
       const paidRate = ratio(o.paid, o.total);
       const priceRate = ratio((p.total || 0) - (p.zero_price || 0), p.total);
       const alertCount = (p.zero_price || 0) + (p.no_image || 0) + (p.low_stock || 0) + (o.pending || 0);
+      const serviceRate = ratio(s.completed || 0, s.total || 0);
+      const problemRate = ratio(o.problem || 0, o.total || 0);
+      const revenueTotal = (o.revenue || 0) + (s.total_revenue || 0);
 
-      const metrics = '<div class="grid-4">' +
-        metric('Receita total', money((o.revenue || 0) + (s.total_revenue || 0)), 'Pedidos + OS concluidas', icon('money')) +
-        metric('Pedidos hoje', number(o.today), money(o.today_revenue) + ' hoje', icon('cart')) +
-        metric('Ticket medio', money(o.avg_ticket), 'Media das vendas concluidas', icon('trend')) +
-        metric('OS abertas', number(s.open || 0), number(s.ready || 0) + ' prontas', icon('file')) +
-        metric('Produtos ativos', number(p.active), percent(activeRate) + ' do catalogo', icon('box')) +
-        metric('Receita mao de obra', money(s.labor_revenue || 0), number(s.completed || 0) + ' servicos concluidos', icon('wrench')) +
-        metric('Receita produtos', money((o.revenue || 0) + (s.product_revenue || 0)), 'Pedidos + pecas em OS', icon('box')) +
-        metric('Alertas operacionais', number(alertCount), 'Itens que pedem acao', icon('alert')) +
-        '</div>';
+      const hero = '<div class="dashboard-hero">' +
+        '<div><small>Resumo executivo</small><strong>' + money(revenueTotal) + '</strong><span>Receita total combinada de pedidos e ordens de servico.</span></div>' +
+        '<div class="hero-metrics">' +
+          compactMetric('Pedidos hoje', number(o.today || 0), money(o.today_revenue || 0)) +
+          compactMetric('Ticket medio', money(o.avg_ticket || 0), 'vendas concluidas') +
+          compactMetric('OS abertas', number(s.open || 0), number(s.ready || 0) + ' prontas') +
+          compactMetric('Alertas', number(alertCount), 'acoes pendentes') +
+        '</div>' +
+      '</div>';
+
+      const healthCharts = '<div class="dashboard-chart-grid">' +
+        ringChart('Catalogo ativo', activeRate, number(p.active || 0) + ' de ' + number(p.total || 0), 'green') +
+        ringChart('Preco valido', priceRate, number((p.total || 0) - (p.zero_price || 0)) + ' itens OK', 'yellow') +
+        ringChart('Pedidos pagos', paidRate, number(o.paid || 0) + ' de ' + number(o.total || 0), '') +
+        ringChart('OS concluidas', serviceRate, number(s.completed || 0) + ' de ' + number(s.total || 0), 'green') +
+      '</div>';
 
       const overview = panel('Visao operacional', 'Indicadores de saude do negocio',
         '<div class="sub-grid">' +
@@ -322,6 +335,23 @@
       );
 
       const alerts = panel('Alertas do sistema', 'Prioridades calculadas automaticamente', alertListV2(m));
+      const health = panel('Saude geral', 'Leitura rapida de catalogo, vendas e servicos', healthCharts);
+      const catalogMix = panel('Composicao do catalogo', 'Ativos, inativos e principais alertas',
+        stackedBars([
+          ['Ativos', p.active || 0, 'green'],
+          ['Inativos', p.inactive || 0, 'muted'],
+          ['Preco invalido', p.zero_price || 0, 'orange'],
+          ['Sem imagem', p.no_image || 0, 'red']
+        ], p.total || 1)
+      );
+      const orderMix = panel('Risco em pedidos', 'Pendencias e falhas no fluxo de venda',
+        stackedBars([
+          ['Pagos', o.paid || 0, 'green'],
+          ['Pendentes', o.pending || 0, 'orange'],
+          ['Problema', o.problem || 0, 'red']
+        ], o.total || 1) +
+        '<div class="dashboard-note">Taxa de problema: <strong>' + percent(problemRate) + '</strong></div>'
+      );
       const brands = panel('Distribuicao por marca', 'Top marcas do catalogo', bars(p.by_brand, p.total));
       const categories = panel('Categorias mais vendidas', 'Ranking por quantidade vendida', bars(m.top_categories_sold || [], null, true));
       const delivery = panel('Entrega e frete', 'Metodos mais usados', bars(o.by_delivery_method || [], null, true));
@@ -329,7 +359,8 @@
       const topProducts = panel('Produtos mais vendidos', 'Ranking por receita em vendas concluidas', renderTopProducts(m.top_products));
       const serviceOrders = panel('Ordens de servico', 'Status e receita de servico', bars(s.by_status || [], s.total, true));
 
-      el.innerHTML = metrics + '<div class="grid-wide"><div>' + overview + '</div><div>' + alerts + '</div></div>' +
+      el.innerHTML = hero + '<div class="grid-wide"><div>' + overview + '</div><div>' + alerts + '</div></div>' +
+        '<div class="grid-2"><div>' + health + '</div><div>' + catalogMix + orderMix + '</div></div>' +
         '<div class="grid-2"><div>' + brands + '</div><div>' + categories + '</div></div>' +
         '<div class="grid-2"><div>' + delivery + '</div><div>' + customers + '</div></div>' +
         '<div class="grid-2"><div>' + serviceOrders + '</div><div>' + topProducts + '</div></div>';
@@ -342,6 +373,19 @@
   function dashboardCard(action, label, value, hint) {
     return '<button class="sub-card dashboard-card" type="button" data-dashboard-action="' + esc(action) + '" title="' + esc(hint || '') + '">' +
       '<small>' + esc(label) + '</small><strong>' + number(value || 0) + '</strong></button>';
+  }
+
+  function ringChart(label, value, hint, tone) {
+    const clamped = Math.max(0, Math.min(100, Number(value || 0)));
+    return '<div class="ring-card"><div class="ring ' + esc(tone || '') + '" style="--value:' + clamped.toFixed(1) + '"><span>' + percent(clamped) + '</span></div><div><strong>' + esc(label) + '</strong><small>' + esc(hint || '') + '</small></div></div>';
+  }
+
+  function stackedBars(rows, total) {
+    const safeTotal = Math.max(1, Number(total || 1));
+    return '<div class="stacked-chart">' + rows.map((row) => {
+      const width = Math.max(3, Math.min(100, (Number(row[1] || 0) / safeTotal) * 100));
+      return '<div class="stacked-row"><div><strong>' + esc(row[0]) + '</strong><span>' + number(row[1] || 0) + '</span></div><div class="stacked-track"><span class="' + esc(row[2] || '') + '" style="width:' + width.toFixed(1) + '%"></span></div></div>';
+    }).join('') + '</div>';
   }
 
   function bindDashboardCards() {

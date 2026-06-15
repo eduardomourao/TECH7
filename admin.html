@@ -462,6 +462,64 @@
       color: var(--muted);
       font-size: 15px;
     }
+    .dashboard-hero {
+      display: grid;
+      grid-template-columns: minmax(260px, .85fr) minmax(0, 1.6fr);
+      gap: 16px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(255, 106, 0, .24);
+      border-radius: var(--radius);
+      padding: 18px;
+      background: linear-gradient(135deg, rgba(255, 106, 0, .16), rgba(20, 20, 20, .82) 42%, rgba(78, 222, 163, .06));
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .2);
+    }
+    html[data-admin-theme="light"] .dashboard-hero {
+      background: linear-gradient(135deg, rgba(255, 106, 0, .13), rgba(255, 255, 255, .9) 42%, rgba(33, 84, 166, .06));
+      box-shadow: 0 18px 36px rgba(15, 23, 42, .08);
+    }
+    .dashboard-hero small,
+    .compact-metric small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .dashboard-hero strong {
+      display: block;
+      margin-top: 7px;
+      font-family: var(--font-display);
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1;
+    }
+    .dashboard-hero span,
+    .compact-metric span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      align-items: stretch;
+    }
+    .compact-metric {
+      min-height: 102px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 13px;
+      background: rgba(255, 255, 255, .04);
+    }
+    html[data-admin-theme="light"] .compact-metric {
+      background: rgba(255, 255, 255, .72);
+    }
+    .compact-metric strong {
+      font-size: 22px;
+    }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
@@ -483,6 +541,12 @@
       grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
       gap: 18px;
       margin-bottom: 18px;
+    }
+    .grid-4 > *,
+    .sub-grid > *,
+    .grid-2 > *,
+    .grid-wide > * {
+      min-width: 0;
     }
     .metric, .panel, .sub-card {
       border: 1px solid var(--line);
@@ -595,6 +659,106 @@
       outline: 2px solid var(--primary);
       outline-offset: 2px;
     }
+    .dashboard-chart-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .ring-card {
+      display: grid;
+      grid-template-columns: 86px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      min-height: 106px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+      background: rgba(255, 255, 255, .03);
+    }
+    html[data-admin-theme="light"] .ring-card {
+      background: rgba(248, 250, 252, .82);
+    }
+    .ring {
+      --ring-color: var(--primary);
+      --value: 0;
+      display: grid;
+      width: 76px;
+      height: 76px;
+      place-items: center;
+      border-radius: 999px;
+      background: conic-gradient(var(--ring-color) calc(var(--value) * 1%), rgba(255, 255, 255, .08) 0);
+      position: relative;
+    }
+    .ring.green { --ring-color: var(--tertiary); }
+    .ring.yellow { --ring-color: var(--warning); }
+    .ring::after {
+      position: absolute;
+      inset: 8px;
+      border-radius: inherit;
+      background: var(--surface);
+      content: "";
+    }
+    .ring span {
+      position: relative;
+      z-index: 1;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .ring-card strong {
+      display: block;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.2;
+    }
+    .ring-card small {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .stacked-chart {
+      display: grid;
+      gap: 12px;
+    }
+    .stacked-row {
+      display: grid;
+      gap: 6px;
+    }
+    .stacked-row > div:first-child {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .stacked-row strong { color: var(--text); }
+    .stacked-track {
+      height: 10px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .05);
+    }
+    .stacked-track span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--primary);
+    }
+    .stacked-track .green { background: var(--tertiary); }
+    .stacked-track .orange { background: var(--primary); }
+    .stacked-track .red { background: var(--error); }
+    .stacked-track .muted { background: var(--surface-bright); }
+    .dashboard-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .dashboard-note strong { color: var(--text); }
     .sub-card strong {
       display: block;
       margin-top: 7px;
@@ -796,6 +960,10 @@
       font-size: 13px;
       font-weight: 700;
     }
+    .bar-row > * {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
     .bar-track {
       height: 8px;
       overflow: hidden;
@@ -904,6 +1072,8 @@
       }
       .nav span { display: none; }
       .main { padding-left: 0; }
+      .dashboard-hero { grid-template-columns: 1fr; }
+      .hero-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .grid-4, .sub-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .grid-wide, .grid-2 { grid-template-columns: 1fr; }
       .topbar-left { min-width: 0; flex: 1; }
@@ -936,6 +1106,9 @@
       .toolbar select,
       .toolbar .btn,
       .page-head .btn { max-width: none; width: 100%; }
+      .hero-metrics,
+      .dashboard-chart-grid { grid-template-columns: 1fr; }
+      .ring-card { grid-template-columns: 76px minmax(0, 1fr); }
       .grid-4, .sub-grid { grid-template-columns: 1fr; }
       .order-detail { grid-template-columns: 1fr; }
       .bar-row { grid-template-columns: 1fr; gap: 6px; }

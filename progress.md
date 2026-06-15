@@ -26,6 +26,10 @@
 - Implementado: cards viraram botoes com `data-dashboard-action`; cada clique muda aba e aplica filtro real.
 - Mapeamentos validados: `alert=missing_price`, `alert=missing_image`, `alert=low_stock`, `active=false`, `alert=duplicate`, `orders status=pending`, `service-orders status=open`, `service-orders status=completed`.
 - Validacoes OK: `node --check assets/js/admin.js`, `node --check server/routes/admin.js`, `npm run validate:endpoints`, Chrome fallback.
+- Usuario pediu melhoria visual do dashboard admin com Creative Production e Product Design.
+- Implementado em `admin.html` e `assets/js/admin.js`: hero executivo, metricas compactas, graficos circulares, barras empilhadas e layout responsivo.
+- Funcoes atuais preservadas: cards operacionais seguem clicaveis e filtros continuam funcionando.
+- Validacao Chrome fallback final: desktop `1366x980` e mobile `390x844` sem overflow e sem console errors.
 
 - 2026-06-15: usuario reportou logo errada aparecendo na aba/Admin de `tech-7.vercel.app`.
 - Inspecao: `favicon.png` de raiz e producao ja sao TECH 7 correto; `admin.html` nao tinha links de favicon e podia cair em cache/fallback antigo.
