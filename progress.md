@@ -1,3 +1,94 @@
+# Progresso - performance producao TECH7 (2026-06-13)
+
+- 2026-06-15: iniciado ajuste exclusivo do `/Admin`: filtros, ordenacao, salvar todas alteracoes, exclusoes, tema e select de categoria por banco.
+- Skills usadas: `caveman` e `planning-with-files`.
+- Supabase plugin usado antes de alterar dados/admin: projeto `supabase-bisque-bridge` (`lzsaaufsdcmqlasjrqck`) confirmado ativo/healthy.
+- Supabase verificado: `categories` com 11 categorias comerciais; `products` com soft delete por `active/is_active`; `orders` sem `deleted_at`; `service_orders` sem `deleted_at`.
+- Estrategia definida: produto = inativacao; pedido = status `cancelled`; OS = status `cancelada`; nenhum hard delete em dados com historico/FKs.
+- Escopo tecnico planejado: `admin.html`, `assets/js/admin.js`, `server/routes/admin.js`, `task_plan.md`, `findings.md`, `progress.md`.
+- Implementado: filtros por status de alerta, ordenacao por preco/nome, `Salvar todas as alteracoes`, inativacao de produto, cancelamento seguro de pedido/OS, tema claro/noturno e select de categoria vindo do banco.
+- Validacoes OK: `node --check assets/js/admin.js`, `node --check server/routes/admin.js`, `npm run validate:assets`, `npm run validate:routes`, `npm run validate:endpoints`.
+- `@chrome` direto nao expos comandos de navegacao nesta sessao; validacao feita com Google Chrome via Playwright `channel: "chrome"` pelo `node_repl`, com evidencias em `_validation/admin-panel-release/admin-ui-validation.json` e `admin-products-after.png`.
+- Resultado da validacao Chrome fallback: salvar sem reload `true`, 1 chamada de save, 1 delete produto, 1 delete pedido, 1 delete OS, tema claro/escuro alternando, sem overflow, sem console/network errors.
+
+- 2026-06-15: usuario reportou logo errada aparecendo na aba/Admin de `tech-7.vercel.app`.
+- Inspecao: `favicon.png` de raiz e producao ja sao TECH 7 correto; `admin.html` nao tinha links de favicon e podia cair em cache/fallback antigo.
+- Correcao: `admin.html` recebeu `theme-color` laranja e links explicitamente versionados para `/favicon.ico`, `/favicon.png` e `/apple-touch-icon.png`.
+- Validacoes locais OK: `npm run validate:routes`, `npm run validate:assets`; `/admin` local contem `favicon.png?v=tech7-20260615`.
+- Validacao Chrome fallback local OK: `_validation/admin-favicon/admin-favicon-local.png` e `_validation/admin-favicon/admin-favicon-local.json`; favicon PNG/ICO versionados responderam 200. `/api/admin/session` 401 e esperado sem login.
+
+- 2026-06-14: usuario solicitou deploy das alteracoes recentes.
+- Projeto Vercel confirmado: `tech-7`, projectId `prj_UDDtUcUUQaEg4m01BhsnR5eSjjhI`, org/team `team_yKRleuToOM89NQWd3zIxD5kc`.
+- Estado local antes do deploy ainda inclui alteracoes anteriores no workspace (`assets/js/tech7-local-runtime.js`, `server/routes/admin.js`, `index.html`, assets de carrossel e paginas de duvidas). Deploy Vercel publica o workspace atual.
+- Validacoes pre-deploy OK: `npm run validate:routes`, `npm run validate:assets`, `npm run validate:endpoints`.
+- Nota: primeira execucao de `validate:assets` em paralelo estourou timeout; repetida isoladamente com timeout maior e passou.
+- Deploy iniciado com `npx vercel deploy --prod --yes --archive=tgz`; o CLI ficou preso e estourou timeout de 10 minutos sem devolver URL.
+- Producao foi validada depois do timeout e ja servia as alteracoes novas em `https://tech-7.vercel.app/duvidas-tipos-de-telas`.
+- Processo `vercel deploy` travado foi encerrado apos confirmacao de producao.
+- Smoke pos-deploy OK: `https://tech-7.vercel.app/duvidas-tipos-de-telas` HTTP 200 com video Drive e aviso S20-S25 Ultra; `https://tech-7.vercel.app/duvidas-servico-de-instalacao` HTTP 200 com endereco novo, sem `X3 Distribuidora`; `/api/health` HTTP 200 com `database=connected`.
+
+- 2026-06-14: iniciado ajuste na pagina `duvidas-tipos-de-telas/index.html` para incluir video comparativo OLED vs ORIGINAL.
+- Player responsivo adicionado via Google Drive preview: `https://drive.google.com/file/d/1mou1mFUSjaqS4OHiep_IO3IQZadxsWDr/preview`.
+- Aviso adicionado informando que o video compara tela OLED com ORIGINAL em aparelhos Galaxy S Ultra do S20 Ultra ao S25 Ultra.
+- Primeira validacao local falhou porque servidor nao estava ativo (`ERR_CONNECTION_REFUSED`).
+- Tentativa `Start-Process npm` abriu processo incorreto no Windows; servidor iniciado com sucesso via `cmd /c npm run dev`, log em `_validation/types-of-screens/dev-server.log`.
+- Validacoes OK: `npm run validate:assets`, `npm run validate:routes`.
+- Browser MCP / Chrome DevTools MCP nao expuseram navegacao/screenshot nesta sessao; validacao visual feita com Playwright usando Google Chrome como fallback final.
+- Evidencias salvas: `_validation/types-of-screens/tipos-de-telas-video-390x844.png`, `_validation/types-of-screens/tipos-de-telas-video-390x844-final.json`, `_validation/types-of-screens/drive-preview-390x844.png` e `_validation/types-of-screens/tipos-de-telas-video-390x844.json`.
+- Resultado mobile 390x844: iframe presente, aviso presente, sem overflow horizontal (`scrollWidth=390`). Drive preview direto respondeu 200 e mostrou `Reproduzir`.
+
+- 2026-06-14: iniciado ajuste textual da pagina `duvidas-servico-de-instalacao/index.html`.
+- Skills aplicadas nesta tarefa: `caveman` e `planning-with-files`.
+- Condicoes de instalacao reescritas para explicitar variacao de mao de obra por aparelho/modelo, limites de responsabilidade por defeitos preexistentes, reparo especifico solicitado, garantia limitada a peca vendida pela TECH 7 e politica de credito em loja.
+- Endereco da pagina de servico corrigido para `Shopping Oiapoque Centro, Av. Oiapoque, Nº 156 - Centro - CEP 30111-070 - Belo Horizonte - MG - Brasil`.
+- Removidas ocorrencias institucionais de `X3 Distribuidora`/`X3` em paginas de duvidas; ocorrencias de produtos `Poco X3` foram mantidas.
+- Arquivos alterados nesta tarefa: `duvidas-servico-de-instalacao/index.html`, `duvidas-alerta-de-fraude/index.html`, `duvidas-politica-de-privacidade/index.html`, `duvidas-descontos-vigentes/index.html`, `duvidas-curso-tecnico-presencial/index.html`, `duvidas-trocas-e-devolucoes/index.html`, `duvidas-troca-de-pecas-de-celular/index.html`, `task_plan.md`, `findings.md`, `progress.md`.
+- Varredura textual OK: sem `X3 Distribuidora`, `Loja Virtual X3`, `CLIENTES X3`, `Rua Santos Dumont`, `Maringa` ou `Maringá` nas paginas HTML publicas verificadas.
+- Validacoes OK: `npm run validate:assets` e `npm run validate:routes`.
+- Browser MCP / Chrome DevTools MCP nao expuseram ferramentas de navegacao nesta sessao; validacao visual feita com Playwright usando Google Chrome como fallback final.
+- Evidencias salvas: `_validation/installation-page/servico-instalacao-390x844-after.png` e `_validation/installation-page/servico-instalacao-390x844-after.json`.
+- Validacao mobile 390x844: textos obrigatorios presentes, textos antigos ausentes, sem overflow horizontal (`scrollWidth=390`, viewport `390x844`). Observado 404 legado de `assets/store/img/fechar.png`, nao introduzido por esta alteracao.
+
+- Deploy solicitado em 2026-06-14: usuario pediu deploy de todas as alteracoes feitas.
+- Projeto Vercel confirmado por `.vercel/project.json`: `tech-7`, projectId `prj_UDDtUcUUQaEg4m01BhsnR5eSjjhI`, team `team_yKRleuToOM89NQWd3zIxD5kc`.
+- Escopo do deploy: workspace atual completo, incluindo alteracoes preexistentes em `assets/js/tech7-local-runtime.js`, `server/routes/admin.js`, arquivos de acompanhamento e novos assets do carrossel.
+- Validacoes pre-deploy OK: `npm run validate:assets`, `npm run validate:routes`, `npm run validate:endpoints`.
+- Primeiro deploy via `npx vercel deploy --prod --yes` falhou por limite de arquivos (`files` > 15000) e recomendacao de `--archive=tgz`.
+- Deploy de producao concluido com `npx vercel deploy --prod --yes --archive=tgz`.
+- URLs retornadas: inspect `https://vercel.com/stiflerwfl1-oss-projects/tech-7/5ob4NZa2den1R8FgSdodwWAjJP4r`, production `https://tech-7-cc6h3o8zp-stiflerwfl1-oss-projects.vercel.app`, alias `https://tech-7.vercel.app`.
+- Smoke pos-deploy OK: `/api/health` 200 com `database=connected` e `source=POSTGRES_URL`; `/` 200 contendo `_assets/tech7/carousel/` e `t7-carousel-picture`; WebP do carrossel 200 `image/webp`; produto Realme 200.
+
+- Continuidade solicitada: corrigir somente o carrossel da home, sem tocar em busca, APIs, banco, precos, carrinho ou scripts de terceiros.
+- Estado confirmado: `index.html` ja tinha prioridade alta no primeiro slide e lazy/low nos demais, mas ainda apontava para JPGs originais grandes.
+- Ferramentas locais: `sharp`, ImageMagick e `cwebp` indisponiveis; `ffmpeg` disponivel com suporte a WebP para gerar assets derivados do carrossel sem nova dependencia.
+- Correcao aplicada somente no carrossel: 30 WebPs responsivos gerados em `_assets/tech7/carousel/` para 10 slides; total dos novos assets ~147 KB.
+- `index.html` atualizado no bloco `.t7-product-carousel-section` para usar `picture/source`, `srcset`, `sizes`, `decoding=async`, prioridade alta apenas no slide principal e lazy/low nos demais.
+- Ajuste CSS restrito ao carrossel: `.t7-carousel-picture` preserva centralizacao e `.t7-carousel-img` usa `box-sizing:border-box`.
+- Validacao Browser MCP / Chrome DevTools MCP: comandos de navegacao/screenshot nao ficaram expostos nesta sessao; usado Playwright com Google Chrome como fallback final.
+- Evidencias salvas: `_validation/production-performance/carousel-after-webp-390x844.png` e `_validation/production-performance/carousel-after-webp-390x844.json`.
+- Validacao mobile 390x844: sem overflow horizontal, 10 requests WebP 200 do carrossel, 0 requests JPG do carrossel, 0 erros de console.
+- Validadores OK isolados: `validate:links`, `validate:assets`, `validate:routes`, `validate:endpoints`, `validate:redirects`, `validate:menu-routes`, `validate:section-filters`, `validate:api-security`, `validate:backend-prices`, `validate:product-exactness`, `validate:product-cards`.
+- `npm run validate:build` agregado estourou timeout de 300s; seus comandos constituintes passaram isoladamente.
+
+- CWD confirmado: `C:\Users\Admin\Downloads\TECH7\TECH7-main`.
+- Dominio real alvo: `https://tech-7.vercel.app/`.
+- Skills usadas: `caveman`, `planning-with-files`.
+- Memoria consultada para historico TECH7/Vercel: validar dominio real, `/api/health`, Supabase envs e logs expandidos quando houver 503/lentidao.
+- Estado Git inicial ja estava sujo: `findings.md`, `progress.md`, `server/routes/admin.js`, `task_plan.md` modificados e `_assets/tech7/os-logo.jpg` untracked.
+- Plano/finding/progresso atualizados antes de medicões profundas.
+- ONE MCP nao apareceu na descoberta de ferramentas. Fallback direto Supabase usado para confirmar projeto: `supabase-bisque-bridge`, ref `lzsaaufsdcmqlasjrqck`, regiao `sa-east-1`, status `ACTIVE_HEALTHY`.
+- Browser MCP / `@chrome` nao expôs navegacao/click/screenshot. Chrome DevTools MCP tambem nao expôs comandos de performance/navegacao. Playwright com Chrome sera fallback final para waterfall.
+- Vercel confirmado por `.vercel/project.json`: projectId `prj_UDDtUcUUQaEg4m01BhsnR5eSjjhI`, team `team_yKRleuToOM89NQWd3zIxD5kc`, projeto `tech-7`.
+- Vercel runtime logs consultados para producao: deployment `dpl_9TArEFFboVnUKLtQdwMSKpvvVrTN`, dominio `tech-7.vercel.app`, logs recentes 200 em `/api/products/resolve-prices` e `/api/cart/...`, 401 esperado em `/api/admin/session`.
+- Medicao HTTP inicial salva: `_validation/production-performance/http-baseline.json`.
+- Browser waterfall inicial salvo: `_validation/production-performance/browser-waterfall-baseline.json`.
+- Causa raiz: home producao serve HTML cacheado rapido, mas carrega muitos assets estaticos pesados no primeiro load, principalmente 10 imagens eager do carrossel home e scripts do tema/runtime. Evento `load` nao completou em 45s no Chrome fallback.
+- APIs medidas: `/api/products` e `/api/search` sao lentas em warm (~1.95s e ~1.39s total mediano), mas nao aparecem no waterfall inicial da home producao; banco/API nao sao gargalo principal do primeiro render da home.
+- Correcao local aplicada: imagens nao iniciais do carrossel viraram `lazy`/`fetchpriority=low`; primeira imagem manteve prioridade alta; `search-index.json` pesado foi adiado para idle.
+- Medicao local pos-fix: `load` 5589ms -> 4763ms; `/api/products/resolve-prices` 3096ms -> 795ms; `search-index.json` saiu do caminho critico.
+
+---
+
 # Progresso - mobile production gate TECH7 (2026-06-12)
 
 - CWD confirmado: `C:\Users\Admin\Downloads\TECH7\TECH7-main`.
@@ -437,3 +528,32 @@
 - Latest focused checks passed: `node --check server/routes/admin.js`, `node --check assets/js/admin.js`, `node scripts/validate-endpoints.js`, `node scripts/validate-api-security.mjs`, authenticated `/api/admin/metrics`.
 
 - 2026-06-12: OS save bug diagnosed from local server log: invalid manual order_id violated service_orders_order_id_fkey and was shown as generic database failure. Added backend preflight validation for optional order origin and global error middleware now returns explicit statusCode errors before database fallback.
+
+## OS PDF visual repair - Progress - 2026-06-13
+
+- Started PDF visual repair request for client-facing OS.
+- Required `caveman` and `planning-with-files` skills read.
+- Memory quick pass used TECH7 validation and browser fallback context.
+- Current PDF generator found in `server/routes/admin.js`; issue appears to be manual filled rectangles overlapping text/boxes.
+- Created test OS `OS-00020` and saved current broken PDF evidence: `_validation/os-pdf/before-os-pdf.pdf` and `_validation/os-pdf/before-os-pdf-render.png`.
+- Installed temporary `pypdfium2` under `%TEMP%` for PDF rasterization because bundled `pdf2image` lacked Poppler and Chrome headless captured only the PDF viewer background.
+- Reworked PDF generator to embed real `_assets/tech7/os-logo.jpg`, use clean A4 layout, move warranty/signatures to page 2, and remove `Estado de entrada` / `Defeito relatado` from the client document.
+- Final visual verification saved: `_validation/os-pdf/final-os-pdf-v2.pdf`, `_validation/os-pdf/final-os-pdf-v2-page-1.png`, `_validation/os-pdf/final-os-pdf-v2-page-2.png`.
+- Text validation via `pypdf`: 2 pages, no `Estado de entrada`, no `Defeito relatado`, warranty and signature text present.
+- Checks passed: `node --check server/routes/admin.js`, `node scripts/validate-endpoints.js`, `node scripts/validate-api-security.mjs`.
+- Test OS `os_19728a2053ec2ac0332e718dd375cf89` deleted from runtime DB after validation.
+- Follow-up one-page PDF request applied: removed `Observacoes ao cliente`, `Termo de ciencia`, and `Assinatura do cliente`; warranty and Tech 7/technician signature now fit on page 1.
+- New visual/text evidence: `_validation/os-pdf/one-page-os-pdf.pdf` and `_validation/os-pdf/one-page-os-pdf-page-1.png`; `pypdf` confirmed 1 page, no removed labels, warranty present, Tech 7/technician signature present.
+- Checks after one-page change passed: `node --check server/routes/admin.js`, `node scripts/validate-endpoints.js`, `node scripts/validate-api-security.mjs`.
+- Cleanup note: first direct DB delete of test OS failed with `ECONNRESET`; retry through project pool succeeded and deleted `os_1da5189816b6f1d0921954f2a39f498e`.
+
+## Mobile search suggestions placement - Progress - 2026-06-13
+
+- Started correction from user screenshot showing mobile search cards opening over the wrong content area.
+- Product Design plugin did not expose a static-site editor suitable for this file; applying the UX correction directly in the runtime.
+- Located autocomplete CSS/JS in `assets/js/tech7-local-runtime.js`.
+- Updated mobile autocomplete positioning to force `position: fixed` over the old `suggestion-words` positioning and calculate `left/top/width/max-height` from the input plus `visualViewport`.
+- Syntax validation passed: `node --check assets/js/tech7-local-runtime.js`.
+- Visual fallback validation passed using Playwright with Chrome channel when available: `_validation/search-autocomplete/mobile-search-position-390x844.png`, `_validation/search-autocomplete/mobile-search-position-keyboard-sim-390x520.png`, `_validation/search-autocomplete/desktop-search-position-1366.png`.
+- Geometry reports passed: `_validation/search-autocomplete/mobile-search-position-report.json` and `_validation/search-autocomplete/desktop-search-position-report.json`.
+- `npm run validate:build` passed.

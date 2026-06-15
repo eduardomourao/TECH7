@@ -1,3 +1,102 @@
+# Plano de execucao - performance producao TECH7 (2026-06-13)
+
+## Admin `/Admin` - filtros, massa, exclusoes e tema - 2026-06-15
+- [x] Confirmar cwd e escopo restrito ao painel admin.
+- [x] Usar Supabase plugin e confirmar projeto ativo antes de tocar produtos/pedidos/OS/categorias.
+- [x] Mapear tabelas reais: `products`, `categories`, `orders`, `service_orders`.
+- [x] Implementar endpoints/admin helpers sem mexer storefront publico.
+- [x] Implementar UI admin: filtros, ordenacao, salvar tudo, exclusoes, tema e categorias por select.
+- [x] Rodar validacoes npm e sintaxe JS.
+- [x] Validar navegador com Chrome; se ferramenta nao expor comandos, registrar fallback.
+- [ ] Commit e push para GitHub apos validacao.
+
+### Guardrails Admin
+- Alterar somente `admin.html`, `assets/js/admin.js`, `server/routes/admin.js` e arquivos de acompanhamento.
+- Produtos usam soft delete/inativacao quando possivel.
+- Pedidos e OS sem coluna `deleted_at`: exclusao no admin deve cancelar status, preservando historico e FKs.
+- Categoria no admin deve vir de `categories` do banco, nao campo livre.
+
+## Remover logo errada do site/admin - 2026-06-15
+- [x] Localizar origem da logo errada mostrada na aba/Admin.
+- [x] Identificar logo correta TECH 7 no projeto.
+- [x] Substituir favicon/icone incorreto sem alterar rotas ou negocio.
+- [x] Validar localmente e registrar evidencias.
+- [ ] Fazer deploy e validar producao.
+
+## Deploy alteracoes paginas de duvidas - 2026-06-14
+- [x] Confirmar estado local e projeto Vercel vinculado.
+- [x] Rodar validacoes rapidas antes do deploy.
+- [x] Fazer deploy de producao com Vercel.
+- [x] Validar URL publicada com smoke tests.
+
+## Ajuste pagina Tipos de Telas - video OLED vs Original - 2026-06-14
+- [x] Localizar pagina `duvidas-tipos-de-telas/index.html`.
+- [x] Inserir player responsivo do Google Drive.
+- [x] Adicionar aviso explicito sobre comparativo OLED vs ORIGINAL linha S Ultra S20-S25 Ultra.
+- [x] Validar rotas/assets e conferir render mobile local.
+
+## Ajuste textual - Servico de Instalacao - 2026-06-14
+- [x] Localizar pagina `duvidas-servico-de-instalacao/index.html`.
+- [x] Mapear ocorrencias reais de `X3 Distribuidora` sem confundir com produtos `Poco X3`.
+- [x] Reescrever condicoes de instalacao conforme pedido.
+- [x] Corrigir nome/endereco da loja e remover citacoes antigas de `X3` que nao sejam produtos.
+- [x] Validar assets/rotas e conferir pagina local.
+
+## Deploy solicitado - 2026-06-14
+- [x] Confirmar projeto Vercel vinculado.
+- [x] Rodar validacoes rapidas antes do deploy.
+- [x] Fazer deploy do workspace atual na Vercel.
+- [x] Validar URL publicada com smoke tests.
+
+## Ajuste pontual - carrossel home
+- [x] Restringir escopo ao carrossel da home.
+- [x] Gerar assets otimizados derivados somente das imagens do carrossel.
+- [x] Atualizar markup do carrossel para `srcset`/`sizes` e prioridade correta.
+- [x] Validar sintaxe, assets e rotas.
+- [x] Validar no navegador mobile com fallback documentado se Browser/Chrome MCP nao estiver callable.
+
+## Objetivo
+Identificar por que `https://tech-7.vercel.app/` demora para carregar em producao, separando DNS/TLS, TTFB, HTML, assets, APIs, banco/Supabase, renderizacao, cold start e warm start.
+
+## Guardrails
+- Comecar medindo. Nao alterar codigo antes de evidenciar gargalo.
+- Dominio real do cliente: `https://tech-7.vercel.app/`.
+- Runtime real de producao: `server/app.js` via `api/[...path].js`; nao confundir com `admin/`.
+- ONE/Supabase: antes de mexer em banco/produtos/precos/carrinho/pedidos/auth/Supabase, tentar ONE e confirmar projeto ativo. Se indisponivel, registrar e usar fallback apenas depois.
+- Browser: tentar Browser MCP / `@chrome`; depois Chrome DevTools MCP; Playwright Chrome apenas fallback final registrado.
+- Se houver correcao, deve reduzir metrica medida e passar validacoes.
+
+## Rotas e endpoints alvo
+- `/`
+- `/Apple/index.html`
+- `/display/tela-display-lcd-realme-c55-rmx3710-com-aro`
+- `/carrinho/`
+- `/api/health`
+- `/api/products`
+- `/api/search?q=iphone&limit=24`
+- `/api/products/resolve-prices`
+
+## Subagentes
+- production-performance-auditor: medir cold/warm, TTFB, payload, waterfall e local vs producao.
+- server-startup-investigator: revisar startup/imports/envs/integracoes opcionais em `server/app.js`.
+- database-latency-investigator: medir conexao/query Supabase e latencia API.
+- frontend-waterfall-auditor: auditar JS/CSS/imagens/APIs de primeiro load.
+- fix-planner: priorizar correcoes por impacto/risco.
+- qa-validator: repetir medicoes e validar producao.
+
+## Fases
+- [x] Confirmar cwd, dominio e skills obrigatorias.
+- [ ] Tentar ONE, Browser MCP, Chrome DevTools MCP e Vercel/logs.
+- [ ] Medir producao sem alterar: cold/warm, APIs, navegador e waterfall.
+- [ ] Medir local para comparar.
+- [ ] Inspecionar `server/app.js`, `api/[...path].js`, `server/lib/db.js`, `vercel.json`, assets e chamadas iniciais.
+- [ ] Identificar causa raiz com evidencia.
+- [ ] Implementar somente correcao segura, se comprovada.
+- [ ] Rodar validacoes e repetir medicoes.
+- [ ] Relatorio final.
+
+---
+
 # Plano de execucao - mobile production gate TECH7 (2026-06-12)
 
 ## Objetivo
@@ -708,3 +807,34 @@ Follow-up - OS save FK bug and deploy:
 - [ ] Run validation gates.
 - [ ] Commit/push to GitHub.
 - [ ] Deploy/verify Vercel.
+
+## Follow-up - OS PDF visual repair - 2026-06-13
+
+Goal: improve the client-facing Service Order PDF so it is clean, printable, brand-consistent and visually verified.
+
+Plugin guidance in force:
+- Creative Production: professional print document, restrained Tech 7 brand accents, no random dark/orange blocks.
+- Product Design: operational document first, dense readable sections, clear hierarchy, no landing-page styling.
+
+Phases:
+- [x] Read required project skills.
+- [x] Locate current OS PDF generator in `server/routes/admin.js`.
+- [x] Generate current PDF evidence and inspect layout.
+- [x] Replace broken PDF layout with stable A4 client document.
+- [x] Validate syntax/API/PDF output.
+- [x] Run visual verification and save screenshots/PDF evidence.
+
+## Follow-up - Mobile Search Suggestions Placement - 2026-06-13
+
+Goal: fix mobile header search suggestions opening over the wrong page area after typing in the search field.
+
+Product Design guidance:
+- Keep suggestions visually anchored to the search input.
+- Use a compact, scrollable overlay suitable for one-handed mobile use.
+- Avoid pushing or overlapping the showcase layout in an uncontrolled way.
+
+Phases:
+- [x] Locate real search surface in `index.html` and runtime autocomplete code.
+- [x] Adjust mobile dropdown positioning against the live input rectangle and visual viewport.
+- [x] Validate syntax and mobile visual geometry.
+- [x] Save visual evidence.

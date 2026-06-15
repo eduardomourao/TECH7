@@ -1,3 +1,89 @@
+# Findings - performance producao TECH7 (2026-06-13)
+
+## Admin `/Admin` - filtros, massa, exclusoes e tema - 2026-06-15
+- Supabase plugin disponivel e usado. Projeto ativo: `supabase-bisque-bridge`, ref `lzsaaufsdcmqlasjrqck`, regiao `sa-east-1`, status `ACTIVE_HEALTHY`.
+- Categorias reais em `public.categories`: `acessorios`, `iphones`, `apple-watch`, `macs`, `ipads`, `iphones-novos`, `iphones-seminovos`, `macs-novos`, `macs-seminovos`, `robos`, `xiaomi`.
+- Secoes atualmente usadas em `products.section`: `pecas-e-componentes`, `display-e-lcd`, `tampas-e-carcacas`, `baterias-celular`. Isso difere das categorias comerciais cadastradas; UI deve mostrar categorias do banco e preservar valor atual quando nao existir na tabela.
+- `products` tem `active` e `is_active`; backend ja inativa produto via `DELETE /api/admin/products/:id` com `active=false`, `is_active=false`, `availability='NO'`.
+- `orders` nao tem `deleted_at`; status reais: `pending` 22, `failed` 2, `paid` 1. Exclusao segura deve marcar `cancelled`, sem apagar linhas e sem quebrar FKs.
+- `service_orders` nao tem `deleted_at`; status real: `entregue` 1. Exclusao segura deve marcar `cancelada`, preservando OS/itens.
+- Advisor Supabase anterior apontou RLS desabilitado em tabelas sensiveis como `orders` e `service_orders`; fora do escopo aplicar politica agora.
+- Validacao visual/funcional local: Google Chrome via Playwright `channel: "chrome"` testou produtos, filtros, ordenacao, salvar todas alteracoes sem reload, excluir produto, excluir pedido, excluir OS e alternar tema. Evidencia: `_validation/admin-panel-release/admin-ui-validation.json` e `admin-products-after.png`.
+- Limitacao: sem senha admin em texto no `.env`, a validacao de painel autenticado usou respostas mockadas no navegador. Supabase foi usado para confirmar estrutura/dados reais antes da implementacao.
+
+## Remover logo errada do site/admin - 2026-06-15
+- O print indica icone errado na aba do navegador em `/Admin`, nao logo de conteudo.
+- `favicon.png` local e `https://tech-7.vercel.app/favicon.png` ja sao a marca TECH 7 correta.
+- `admin.html` nao tinha favicon explicito; o navegador podia usar fallback/cache antigo do dominio.
+- Correcao aplicada em `admin.html`: adicionados `theme-color`, `shortcut icon`, `icon` PNG e `apple-touch-icon` com query `?v=tech7-20260615` para forcar refresh do favicon correto TECH 7.
+- Validacao local em `/admin`: links de favicon versionados presentes; requests para `/favicon.ico?v=tech7-20260615` e `/favicon.png?v=tech7-20260615` retornaram 200.
+
+## Ajuste pagina Tipos de Telas - video OLED vs Original - 2026-06-14
+- Pagina alvo localizada em `duvidas-tipos-de-telas/index.html`.
+- O conteudo anterior explicava OLED/AMOLED apenas em texto, sem demonstracao visual.
+- Foi adicionado player responsivo por `iframe` do Google Drive usando URL `/preview` para o video `1mou1mFUSjaqS4OHiep_IO3IQZadxsWDr`.
+- Aviso adicionado: o video e comparativo visual de tela OLED vs ORIGINAL para aparelhos Galaxy linha S Ultra, do S20 Ultra ao S25 Ultra.
+- Validacoes `npm run validate:assets` e `npm run validate:routes` passaram.
+- Validacao mobile 390x844 com Chrome via Playwright fallback confirmou iframe presente, aviso presente, `scrollWidth=390` e sem overflow horizontal. Evidencias: `_validation/types-of-screens/tipos-de-telas-video-390x844.png`, `_validation/types-of-screens/tipos-de-telas-video-390x844-final.json`.
+- Drive preview direto respondeu 200 e exibiu texto `Reproduzir`, sem sinal de bloqueio de acesso. Evidencia: `_validation/types-of-screens/drive-preview-390x844.png`.
+- Observacoes de rede fora do HTML alterado: Google Drive dispara um 403 em endpoint de sharing client e o tema legado ainda solicita `/assets/store/img/fechar.png` com 404.
+
+## Ajuste textual - Servico de Instalacao - 2026-06-14
+- A pagina `duvidas-servico-de-instalacao/index.html` ainda tinha condicoes antigas, prazo fixo de 1 dia util, endereco antigo e mencao a `X3 Distribuidora`.
+- A pagina foi reescrita para deixar explicito que cada aparelho/modelo possui valor proprio de mao de obra, que o reparo cobre somente o servico solicitado e que defeitos preexistentes precisam ser declarados antes do atendimento.
+- A responsabilidade foi limitada a peca vendida pela TECH 7 e ao servico contratado para essa peca; defeitos posteriores de placa, software, perifericos, oxidacao, queda, mau uso ou problemas nao ligados diretamente a peca vendida ficam fora da responsabilidade da loja.
+- O texto agora informa que prazos podem variar, trocas de tela e bateria normalmente sao feitas no mesmo dia quando a peca esta disponivel e nao ha defeitos adicionais, e que eventual restituição pode ser revertida em credito na loja, sem devolucao em especie.
+- Ocorrencias institucionais antigas de `X3 Distribuidora` foram substituidas por `TECH 7`; a pagina de alerta de fraude tambem teve mencoes genericas a `X3` substituidas por `TECH 7`. Mencoes de produto como `Poco X3` foram preservadas.
+- Validacao local mobile 390x844 confirmou texto obrigatorio presente, textos antigos ausentes, `scrollWidth=390` e sem overflow horizontal. Evidencias: `_validation/installation-page/servico-instalacao-390x844-after.png` e `_validation/installation-page/servico-instalacao-390x844-after.json`.
+- Risco remanescente fora do escopo textual: o tema legado ainda solicita `http://127.0.0.1:3000/assets/store/img/fechar.png` e recebe 404. Esse asset nao foi introduzido por esta alteracao.
+
+## Estado inicial
+- URL alvo confirmada pelo pedido: `https://tech-7.vercel.app/`.
+- Investigacao deve começar por medicao; nenhuma alteracao funcional feita ainda.
+- Memoria relevante: producao TECH7 em Vercel ja teve historico de `/api/health`, envs Supabase, `PGSSL_REJECT_UNAUTHORIZED`, `WHATSAPP_APP_SECRET` opcional e necessidade de `vercel logs --expand`.
+- Worktree ja possui mudancas anteriores; preservar e nao reverter.
+
+## Hipoteses a medir
+- Cold start de funcao Vercel/API.
+- TTFB alto no HTML por render/roteamento server-side.
+- API inicial lenta (`/api/products`, `/api/search`, `/api/products/resolve-prices`).
+- Conexao Supabase/pooler/SSL/envs.
+- Assets JS/CSS/imagens grandes ou bloqueantes.
+- Integracoes opcionais inicializadas de forma bloqueante.
+
+## Medicoes iniciais
+- `https://tech-7.vercel.app/api/health`: `ok=true`, `database=connected`, `source=POSTGRES_URL`.
+- HTTP baseline salvo em `_validation/production-performance/http-baseline.json`.
+- Browser waterfall salvo em `_validation/production-performance/browser-waterfall-baseline.json`.
+- Home producao: HTML cache `HIT`, TTFB warm baixo (~33ms no HTTP baseline), mas `load` nao completou em 45s no Chrome fallback por assets estaticos pendurados.
+- APIs producao:
+  - `/api/products?limit=24`: primeiro total 5744ms, warm mediano 1951ms, TTFB warm mediano 750ms.
+  - `/api/search?q=iphone&limit=24`: warm mediano 1387ms, TTFB warm mediano 822ms.
+  - `/api/products/resolve-prices`: warm mediano 282ms.
+  - `/api/health`: warm mediano 377ms.
+- Home producao no waterfall nao chamou API inicial; gargalo do primeiro load veio de assets estaticos.
+
+## Causa raiz comprovada
+- `index.html` carregava 10 imagens do carrossel principal com `loading="eager"`, todas com arquivos grandes (~172KB a 288KB cada) e dimensoes declaradas `2000x2000`.
+- No waterfall de producao, essas imagens e scripts estaticos do tema/runtime ficaram com duracoes de 13s a 42s, impedindo o evento `load`.
+- `assets/js/tech7-local-runtime.js` tambem disparava `/_assets/tech7/search-index.json` (~2,8MB) cedo no fluxo local, disputando rede com render e reconciliacao de preco.
+
+## Correcao local aplicada
+- `index.html`: primeira imagem do carrossel segue `eager` com `fetchpriority="high"`; as demais usam `loading="lazy"`, `fetchpriority="low"` e `decoding="async"`.
+- `assets/js/tech7-local-runtime.js`: `loadCardSearchIndex()` agora agenda o fetch pesado via `requestIdleCallback`/timeout, em vez de disputar o caminho critico.
+- Medicao local pos-fix: `load` 5589ms -> 4763ms; `/api/products/resolve-prices` 3096ms -> 795ms; `search-index.json` deixou de aparecer no caminho critico inicial.
+
+## Correcao pontual do carrossel solicitada
+- Escopo: somente carrossel da home (`.t7-product-carousel-section` em `index.html`) e assets derivados das suas 10 imagens.
+- Problema: os slides ainda dependiam dos JPGs originais de ~168KB a ~281KB cada; com clones do Swiper, o navegador ainda podia baixar JPGs do carrossel mesmo apos `lazy`.
+- Correcao aplicada: geradas 3 variantes WebP por slide (`160w`, `240w`, `360w`) em `_assets/tech7/carousel/`, totalizando ~147KB para 30 arquivos.
+- Markup: cada slide agora usa `picture/source` com `srcset`/`sizes`; o `img src` tambem aponta para WebP para impedir fallback JPG nos clones do Swiper. O JPG original ficou apenas em `data-original-src`.
+- CSS restrito: `.t7-carousel-picture` preserva centralizacao do card e `.t7-carousel-img` usa `box-sizing:border-box`.
+- Evidencia: `_validation/production-performance/carousel-after-webp-390x844.json` registrou 10 requests WebP HTTP 200, 0 requests JPG do carrossel, 0 erros de console e `noHorizontalOverflow=true`.
+- Screenshot: `_validation/production-performance/carousel-after-webp-390x844.png`.
+
+---
+
 # Findings - mobile production gate TECH7 (2026-06-12)
 
 ## Estado inicial
@@ -415,3 +501,25 @@
 - Visual/API evidence saved under `_validation/admin-os/os-manual-product-flow.json`, `os-manual-product-picker.png`, `os-manual-product-saved.png`, and `os-manual-product-client.pdf`; test OS rows were deleted after validation.
 
 - OS save screenshot root cause: optional Pedido origem had/kept a non-existing order id. Postgres raised service_orders_order_id_fkey; app middleware mapped it to database_connection_error. Fix: validate order_id before insert/update and return friendly order_not_found, while empty order origin remains null for manual OS.
+
+## OS PDF visual repair - Findings - 2026-06-13
+
+- Current PDF is generated manually in `server/routes/admin.js`, function `buildServiceOrderPdf(order)`.
+- Current layout draws a black band, orange block, black overlay, and later draws orange total background plus a bordered `kv()` box on top. This explains random-looking colors and broken header/total area.
+- PDF generator uses simple Type1 Helvetica fonts and vector drawing; best fix is restrained one-page A4 layout with explicit sections, thin borders, small orange accent, and no overlapping filled blocks.
+- Logo should be a clean vector Tech 7 mark in the top-left, not a color block collision.
+- Before screenshot `_validation/os-pdf/before-os-pdf-render.png` confirmed: logo subtitle rendered dark over black band, the left logo block overlaps header structure, sections are too tight, `Endereco` collides with `Aparelho`, and final total block is visually heavy/random.
+- Final PDF uses real logo image from `_assets/tech7/os-logo.jpg` in the top-left only; no improvised text/subtitle logo remains.
+- Client PDF now uses two pages: page 1 for OS/customer/device/service/products/totals, page 2 for warranty/observations/signatures. This prevents footer/signature overlap on real service text.
+- `Estado de entrada` and `Defeito relatado` were removed from the PDF because diagnosis/services now carry that information.
+- Final visual evidence saved as `_validation/os-pdf/final-os-pdf-v2.pdf`, `final-os-pdf-v2-page-1.png`, and `final-os-pdf-v2-page-2.png`.
+- Follow-up change: user requested one-page PDF and removal of `Observacoes ao cliente`, `Termo de ciencia`, and `Assinatura do cliente`. Final layout now fits on one page with warranty and only `Assinatura Tech 7 / tecnico`.
+- One-page evidence saved as `_validation/os-pdf/one-page-os-pdf.pdf` and `_validation/os-pdf/one-page-os-pdf-page-1.png`; text extraction confirmed one page and no removed sections.
+
+## Mobile search suggestions placement - Findings - 2026-06-13
+
+- Search surface is the real home header form: `form.search-header[data-search="suggestion"]` with `input[name="palavra_busca"][data-input="suggestion"]`.
+- The autocomplete renderer is in `assets/js/tech7-local-runtime.js`, using `/api/search` as the product source.
+- The reported mobile bug is a placement issue, not a data issue: suggestions are rendered as an overlay but the mobile positioning only set `top`, leaving width/left/max-height insufficiently anchored to the input and viewport when the keyboard changes available space.
+- The legacy `suggestion-words` class still forced absolute positioning. Mobile now applies priority inline fixed positioning, left, top, width and max-height calculated from the live input and `visualViewport`.
+- Validation confirmed mobile 390x844 and keyboard-simulated 390x520 both keep the dropdown under the input, horizontally aligned, inside the viewport and without horizontal page overflow.

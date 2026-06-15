@@ -4,6 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Admin - TECH 7</title>
+  <meta name="theme-color" content="#ff6a00">
+  <link rel="shortcut icon" href="/favicon.ico?v=tech7-20260615" type="image/x-icon">
+  <link rel="icon" href="/favicon.png?v=tech7-20260615" type="image/png" sizes="512x512">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=tech7-20260615" sizes="180x180">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
@@ -34,6 +38,28 @@
       --font-body: Inter, system-ui, sans-serif;
     }
 
+    html[data-admin-theme="light"] {
+      color-scheme: light;
+      --bg: #f5f6f8;
+      --surface-lowest: #ffffff;
+      --surface-low: #f0f2f5;
+      --surface: #ffffff;
+      --surface-high: #e8ebef;
+      --surface-variant: #dde2e8;
+      --surface-bright: #d2d8e0;
+      --line: rgba(15, 23, 42, .12);
+      --line-strong: rgba(15, 23, 42, .2);
+      --text: #111827;
+      --muted: #526071;
+      --dim: #6b7280;
+      --primary-bg: rgba(255, 106, 0, .12);
+      --secondary: #2154a6;
+      --tertiary: #067647;
+      --error: #b42318;
+      --warning: #9a6700;
+      --shadow: 0 18px 50px rgba(15, 23, 42, .14);
+    }
+
     *, *::before, *::after { box-sizing: border-box; }
     * { margin: 0; padding: 0; }
     html { font-size: 16px; color-scheme: dark; }
@@ -62,6 +88,12 @@
         linear-gradient(90deg, rgba(255, 255, 255, .025) 1px, transparent 1px);
       background-size: 40px 40px;
       mask-image: linear-gradient(to bottom, #000, transparent 78%);
+    }
+    html[data-admin-theme="light"] body {
+      background:
+        radial-gradient(circle at 12% 42%, rgba(255, 106, 0, .08), transparent 24rem),
+        radial-gradient(circle at 86% 18%, rgba(33, 84, 166, .055), transparent 22rem),
+        var(--bg);
     }
 
     button, input, select, textarea { font: inherit; }
@@ -167,6 +199,13 @@
       box-shadow: 0 0 0 3px rgba(255, 106, 0, .15), inset 0 2px 5px rgba(0, 0, 0, .5);
       outline: none;
     }
+    html[data-admin-theme="light"] input,
+    html[data-admin-theme="light"] select,
+    html[data-admin-theme="light"] textarea {
+      background: #fff;
+      color: var(--text);
+      box-shadow: inset 0 1px 2px rgba(15, 23, 42, .06);
+    }
     input[type="range"] {
       min-height: 28px;
       padding: 0;
@@ -196,6 +235,10 @@
       background: rgba(14, 14, 14, .94);
       box-shadow: 16px 0 55px rgba(0, 0, 0, .28);
       backdrop-filter: blur(20px);
+    }
+    html[data-admin-theme="light"] .sidebar {
+      background: rgba(255, 255, 255, .94);
+      box-shadow: 16px 0 45px rgba(15, 23, 42, .08);
     }
     .side-head {
       padding: 24px 22px 18px;
@@ -308,6 +351,10 @@
       background: rgba(19, 19, 19, .76);
       box-shadow: 0 6px 24px rgba(255, 106, 0, .05);
       backdrop-filter: blur(18px);
+    }
+    html[data-admin-theme="light"] .topbar {
+      background: rgba(255, 255, 255, .82);
+      box-shadow: 0 6px 24px rgba(15, 23, 42, .06);
     }
     .topbar-left {
       display: flex;
@@ -444,6 +491,13 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045);
       backdrop-filter: blur(18px);
     }
+    html[data-admin-theme="light"] .metric,
+    html[data-admin-theme="light"] .panel,
+    html[data-admin-theme="light"] .sub-card,
+    html[data-admin-theme="light"] .login-card {
+      background: rgba(255, 255, 255, .82);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), 0 12px 30px rgba(15, 23, 42, .06);
+    }
     .metric {
       min-height: 138px;
       padding: 18px;
@@ -501,6 +555,9 @@
       border-bottom: 1px solid var(--line);
       background: rgba(14, 14, 14, .24);
     }
+    html[data-admin-theme="light"] .panel-head {
+      background: rgba(248, 250, 252, .86);
+    }
     .panel-head h2 {
       font-family: var(--font-display);
       font-size: 19px;
@@ -541,7 +598,7 @@
       flex-wrap: wrap;
     }
     .toolbar input { max-width: 330px; }
-    .toolbar select { max-width: 230px; }
+    .toolbar select { max-width: 260px; }
     .btn {
       display: inline-flex;
       min-height: 40px;
@@ -556,8 +613,10 @@
       font-size: 13px;
       font-weight: 900;
       text-decoration: none;
-      transition: background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease, filter .18s ease;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+      transition: background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease, filter .18s ease, box-shadow .18s ease;
     }
+    .btn:hover { box-shadow: 0 10px 20px rgba(0, 0, 0, .14), inset 0 1px 0 rgba(255, 255, 255, .12); }
     .btn:active { transform: translateY(1px); }
     .btn-sm {
       min-height: 34px;
@@ -572,7 +631,7 @@
     .btn-primary:hover { filter: brightness(1.08); }
     .btn-outline {
       border-color: var(--line-strong);
-      color: #dedede;
+      color: var(--text);
       background: rgba(255, 255, 255, .025);
     }
     .btn-outline:hover {
@@ -590,12 +649,19 @@
       background: rgba(255, 180, 171, .1);
       color: var(--error);
     }
+    .row-dirty td { background: rgba(255, 106, 0, .06); }
 
     .table-wrap {
       overflow-x: auto;
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: rgba(12, 12, 12, .4);
+    }
+    html[data-admin-theme="light"] .table-wrap,
+    html[data-admin-theme="light"] .field,
+    html[data-admin-theme="light"] .bar-track,
+    html[data-admin-theme="light"] .search-shell {
+      background: #fff;
     }
     table {
       width: 100%;
@@ -617,7 +683,7 @@
       letter-spacing: .06em;
       text-transform: uppercase;
     }
-    td { color: #d7d7dc; }
+    td { color: var(--text); }
     tr:hover td { background: rgba(255, 255, 255, .025); }
     tr:last-child td { border-bottom: 0; }
     td strong { color: var(--text); }
@@ -994,6 +1060,7 @@
 
           <div class="topbar-actions">
             <div class="top-meta mono" id="lastSync">Aguardando dados</div>
+            <button class="btn btn-outline btn-sm" id="themeToggle" type="button" aria-pressed="false">Modo claro</button>
             <button class="icon-btn" id="refreshBtn" type="button" aria-label="Atualizar dados">
               <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>

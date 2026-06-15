@@ -1,5 +1,6 @@
 import express from "express";
 import crypto from "node:crypto";
+import fs from "node:fs";
 import bcrypt from "bcryptjs";
 import { pool } from "../lib/db.js";
 import { newId } from "../lib/ids.js";
@@ -417,131 +418,174 @@ function wrapPdfText(value, max = 82) {
   return lines.length ? lines : ["-"];
 }
 
+const SERVICE_ORDER_LOGO = {
+  path: new URL("../../_assets/tech7/os-logo.jpg", import.meta.url),
+  width: 520,
+  height: 208
+};
+
+function loadServiceOrderLogo() {
+  try {
+    return {
+      ...SERVICE_ORDER_LOGO,
+      data: fs.readFileSync(SERVICE_ORDER_LOGO.path)
+    };
+  } catch (_error) {
+    return null;
+  }
+}
+
 function buildServiceOrderPdf(order) {
   const pageWidth = 595;
   const pageHeight = 842;
-  const margin = 42;
-  const content = [];
-  let y = 800;
+  const margin = 38;
+  let content = [];
+  const pages = [content];
+  let y = 806;
 
   const color = {
     black: "0.05 0.06 0.06",
-    dark: "0.10 0.12 0.12",
-    gray: "0.42 0.44 0.48",
-    light: "0.92 0.93 0.94",
+    dark: "0.12 0.14 0.16",
+    gray: "0.43 0.46 0.50",
+    border: "0.82 0.84 0.86",
+    light: "0.97 0.98 0.99",
+    warm: "1 0.96 0.92",
     orange: "1 0.37 0",
     white: "1 1 1"
+  };
+
+  const pageRight = pageWidth - margin;
+  const logoImage = loadServiceOrderLogo();
+  const money = (value) => {
+    const numeric = Number(value || 0);
+    const sign = numeric < 0 ? "-" : "";
+    const [whole, cents] = Math.abs(numeric).toFixed(2).split(".");
+    return `${sign}R$ ${whole.replace(/\B(?=(\d{3})+(?!\d))/g, ".")},${cents}`;
   };
   const text = (x, yy, value, size = 9, font = "F1", fill = color.dark) => {
     content.push(`${fill} rg BT /${font} ${size} Tf ${x} ${yy} Td (${pdfEscape(value)}) Tj ET`);
   };
   const line = (x1, y1, x2, y2, stroke = color.light) => content.push(`${stroke} RG ${x1} ${y1} m ${x2} ${y2} l S`);
-  const rect = (x, yy, w, h, stroke = color.light) => content.push(`${stroke} RG ${x} ${yy} ${w} ${h} re S`);
+  const rect = (x, yy, w, h, stroke = color.border) => content.push(`${stroke} RG ${x} ${yy} ${w} ${h} re S`);
   const fillRect = (x, yy, w, h, fill) => content.push(`${fill} rg ${x} ${yy} ${w} ${h} re f`);
+
   const section = (title) => {
-    y -= 18;
-    text(margin, y, title, 10, "F2", color.black);
-    line(margin, y - 5, pageWidth - margin, y - 5, color.orange);
-    y -= 18;
-  };
-  const kv = (label, value, x = margin, width = 246) => {
-    text(x, y, label, 7, "F2", color.gray);
-    text(x, y - 12, value || "-", 9, "F1", color.dark);
-    rect(x - 4, y - 20, width, 30);
-  };
-  const paragraph = (label, value) => {
-    text(margin, y, label, 8, "F2", color.black);
-    y -= 12;
-    for (const row of wrapPdfText(value, 96).slice(0, 5)) {
-      text(margin, y, row, 8, "F1", color.dark);
-      y -= 10;
-    }
-    y -= 4;
+    y -= 16;
+    fillRect(margin, y - 7, 10, 10, color.orange);
+    text(margin + 16, y - 4, title, 11, "F2", color.black);
+    line(margin, y - 12, pageRight, y - 12, color.border);
+    y -= 22;
   };
 
-  fillRect(0, 800, pageWidth, 42, color.black);
-  fillRect(margin, 785, 66, 44, color.orange);
-  fillRect(margin + 34, 785, 32, 44, color.black);
-  text(margin + 8, 798, "7", 34, "F2", color.white);
-  text(margin + 78, 813, "TECH 7", 22, "F2", color.orange);
-  text(margin + 79, 799, "Pecas e Servicos para Celulares", 8, "F2", color.dark);
-  text(386, 813, "ORDEM DE SERVICO", 14, "F2", color.black);
-  text(430, 797, order.code, 13, "F2", color.orange);
-  text(430, 784, `Emissao: ${new Date(order.created_at || Date.now()).toLocaleDateString("pt-BR")}`, 8, "F1", color.gray);
-  y = 760;
+  const field = (x, top, width, height, label, value, maxChars = 40) => {
+    fillRect(x, top - height, width, height, color.light);
+    rect(x, top - height, width, height, color.border);
+    text(x + 7, top - 12, label, 7, "F2", color.gray);
+    const rows = wrapPdfText(value || "-", maxChars).slice(0, Math.max(1, Math.floor((height - 18) / 10)));
+    rows.forEach((row, index) => text(x + 7, top - 24 - (index * 10), row, 9, "F1", color.dark));
+  };
+
+  const paragraph = (label, value, maxLines = 4, maxChars = 96) => {
+    const rows = wrapPdfText(value, maxChars).slice(0, maxLines);
+    const boxHeight = 18 + rows.length * 10;
+    fillRect(margin, y - boxHeight, pageRight - margin, boxHeight, color.white);
+    rect(margin, y - boxHeight, pageRight - margin, boxHeight, color.border);
+    text(margin + 7, y - 12, label, 7, "F2", color.gray);
+    rows.forEach((row, index) => text(margin + 7, y - 24 - (index * 10), row, 8, "F1", color.dark));
+    y -= boxHeight + 8;
+  };
+
+  const logo = () => {
+    if (logoImage) {
+      content.push(`q 164 0 0 65 ${margin} ${y - 65} cm /Logo Do Q`);
+      return;
+    }
+    text(margin, y - 18, "TECH 7", 22, "F2", color.orange);
+  };
+
+  logo();
+  fillRect(382, y - 58, 175, 58, color.light);
+  rect(382, y - 58, 175, 58, color.border);
+  text(394, y - 15, "ORDEM DE SERVICO", 8, "F2", color.gray);
+  text(394, y - 33, order.code, 16, "F2", color.orange);
+  text(394, y - 48, `Emissao: ${new Date(order.created_at || Date.now()).toLocaleDateString("pt-BR")}`, 8, "F1", color.dark);
+
+  y -= 86;
   text(margin, y, "Tech 7 - Shopping Oiapoque Centro, Av. Oiapoque, 156 - Centro - Belo Horizonte/MG", 8, "F1", color.dark);
   text(margin, y - 11, "WhatsApp: (31) 99945-4848 | E-mail: suportehubtech7@gmail.com", 8, "F1", color.dark);
-  fillRect(430, y - 18, 122, 20, color.orange);
-  text(455, y - 12, "VIA DO CLIENTE", 8, "F2", color.white);
-  y -= 26;
-  text(margin, y, "Documento pronto para envio ao cliente: atendimento, pecas, mao de obra, totais, garantia e assinaturas.", 8, "F1", color.gray);
+  fillRect(426, y - 19, 131, 22, color.warm);
+  rect(426, y - 19, 131, 22, color.orange);
+  text(452, y - 12, "VIA DO CLIENTE", 8, "F2", color.orange);
+  y -= 28;
+  line(margin, y, pageRight, y, color.orange);
+  y -= 8;
+  text(margin, y, "Documento para envio ao cliente: atendimento, aparelho, servicos, pecas, totais, garantia e assinatura.", 8, "F1", color.gray);
 
   section("Cliente");
-  kv("Nome", order.customer_name, margin, 246);
-  kv("WhatsApp", order.customer_phone, 306, 246);
-  y -= 38;
-  kv("CPF/CNPJ", order.customer_document || "Opcional", margin, 246);
-  kv("E-mail", order.customer_email || "Opcional", 306, 246);
-  y -= 38;
-  kv("Endereco", order.customer_address || "Opcional", margin, 510);
+  field(margin, y, 250, 34, "Nome", order.customer_name, 42);
+  field(307, y, 250, 34, "WhatsApp", order.customer_phone, 38);
+  y -= 42;
+  field(margin, y, 250, 34, "CPF/CNPJ", order.customer_document || "Opcional", 42);
+  field(307, y, 250, 34, "E-mail", order.customer_email || "Opcional", 42);
+  y -= 42;
+  field(margin, y, pageRight - margin, 34, "Endereco", order.customer_address || "Opcional", 92);
+  y -= 28;
 
   section("Aparelho");
-  kv("Marca", order.device_brand, margin, 120);
-  kv("Modelo", order.device_model, 170, 170);
-  kv("Cor", order.device_color, 370, 80);
-  kv("IMEI/Serial", order.device_serial || "Opcional", 462, 90);
-  y -= 42;
-  paragraph("Estado de entrada", order.intake_condition);
-  paragraph("Defeito relatado", order.reported_issue);
+  field(margin, y, 122, 34, "Marca", order.device_brand, 18);
+  field(169, y, 180, 34, "Modelo", order.device_model, 28);
+  field(358, y, 82, 34, "Cor", order.device_color || "-", 12);
+  field(449, y, 108, 34, "IMEI/Serial", order.device_serial || "Opcional", 18);
+  y -= 34;
 
   section("Servico");
-  paragraph("Diagnostico", order.diagnosis);
-  paragraph("Servicos feitos", order.services_done);
-  kv("Tecnico", order.technician || "-", margin, 160);
-  kv("Status", order.status_label, 220, 150);
-  kv("Pagamento", `${order.payment_status || "-"} ${order.payment_method ? "- " + order.payment_method : ""}`, 390, 160);
-  y -= 44;
+  paragraph("Diagnostico", order.diagnosis, 3, 96);
+  paragraph("Servicos feitos", order.services_done, 3, 96);
+  field(margin, y, 164, 32, "Tecnico", order.technician || "-", 24);
+  field(220, y, 150, 32, "Status", order.status_label, 22);
+  field(386, y, 171, 32, "Pagamento", `${order.payment_status || "-"}${order.payment_method ? " - " + order.payment_method : ""}`, 26);
+  y -= 38;
 
   section("Produtos e totais");
-  fillRect(margin - 4, y - 5, 514, 16, color.black);
-  text(margin, y, "Produto/Peca", 8, "F2", color.white);
-  text(370, y, "Qtd", 8, "F2", color.white);
-  text(420, y, "Unit.", 8, "F2", color.white);
-  text(492, y, "Total", 8, "F2", color.white);
-  y -= 12;
-  for (const item of (order.items || []).slice(0, 8)) {
-    text(margin, y, String(item.product_name || "-").slice(0, 58), 8, "F1", color.dark);
-    text(374, y, String(item.quantity || 0), 8, "F1", color.dark);
-    text(420, y, `R$ ${Number(item.unit_price || 0).toFixed(2)}`, 8, "F1", color.dark);
-    text(492, y, `R$ ${Number(item.total_price || 0).toFixed(2)}`, 8, "F1", color.dark);
-    line(margin - 4, y - 4, pageWidth - margin, y - 4, color.light);
-    y -= 11;
+  fillRect(margin, y - 16, pageRight - margin, 18, color.black);
+  text(margin + 6, y - 11, "Produto/Peca", 8, "F2", color.white);
+  text(374, y - 11, "Qtd", 8, "F2", color.white);
+  text(424, y - 11, "Unit.", 8, "F2", color.white);
+  text(497, y - 11, "Total", 8, "F2", color.white);
+  y -= 26;
+  const items = (order.items || []).slice(0, 6);
+  if (items.length) {
+    for (const item of items) {
+      text(margin + 6, y, String(item.product_name || "-").slice(0, 62), 8, "F1", color.dark);
+      text(378, y, String(item.quantity || 0), 8, "F1", color.dark);
+      text(424, y, money(item.unit_price), 8, "F1", color.dark);
+      text(497, y, money(item.total_price), 8, "F1", color.dark);
+      line(margin, y - 6, pageRight, y - 6, color.border);
+      y -= 14;
+    }
+  } else {
+    text(margin + 6, y, "Sem pecas registradas.", 8, "F1", color.gray);
+    y -= 14;
   }
-  if (!(order.items || []).length) {
-    text(margin, y, "Sem pecas registradas.", 8, "F1", color.dark);
-    y -= 12;
-  }
-  y -= 8;
-  kv("Produtos", `R$ ${Number(order.product_total || 0).toFixed(2)}`, margin, 120);
-  kv("Mao de obra", `R$ ${Number(order.labor || 0).toFixed(2)}`, 176, 120);
-  kv("Desconto", `R$ ${Number(order.discount || 0).toFixed(2)}`, 310, 100);
-  fillRect(426, y - 22, 130, 34, color.orange);
-  kv("Total final", `R$ ${Number(order.total || 0).toFixed(2)}`, 430, 122);
-  y -= 44;
+  y -= 5;
+  field(margin, y, 120, 32, "Produtos", money(order.product_total), 18);
+  field(170, y, 120, 32, "Mao de obra", money(order.labor), 18);
+  field(300, y, 100, 32, "Desconto", money(order.discount), 16);
+  fillRect(412, y - 34, 145, 34, color.warm);
+  rect(412, y - 34, 145, 34, color.orange);
+  text(422, y - 13, "Total final", 7, "F2", color.orange);
+  text(422, y - 27, money(order.total), 13, "F2", color.black);
 
-  section("Garantia e observacoes");
-  paragraph("Garantia", `${order.warranty_days || 0} dias. ${order.warranty_terms || ""}`);
-  paragraph("Observacoes ao cliente", order.customer_notes || order.warranty_notes || "-");
-  paragraph("Termo de ciencia", "Cliente declara estar ciente do estado de entrada, servicos executados, pecas usadas, valores, condicoes de garantia e prazo combinado para retirada.");
+  y -= 36;
+  section("Garantia");
+  paragraph("Garantia", `${order.warranty_days || 0} dias. ${order.warranty_terms || ""}`, 3, 96);
 
-  y = Math.max(y, 98);
-  line(margin, y, 250, y);
+  y = 72;
   line(344, y, 553, y);
-  text(84, y - 14, "Assinatura do cliente", 8, "F1", color.gray);
-  text(380, y - 14, "Assinatura Tech 7 / tecnico", 8, "F1", color.gray);
-  text(margin, 42, "Obrigado pela preferencia. Guarde esta OS para retirada, garantia e conferencia do servico.", 7, "F1", color.gray);
+  text(382, y - 14, "Assinatura Tech 7 / tecnico", 8, "F1", color.gray);
+  line(margin, 52, pageRight, 52, color.border);
+  text(margin, 36, "Obrigado pela preferencia. Guarde esta OS para retirada, garantia e conferencia do servico.", 7, "F1", color.gray);
 
-  const stream = content.join("\n");
   const objects = [];
   const add = (body) => {
     objects.push(body);
@@ -550,23 +594,35 @@ function buildServiceOrderPdf(order) {
   const pagesId = add("");
   const fontId = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
   const boldId = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
-  const contentId = add(`<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`);
-  const pageId = add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontId} 0 R /F2 ${boldId} 0 R >> >> /Contents ${contentId} 0 R >>`);
-  objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageId} 0 R] /Count 1 >>`;
+  const logoId = logoImage ? add(Buffer.concat([
+    Buffer.from(`<< /Type /XObject /Subtype /Image /Width ${logoImage.width} /Height ${logoImage.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${logoImage.data.length} >>\nstream\n`, "binary"),
+    logoImage.data,
+    Buffer.from("\nendstream", "binary")
+  ])) : null;
+  const xObjectResource = logoId ? `/XObject << /Logo ${logoId} 0 R >>` : "";
+  const pageIds = pages.map((pageContent) => {
+    const stream = pageContent.join("\n");
+    const contentId = add(`<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`);
+    return add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontId} 0 R /F2 ${boldId} 0 R >> ${xObjectResource} >> /Contents ${contentId} 0 R >>`);
+  });
+  objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
   const catalogId = add(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
-  let pdf = "%PDF-1.4\n";
+  const chunks = [Buffer.from("%PDF-1.4\n", "binary")];
   const offsets = [0];
+  const length = () => chunks.reduce((sum, chunk) => sum + chunk.length, 0);
   objects.forEach((body, index) => {
-    offsets.push(Buffer.byteLength(pdf));
-    pdf += `${index + 1} 0 obj\n${body}\nendobj\n`;
+    offsets.push(length());
+    chunks.push(Buffer.from(`${index + 1} 0 obj\n`, "binary"));
+    chunks.push(Buffer.isBuffer(body) ? body : Buffer.from(body, "binary"));
+    chunks.push(Buffer.from("\nendobj\n", "binary"));
   });
-  const xref = Buffer.byteLength(pdf);
-  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  const xref = length();
+  chunks.push(Buffer.from(`xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`, "binary"));
   offsets.slice(1).forEach((offset) => {
-    pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
+    chunks.push(Buffer.from(`${String(offset).padStart(10, "0")} 00000 n \n`, "binary"));
   });
-  pdf += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xref}\n%%EOF`;
-  return Buffer.from(pdf);
+  chunks.push(Buffer.from(`trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xref}\n%%EOF`, "binary"));
+  return Buffer.concat(chunks);
 }
 
 function productSelectSql() {
@@ -778,6 +834,8 @@ router.get("/products", adminAuth, async (req, res) => {
   const brand = String(req.query.brand || "").trim();
   const category = String(req.query.category || "").trim();
   const active = String(req.query.active || "").trim();
+  const alert = String(req.query.alert || "").trim();
+  const sort = String(req.query.sort || "updated_desc").trim();
 
   const params = [];
   const filters = ["1=1"];
@@ -797,6 +855,28 @@ router.get("/products", adminAuth, async (req, res) => {
     params.push(active === "true");
     filters.push(`active = $${params.length}`);
   }
+  if (alert === "missing_image") {
+    filters.push(`coalesce(nullif(primary_image_url, ''), nullif(image_url, ''), '') = ''`);
+  } else if (alert === "missing_price") {
+    filters.push(`coalesce(price_cents, 0) < 200`);
+  } else if (alert === "low_stock") {
+    filters.push(`stock is not null and stock <= 2`);
+  } else if (alert === "missing_category") {
+    filters.push(`coalesce(section, '') = ''`);
+  } else if (alert === "ok") {
+    filters.push(`coalesce(nullif(primary_image_url, ''), nullif(image_url, ''), '') <> ''`);
+    filters.push(`coalesce(price_cents, 0) >= 200`);
+    filters.push(`(stock is null or stock > 2)`);
+    filters.push(`coalesce(section, '') <> ''`);
+  }
+
+  const orderSql = {
+    updated_desc: "updated_at desc nulls last, created_at desc",
+    name_asc: "lower(coalesce(name, '')) asc, updated_at desc nulls last",
+    name_desc: "lower(coalesce(name, '')) desc, updated_at desc nulls last",
+    price_asc: "price_cents asc nulls last, lower(coalesce(name, '')) asc",
+    price_desc: "price_cents desc nulls last, lower(coalesce(name, '')) asc"
+  }[sort] || "updated_at desc nulls last, created_at desc";
 
   const countRes = await pool.query(`select count(*)::int as total from products where ${filters.join(" and ")}`, params);
   params.push(limit, offset);
@@ -806,7 +886,7 @@ router.get("/products", adminAuth, async (req, res) => {
       select ${productSelectSql()}
       from products
       where ${filters.join(" and ")}
-      order by updated_at desc nulls last, created_at desc
+      order by ${orderSql}
       limit $${params.length - 1} offset $${params.length}
     `,
     params
@@ -820,6 +900,24 @@ router.get("/products", adminAuth, async (req, res) => {
     items: pricedRows.map(mapAdminProduct)
   });
 });
+
+router.get("/categories", adminAuth, asyncRoute(async (_req, res) => {
+  const { rows } = await pool.query(
+    `
+      select slug, name, source_name, sort_order
+      from categories
+      order by sort_order nulls last, name asc
+    `
+  );
+  res.json({
+    items: rows.map((row) => ({
+      slug: row.slug,
+      name: row.name,
+      source_name: row.source_name,
+      sort_order: row.sort_order
+    }))
+  });
+}));
 
 router.get("/products/:id", adminAuth, async (req, res) => {
   const row = await getProductOr404(String(req.params.id || ""), res);
@@ -1346,6 +1444,25 @@ router.get("/service-orders/:id", adminAuth, asyncRoute(async (req, res) => {
   return res.json(mapServiceOrder(rows[0], items.rows));
 }));
 
+router.delete("/service-orders/:id", adminAuth, asyncRoute(async (req, res) => {
+  const id = String(req.params.id || "");
+  const { rows } = await pool.query(
+    `
+      update service_orders
+      set status = 'cancelada', updated_at = now()
+      where id = $1
+      returning ${serviceOrderSelectSql()}
+    `,
+    [id]
+  );
+  if (!rows.length) return res.status(404).json({ error: "service_order_not_found", message: "OS nao encontrada" });
+  const items = await pool.query(
+    `select id, product_id, product_name, qty, unit_price_cents, line_total_cents from service_order_items where service_order_id = $1 order by id asc`,
+    [id]
+  );
+  return res.json(mapServiceOrder(rows[0], items.rows));
+}));
+
 router.post("/service-orders", adminAuth, asyncRoute(async (req, res) => {
   const payload = await normalizeServiceOrderPayload(req.body || {});
   if (!payload.values.customer_name) return res.status(400).json({ error: "customer_name_required", message: "Nome do cliente obrigatorio" });
@@ -1690,4 +1807,14 @@ router.put("/orders/:id/status", adminAuth, async (req, res) => {
     createLoggiShipmentForOrder(id).catch(() => {});
   }
   res.json({ ok: true });
+});
+
+router.delete("/orders/:id", adminAuth, async (req, res) => {
+  const id = String(req.params.id || "");
+  const r = await pool.query(
+    `update orders set status = 'cancelled', updated_at = now() where id = $1 returning id, status, updated_at`,
+    [id]
+  );
+  if (!r.rowCount) return res.status(404).json({ error: "order_not_found", message: "Pedido nao encontrado" });
+  return res.json({ ok: true, id: r.rows[0].id, status: r.rows[0].status, updated_at: r.rows[0].updated_at });
 });
