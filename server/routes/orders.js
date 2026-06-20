@@ -9,6 +9,7 @@ async function getOrder(orderId) {
   const orderRes = await pool.query(
     `
     select id, status, currency, total_cents, subtotal_cents, shipping_total_cents,
+           discount_cents, coupon_id, coupon_code, coupon_discount_cents,
            delivery_mode, shipping_provider, shipping_quote_id, shipping_service_id,
            shipping_service_label, shipping_slo_days, shipping_zipcode, shipping_address,
            shipping_number, shipping_complement, shipping_neighborhood, shipping_city,
@@ -80,6 +81,60 @@ function normalizeCustomer(input = {}) {
     email: cleanText(input.email, 160),
     phone: cleanText(input.telefone || input.phone, 40),
     document: cleanText(input.documento || input.document || input.cpf || input.cnpj, 32).replace(/\D/g, "")
+  };
+}
+
+function normalizeCoupon(input = {}) {
+  const raw = input || {};
+  return {
+    code: cleanText(raw.code || raw.couponCode || raw.coupon_code, 80).toUpperCase().replace(/\s+/g, "")
+  };
+}
+
+async function resolveCoupon({ coupon, subtotalCents }) {
+  if (!coupon.code) {
+    return {
+      discountCents: 0,
+      couponId: null,
+      couponCode: null
+    };
+  }
+
+  const couponRes = await pool.query(
+    `select id, code, discount_cents, expires_at, active from coupons where lower(code) = lower($1) limit 1`,
+    [coupon.code]
+  );
+  if (!couponRes.rowCount) {
+    const error = new Error("coupon_not_found");
+    error.status = 404;
+    throw error;
+  }
+  const row = couponRes.rows[0];
+  if (!row.active) {
+    const error = new Error("coupon_inactive");
+    error.status = 409;
+    throw error;
+  }
+  if (new Date(row.expires_at).getTime() < Date.now()) {
+    const error = new Error("coupon_expired");
+    error.status = 409;
+    throw error;
+  }
+  const discountCents = Number(row.discount_cents || 0);
+  if (!Number.isFinite(discountCents) || discountCents <= 0) {
+    const error = new Error("invalid_coupon_discount");
+    error.status = 409;
+    throw error;
+  }
+  if (discountCents > subtotalCents) {
+    const error = new Error("coupon_discount_exceeds_subtotal");
+    error.status = 422;
+    throw error;
+  }
+  return {
+    discountCents,
+    couponId: row.id,
+    couponCode: row.code
   };
 }
 
@@ -199,18 +254,22 @@ router.post("/", async (req, res) => {
   const orderId = newId("order");
   const shipping = normalizeShipping(req.body?.shipping || {});
   const customer = normalizeCustomer(req.body?.customer || {});
+  const coupon = normalizeCoupon(req.body?.coupon || req.body || {});
 
   await pool.query("begin");
   try {
     let subtotal = 0;
     for (const r of pricedItems) subtotal += Number(r.price_cents) * Number(r.qty);
+    const couponInfo = await resolveCoupon({ coupon, subtotalCents: subtotal });
     const shippingInfo = await resolveShipping({ shipping, subtotalCents: subtotal, currency });
-    const total = subtotal + Number(shippingInfo.shippingTotalCents || 0);
+    const discount = Number(couponInfo.discountCents || 0);
+    const total = Math.max(0, subtotal - discount) + Number(shippingInfo.shippingTotalCents || 0);
 
     await pool.query(
       `
         insert into orders (
-          id, status, currency, subtotal_cents, shipping_total_cents, total_cents,
+          id, status, currency, subtotal_cents, shipping_total_cents, discount_cents,
+          coupon_id, coupon_code, coupon_discount_cents, total_cents,
           cart_id, customer_name, customer_email, customer_phone, customer_document, delivery_mode,
           shipping_provider, shipping_quote_id, shipping_service_id, shipping_service_label,
           shipping_slo_days, shipping_zipcode, shipping_address, shipping_number,
@@ -218,10 +277,11 @@ router.post("/", async (req, res) => {
         )
         values (
           $1, 'pending', $2, $3, $4, $5,
-          $6, $7, $8, $9, $10, $11,
-          $12, $13, $14, $15,
+          $6, $7, $8, $9,
+          $10, $11, $12, $13, $14, $15,
           $16, $17, $18, $19,
-          $20, $21, $22, $23
+          $20, $21, $22, $23,
+          $24, $25, $26, $27
         )
       `,
       [
@@ -229,6 +289,10 @@ router.post("/", async (req, res) => {
         currency,
         subtotal,
         shippingInfo.shippingTotalCents,
+        discount,
+        couponInfo.couponId,
+        couponInfo.couponCode,
+        discount,
         total,
         cartId,
         customer.name || "Cliente",

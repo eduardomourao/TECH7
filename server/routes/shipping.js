@@ -313,7 +313,10 @@ function buildMelhorEnvioProducts(items) {
 function normalizeMelhorEnvioOptions(response) {
   const allowedServiceIds = new Set(melhorEnvioServiceIds());
   return (Array.isArray(response) ? response : [])
-    .filter((quote) => !quote.error && (quote.price || quote.custom_price))
+    .filter((quote) => {
+      const rawPrice = quote.custom_price ?? quote.price;
+      return !quote.error && rawPrice !== null && rawPrice !== undefined && String(rawPrice).trim() !== "";
+    })
     .map((quote) => {
       const priceCents = decimalToCents(quote.custom_price ?? quote.price);
       const company = quote.company?.name || "Melhor Envio";

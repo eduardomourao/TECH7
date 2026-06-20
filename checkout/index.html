@@ -1887,6 +1887,7 @@
                   <div class="review-list" id="review-list"></div>
                   <div class="review-totals">
                     <div class="review-total-line"><span>Subtotal</span><strong id="review-subtotal">R$ 0,00</strong></div>
+                    <div class="review-total-line" id="review-discount-line" hidden><span>Desconto</span><strong id="review-discount">-R$ 0,00</strong></div>
                     <div class="review-total-line"><span>Frete</span><strong id="review-shipping">Calcule o frete</strong></div>
                     <div class="review-total-line is-final"><span>Total final</span><strong id="review-total">R$ 0,00</strong></div>
                   </div>
@@ -1943,7 +1944,7 @@
                 <div class="summary-list" id="summary-list"></div>
                 <div class="summary-lines">
                   <div class="summary-line"><span>Subtotal</span><strong id="subtotal">R$ 0,00</strong></div>
-                  <div class="summary-line"><span>Desconto</span><strong>R$ 0,00</strong></div>
+                  <div class="summary-line" id="discount-summary-line" hidden><span>Desconto</span><strong id="discount-summary">-R$ 0,00</strong></div>
                   <div class="summary-line"><span>Entrega</span><strong id="delivery-summary">Calcule o frete</strong></div>
                   <div class="summary-line summary-total"><span>Total</span><strong id="total">R$ 0,00</strong></div>
                   <div class="summary-line"><span>Pagamento</span><strong id="payment-status">PIX</strong></div>
@@ -1972,6 +1973,7 @@
   <script>
     (function () {
       var STORAGE_KEY = 'carrinho';
+      var COUPON_KEY = 't7_coupon_v1';
       var PIX_SESSION_KEY = 'tech7_checkout_pix_state_v1';
       var POLL_INTERVAL_MS = 5000;
       var currentStep = 1;
@@ -2022,6 +2024,46 @@
         if (cartPriceStatus() === 'pending') return 'Atualizando preco';
         if (cartPriceStatus() === 'error') return 'Preco indisponivel';
         return formatCurrency(value);
+      }
+
+      function amountToCents(value) {
+        return Math.max(0, Math.round(Number(value || 0) * 100));
+      }
+
+      function readCoupon() {
+        try {
+          var parsed = JSON.parse(localStorage.getItem(COUPON_KEY) || 'null');
+          return parsed && parsed.code ? parsed : null;
+        } catch (_error) {
+          return null;
+        }
+      }
+
+      function clearCoupon() {
+        localStorage.removeItem(COUPON_KEY);
+      }
+
+      function couponDiscountCents(subtotal) {
+        var coupon = readCoupon();
+        if (!coupon) return 0;
+        var subtotalCents = amountToCents(subtotal);
+        if (Number(coupon.subtotal_cents || 0) !== subtotalCents) {
+          clearCoupon();
+          return 0;
+        }
+        return Math.min(subtotalCents, Math.max(0, Number(coupon.discount_cents || coupon.applied_discount_cents || 0)));
+      }
+
+      function couponPayload(subtotal) {
+        var coupon = readCoupon();
+        var discountCents = couponDiscountCents(subtotal);
+        if (!coupon || discountCents <= 0) return null;
+        return {
+          id: coupon.id || '',
+          code: coupon.code || '',
+          discount_cents: discountCents,
+          subtotal_cents: amountToCents(subtotal)
+        };
       }
 
       function normalizeItem(item, index) {
@@ -2120,6 +2162,7 @@
         loggiSelectedOption = loggiOptions.find(function (option) {
           return String(option.serviceId) === String(serviceId);
         }) || loggiOptions[0] || null;
+        clearPixSession();
         renderLoggiOptions();
         updateTotals();
         updateStepControls();
@@ -2174,6 +2217,7 @@
           loggiSelectedOption = loggiOptions.find(function (option) {
             return String(option.serviceId) === String(data.selectedServiceId);
           }) || loggiOptions[0] || null;
+          clearPixSession();
           renderLoggiOptions();
           setLoggiState(loggiSelectedOption ? 'ready' : 'error', loggiSelectedOption ? '' : 'Nao ha opcoes de frete para este endereco.');
           updateTotals();
@@ -2200,19 +2244,28 @@
         var items = readCart();
         var subtotal = cartTotal(items);
         var freight = shippingAmount();
-        var total = subtotal + freight;
+        var discountCents = couponDiscountCents(subtotal);
+        var discount = discountCents / 100;
+        var total = Math.max(0, subtotal - discount) + freight;
         var hasItems = items.length > 0;
         var ready = cartPricesReady();
         var subtotalLabel = hasItems && !ready ? cartPriceLabel(0) : formatCurrency(subtotal);
+        var discountLabel = '-' + formatCurrency(discount);
         var totalLabel = hasItems && !ready ? cartPriceLabel(0) : formatCurrency(total);
         var subtotalEl = document.getElementById('subtotal');
+        var discountSummaryLine = document.getElementById('discount-summary-line');
+        var discountSummary = document.getElementById('discount-summary');
         var totalEl = document.getElementById('total');
         var toggleTotal = document.getElementById('summary-toggle-total');
         var deliverySummary = document.getElementById('delivery-summary');
         var reviewSubtotal = document.getElementById('review-subtotal');
+        var reviewDiscountLine = document.getElementById('review-discount-line');
+        var reviewDiscount = document.getElementById('review-discount');
         var reviewShipping = document.getElementById('review-shipping');
         var reviewTotal = document.getElementById('review-total');
         if (subtotalEl) subtotalEl.textContent = subtotalLabel;
+        if (discountSummaryLine) discountSummaryLine.hidden = discountCents <= 0;
+        if (discountSummary) discountSummary.textContent = discountLabel;
         if (totalEl) totalEl.textContent = totalLabel;
         if (toggleTotal) toggleTotal.textContent = totalLabel;
         if (deliverySummary) {
@@ -2225,6 +2278,8 @@
                 : 'Calcule o frete';
         }
         if (reviewSubtotal) reviewSubtotal.textContent = subtotalLabel;
+        if (reviewDiscountLine) reviewDiscountLine.hidden = discountCents <= 0;
+        if (reviewDiscount) reviewDiscount.textContent = discountLabel;
         if (reviewShipping) reviewShipping.textContent = deliveryMode === 'pickup'
           ? 'Retirada na loja - Gratis'
           : deliveryMode === 'uber'
@@ -2300,7 +2355,9 @@
       }
 
       function setDeliveryMode(mode) {
+        var previousDeliveryMode = deliveryMode;
         deliveryMode = mode === 'pickup' ? 'pickup' : mode === 'uber' ? 'uber' : 'shipping';
+        if (previousDeliveryMode !== deliveryMode) clearPixSession();
         var isPickup = deliveryMode === 'pickup';
         var addressBlock = document.getElementById('delivery-address-fields');
         var shippingInfo = document.getElementById('shipping-info-card');
@@ -2522,13 +2579,17 @@
         if (!cartPricesReady()) throw new Error('cart_prices_not_ready');
         var itens = readCart();
         var subtotal = cartTotal(itens);
+        var cupom = couponPayload(subtotal);
+        var desconto = cupom ? (Number(cupom.discount_cents || 0) / 100) : 0;
         var isPickup = deliveryMode === 'pickup';
         var frete = shippingAmount();
         return {
           itens: itens,
           subtotal: subtotal,
+          desconto: desconto,
+          cupom: cupom,
           frete: frete,
-          total: subtotal + frete,
+          total: Math.max(0, subtotal - desconto) + frete,
           cliente: {
             nome: fields.nome.value.trim(),
             email: fields.email.value.trim(),
@@ -2578,6 +2639,53 @@
         };
       }
 
+      function buildCartSignature(items) {
+        return JSON.stringify((items || []).map(function (item) {
+          return {
+            id: String(item.id || ''),
+            qty: Number(item.qty || 0),
+            preco: Number(item.preco || 0),
+            variacao: String(item.variacao || '')
+          };
+        }));
+      }
+
+      function buildOrderSignature(dadosPedido) {
+        var pedido = dadosPedido || {};
+        var entrega = pedido.entrega || {};
+        var cliente = pedido.cliente || {};
+        return JSON.stringify({
+          cart: buildCartSignature(pedido.itens || []),
+          cliente: {
+            nome: String(cliente.nome || '').trim(),
+            email: String(cliente.email || '').trim().toLowerCase(),
+            telefone: cleanDigits(cliente.telefone || ''),
+            documento: cleanDigits(cliente.documento || '')
+          },
+          entrega: {
+            deliveryMode: String(entrega.deliveryMode || ''),
+            cep: cleanDigits(entrega.cep || ''),
+            logradouro: String(entrega.logradouro || '').trim(),
+            numero: String(entrega.numero || '').trim(),
+            bairro: String(entrega.bairro || '').trim(),
+            cidade: String(entrega.cidade || '').trim(),
+            estado: String(entrega.estado || '').trim().toUpperCase(),
+            quoteId: String(entrega.quoteId || ''),
+            selectedServiceId: String(entrega.selectedServiceId || ''),
+            carrier: String(entrega.carrier || entrega.metodo || '')
+          },
+          subtotal: Number(pedido.subtotal || 0),
+          desconto: Number(pedido.desconto || 0),
+          cupom: {
+            id: String(pedido.cupom && pedido.cupom.id || ''),
+            code: String(pedido.cupom && pedido.cupom.code || ''),
+            discount_cents: Number(pedido.cupom && pedido.cupom.discount_cents || 0)
+          },
+          frete: Number(pedido.frete || 0),
+          total: Number(pedido.total || 0)
+        });
+      }
+
       async function apiJson(url, options) {
         var response = await fetch(url, options || {});
         var data = await response.json().catch(function () { return {}; });
@@ -2618,7 +2726,8 @@
           body: JSON.stringify({
             cartId: cart.id,
             customer: dadosPedido.cliente,
-            shipping: dadosPedido.entrega
+            shipping: dadosPedido.entrega,
+            coupon: dadosPedido.cupom
           })
         });
       }
@@ -2911,6 +3020,11 @@
         if (code === 'invalid_orderId') return 'Pedido invalido para pagamento.';
         if (code === 'payment_provider_not_configured') return 'PIX nao configurado no servidor.';
         if (code === 'payment_provider_error') return 'Falha ao gerar PIX no provedor.';
+        if (code === 'coupon_not_found') return 'Cupom invalido.';
+        if (code === 'coupon_expired') return 'Cupom expirado.';
+        if (code === 'coupon_inactive') return 'Cupom inativo.';
+        if (code === 'coupon_discount_exceeds_subtotal') return 'Desconto maior que subtotal.';
+        if (code === 'invalid_coupon_discount') return 'Cupom invalido para este pedido.';
         return code;
       }
 
@@ -2923,12 +3037,16 @@
       }
 
       function savePixSnapshot(orderId, payload, status) {
+        var existing = readPixSession() || {};
         writePixSession({
           orderId: orderId,
           codigoPix: payload && payload.codigoPix ? payload.codigoPix : '',
           qrCodeUrl: payload && payload.qrCodeUrl ? payload.qrCodeUrl : '',
           expiresIn: payload && payload.expiresIn ? payload.expiresIn : null,
           expiresDate: payload && payload.expiresDate ? payload.expiresDate : null,
+          orderSignature: orderSnapshot ? buildOrderSignature(orderSnapshot) : (existing.orderSignature || ''),
+          cartSignature: orderSnapshot ? buildCartSignature(orderSnapshot.itens || []) : (existing.cartSignature || buildCartSignature(readCart())),
+          couponSignature: JSON.stringify(readCoupon() || null),
           status: status || 'aguardando_pagamento',
           updatedAt: new Date().toISOString()
         });
@@ -3009,7 +3127,10 @@
               throw new Error('order_already_paid');
             }
             if (currentStatus.orderStatus === 'pending' || currentStatus.orderStatus === 'failed') {
-              return saved.orderId;
+              if (saved.orderSignature && saved.orderSignature === buildOrderSignature(dadosPedido)) {
+                return saved.orderId;
+              }
+              clearPixSession();
             }
           } catch (error) {
             if (error && error.message === 'order_already_paid') throw error;
@@ -3093,6 +3214,8 @@
               qrCodeUrl: sessionAfterError && sessionAfterError.qrCodeUrl ? sessionAfterError.qrCodeUrl : '',
               expiresIn: sessionAfterError && sessionAfterError.expiresIn ? sessionAfterError.expiresIn : null,
               expiresDate: sessionAfterError && sessionAfterError.expiresDate ? sessionAfterError.expiresDate : null,
+              orderSignature: orderSnapshot ? buildOrderSignature(orderSnapshot) : (sessionAfterError && sessionAfterError.orderSignature ? sessionAfterError.orderSignature : ''),
+              cartSignature: orderSnapshot ? buildCartSignature(orderSnapshot.itens || []) : (sessionAfterError && sessionAfterError.cartSignature ? sessionAfterError.cartSignature : buildCartSignature(readCart())),
               status: 'erro',
               updatedAt: new Date().toISOString()
             });
@@ -3109,6 +3232,14 @@
       async function restorePixSession() {
         var saved = readPixSession();
         if (!saved || !saved.orderId) return;
+        if (saved.cartSignature && saved.cartSignature !== buildCartSignature(readCart())) {
+          clearPixSession();
+          return;
+        }
+        if (saved.couponSignature && saved.couponSignature !== JSON.stringify(readCoupon() || null)) {
+          clearPixSession();
+          return;
+        }
 
         goToStep(5);
         renderPixPayload({
@@ -3155,6 +3286,7 @@
         document.getElementById('numero-pedido').textContent = numeroPedido;
         document.getElementById('confirmation').classList.add('is-visible');
         localStorage.setItem(STORAGE_KEY, '[]');
+        clearCoupon();
         renderSummary();
       }
 
@@ -3225,10 +3357,12 @@
         startPixFlow(true);
       });
       document.addEventListener('carrinhoAtualizado', function () {
+        clearPixSession();
         clearLoggiQuote();
         renderSummary();
       });
       document.addEventListener('carrinho:atualizado', function () {
+        clearPixSession();
         clearLoggiQuote();
         renderSummary();
       });

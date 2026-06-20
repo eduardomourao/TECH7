@@ -19,6 +19,16 @@
     { label: 'Deposito', alt: 'Deposito bancario', src: T7_PAYMENT_ICON_BASE + 'pag_peqdepositobancario__f46324de.png' }
   ];
   var T7_LOJA_PROTEGIDA_SEAL = '/_assets/images.tcdn.com.br/files/996644/themes/46/img/seal-lp__e4660e26.png';
+  var T7_IMPORTADOS_MENU = {
+    root: 'https://tech7importados.vercel.app/',
+    icon: '/_assets/tech7/apple-importados.jpg',
+    label: 'iPhone, Macbooks e iPads',
+    categories: [
+      { label: 'iPhones', href: 'https://tech7importados.vercel.app/categoria/iphones' },
+      { label: 'Macbooks', href: 'https://tech7importados.vercel.app/categoria/macs' },
+      { label: 'iPads', href: 'https://tech7importados.vercel.app/categoria/ipads' }
+    ]
+  };
 
   window.dataLayer = Array.isArray(window.dataLayer) ? window.dataLayer : [];
   window.dataLayerGa4 = Array.isArray(window.dataLayerGa4) ? window.dataLayerGa4 : [];
@@ -703,6 +713,148 @@
     });
   }
 
+  function createImportadosSubmenu() {
+    var submenu = document.createElement('div');
+    submenu.className = 'sub-line-category flex product-sub';
+
+    var title = document.createElement('div');
+    title.className = 'header-sub';
+    title.textContent = T7_IMPORTADOS_MENU.label;
+    submenu.appendChild(title);
+
+    var over = document.createElement('div');
+    over.className = 'over flex';
+    var list = document.createElement('ul');
+    list.className = 'list-line-sub';
+    T7_IMPORTADOS_MENU.categories.forEach(function (category) {
+      var item = document.createElement('li');
+      var link = document.createElement('a');
+      link.className = 'second-nivel';
+      link.href = category.href;
+      link.textContent = category.label;
+      item.appendChild(link);
+      list.appendChild(item);
+    });
+    over.appendChild(list);
+    submenu.appendChild(over);
+
+    return submenu;
+  }
+
+  function createImportadosDesktopItem() {
+    var item = document.createElement('li');
+    item.className = 'relative t7-importados-nav';
+    item.setAttribute('data-id', 'importados');
+    item.setAttribute('data-level', '0');
+
+    var link = document.createElement('a');
+    link.className = 'icon-show sub vertical-icon';
+    link.href = T7_IMPORTADOS_MENU.root;
+    link.setAttribute('aria-label', T7_IMPORTADOS_MENU.label);
+
+    var image = document.createElement('img');
+    image.className = 'icon t7-importados-icon';
+    image.alt = 'Apple';
+    image.src = T7_IMPORTADOS_MENU.icon;
+    image.width = 70;
+    image.height = 70;
+    image.loading = 'lazy';
+    link.appendChild(image);
+
+    var name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = T7_IMPORTADOS_MENU.label;
+    link.appendChild(name);
+
+    item.appendChild(link);
+    item.appendChild(createImportadosSubmenu());
+    return item;
+  }
+
+  function createImportadosMobileItem() {
+    var item = document.createElement('li');
+    item.className = 't7-importados-mobile';
+
+    var link = document.createElement('a');
+    link.className = 'space sub';
+    link.href = T7_IMPORTADOS_MENU.root;
+    link.setAttribute('aria-label', T7_IMPORTADOS_MENU.label);
+    link.setAttribute('aria-expanded', 'false');
+
+    var iconBox = document.createElement('div');
+    iconBox.className = 'icon flex align-center justify-center';
+    var image = document.createElement('img');
+    image.alt = 'Apple';
+    image.src = T7_IMPORTADOS_MENU.icon;
+    image.width = 70;
+    image.height = 70;
+    image.loading = 'lazy';
+    iconBox.appendChild(image);
+    link.appendChild(iconBox);
+
+    var text = document.createElement('span');
+    text.className = 'text';
+    text.textContent = T7_IMPORTADOS_MENU.label;
+    link.appendChild(text);
+
+    var arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    arrow.setAttribute('class', 'ico');
+    arrow.setAttribute('viewBox', '0 0 284.929 284.929');
+    arrow.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    arrow.setAttribute('aria-hidden', 'true');
+    var arrowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    arrowPath.setAttribute('d', 'M282.082,76.511l-14.274-14.273c-1.902-1.906-4.093-2.856-6.57-2.856c-2.471,0-4.661,0.95-6.563,2.856L142.466,174.441 L30.262,62.241c-1.903-1.906-4.093-2.856-6.567-2.856c-2.475,0-4.665,0.95-6.567,2.856L2.856,76.515C0.95,78.417,0,80.607,0,83.082 c0,2.473,0.953,4.663,2.856,6.565l133.043,133.046c1.902,1.903,4.093,2.854,6.567,2.854s4.661-0.951,6.562-2.854L282.082,89.647 c1.902-1.903,2.847-4.093,2.847-6.565C284.929,80.607,283.984,78.417,282.082,76.511z');
+    arrow.appendChild(arrowPath);
+    link.appendChild(arrow);
+
+    item.appendChild(link);
+
+    var subList = document.createElement('ul');
+    subList.className = 't7-importados-mobile-sub';
+    T7_IMPORTADOS_MENU.categories.forEach(function (category) {
+      var subItem = document.createElement('li');
+      var subLink = document.createElement('a');
+      subLink.href = category.href;
+      subLink.textContent = category.label;
+      subItem.appendChild(subLink);
+      subList.appendChild(subItem);
+    });
+    item.appendChild(subList);
+
+    return item;
+  }
+
+  function ensureImportadosMenuItem() {
+    document.querySelectorAll('.header .nav .list').forEach(function (list) {
+      if (!list.querySelector('.t7-importados-nav')) {
+        list.appendChild(createImportadosDesktopItem());
+      }
+    });
+
+    document.querySelectorAll('.content-nav .list-nav').forEach(function (list) {
+      if (!list.querySelector('.t7-importados-mobile')) {
+        list.appendChild(createImportadosMobileItem());
+      }
+    });
+  }
+
+  function bindImportadosMobileToggle() {
+    if (document.documentElement.getAttribute('data-t7-importados-mobile-toggle') === '1') return;
+    document.documentElement.setAttribute('data-t7-importados-mobile-toggle', '1');
+    document.addEventListener('click', function (event) {
+      var trigger = event.target && event.target.closest
+        ? event.target.closest('.t7-importados-mobile > a.sub')
+        : null;
+      if (!trigger) return;
+
+      event.preventDefault();
+      var item = trigger.closest('.t7-importados-mobile');
+      var isOpen = item && item.classList.toggle('active');
+      trigger.classList.toggle('active', !!isOpen);
+      trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+  }
+
   function normalizeNewsletterForms() {
     var forms = document.querySelectorAll('form[action*="/mvc/store/newsletter"]');
     forms.forEach(function (form) {
@@ -885,6 +1037,8 @@
         normalizeSearchForms();
         bindHeaderSearchAutocomplete();
         normalizeMenuLinks();
+        ensureImportadosMenuItem();
+        bindImportadosMobileToggle();
         normalizeNewsletterForms();
       })
       .catch(function () {});
@@ -3874,7 +4028,17 @@
     style.id = 't7-mobile-consent-styles';
     style.textContent = [
       '.banner-info .item.t7-benefit-clone{display:none!important;}',
+      '.header .nav .list>li.t7-importados-nav{min-width:0!important;}',
+      '.header .nav .list>li.t7-importados-nav>a.vertical-icon{box-sizing:border-box!important;overflow:hidden!important;}',
+      '.header .nav .list>li.t7-importados-nav>a .name{max-width:170px!important;margin:0 auto!important;white-space:normal!important;line-height:1.08!important;letter-spacing:0!important;}',
+      '.header .nav .list>li.t7-importados-nav .t7-importados-icon,.content-nav .t7-importados-mobile .icon img{object-fit:cover!important;object-position:center!important;border-radius:4px!important;background:#000!important;}',
+      '.content-nav .t7-importados-mobile .icon img{width:36px!important;height:36px!important;}',
+      '.content-nav .t7-importados-mobile{height:auto!important;}',
+      '.content-nav .t7-importados-mobile-sub{display:block!important;height:auto!important;max-height:0!important;margin:0 0 0 64px!important;padding:0!important;overflow:hidden!important;list-style:none!important;transition:max-height 180ms ease!important;}',
+      '.content-nav .t7-importados-mobile.active .t7-importados-mobile-sub{max-height:130px!important;margin-bottom:10px!important;}',
+      '.content-nav .t7-importados-mobile-sub a{display:flex!important;align-items:center!important;min-height:34px!important;padding:0!important;color:#fff!important;font-size:13px!important;font-weight:700!important;text-transform:uppercase!important;}',
       '@keyframes t7-benefits-marquee-right{from{transform:translate3d(calc(-1 * var(--t7-benefits-loop-width, 0px)),0,0);}to{transform:translate3d(0,0,0);}}',
+      '@media (min-width:768px){.header .nav .list>li.t7-importados-nav>a .name{font-size:11px!important;}.header .nav .list>li.t7-importados-nav .t7-importados-icon{width:34px!important;height:34px!important;max-width:34px!important;max-height:34px!important;}}',
       '@media (max-width:767px){',
       '#cookie-banner[class*="adopt-"]{left:8px!important;right:8px!important;bottom:8px!important;top:auto!important;width:auto!important;max-width:calc(100vw - 16px)!important;max-height:none!important;padding:8px 10px!important;border-radius:12px!important;overflow:visible!important;box-shadow:0 12px 30px rgba(17,17,17,.22)!important;}',
       '#cookie-banner[class*="adopt-"]>div,#cookie-banner[class*="adopt-"]>div>div{width:auto!important;height:auto!important;min-height:0!important;max-height:none!important;}',
@@ -4039,6 +4203,8 @@
     normalizeSearchForms();
     bindHeaderSearchAutocomplete();
     normalizeMenuLinks();
+    ensureImportadosMenuItem();
+    bindImportadosMobileToggle();
     normalizeCartHeaderNavigation();
     normalizeNewsletterForms();
     normalizeUnavailableNotice();
@@ -4093,6 +4259,8 @@
       bindBackendCatalogFilters();
       normalizeCurrentBrandFilters();
       ensureProductCardLinks();
+      ensureImportadosMenuItem();
+      bindImportadosMobileToggle();
       bindHeaderSearchAutocomplete();
       normalizeRelatedProductCards();
       removeRelatedInlinePurchaseControls();
@@ -4103,6 +4271,8 @@
 
     window.addEventListener('load', function () {
       ensureProductCardLinks();
+      ensureImportadosMenuItem();
+      bindImportadosMobileToggle();
       bindHeaderSearchAutocomplete();
       normalizeRelatedProductCards();
       removeRelatedInlinePurchaseControls();
@@ -4151,6 +4321,8 @@
       normalizeSearchForms();
       bindHeaderSearchAutocomplete();
       normalizeMenuLinks();
+      ensureImportadosMenuItem();
+      bindImportadosMobileToggle();
       normalizeNewsletterForms();
       normalizeUnavailableNotice();
       normalizePaymentLabels();

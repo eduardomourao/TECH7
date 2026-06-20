@@ -1,5 +1,39 @@
 # Plano de execucao - performance producao TECH7 (2026-06-13)
 
+## Admin `/Admin` - persistencia de edicao produto - 2026-06-20
+- [x] Confirmar cwd, estado do git e skills obrigatorias.
+- [x] Confirmar Supabase ativo e schema real de produtos/imagens/categorias.
+- [x] Reproduzir fluxo de edicao de produto existente antes de corrigir.
+- [x] Capturar payload/resposta e comparar com banco apos salvar.
+- [x] Corrigir perda de titulo, imagem, descricao e categoria no caminho real.
+- [x] Validar reabertura no admin e exibicao publica.
+- [x] Rodar validacoes npm relevantes e registrar evidencias.
+
+### Guardrails Edicao Produto
+- Nao mascarar com estado local; confirmar persistencia no Supabase.
+- Nao quebrar preco, estoque, slug, status ou outros campos.
+- Categoria editada deve existir em `public.categories`.
+- Imagens devem atualizar `products.metadata.images`, `primary_image_url`/`image_url` e relacionamentos quando aplicavel.
+
+## Admin `/Admin` - criar novo produto - 2026-06-20
+- [x] Confirmar cwd, estado do git e ferramentas obrigatorias.
+- [x] Tentar ONE primeiro para Supabase; se indisponivel, usar `@supabase` como fallback registrado.
+- [x] Confirmar projeto Supabase ativo antes de alterar produto/categoria/imagens.
+- [x] Mapear painel admin, endpoints de produtos, schema real e layout publico atual.
+- [x] Implementar botao `+ Novo produto` no admin com formulario em branco.
+- [x] Validar titulo, preco, categoria existente, slug unico e imagens conforme schema.
+- [x] Salvar produto real no banco, sem localStorage/estado temporario como fonte final.
+- [x] Garantir que o produto novo use o layout publico existente de produto.
+- [x] Validar com npm, API e navegador Chrome/fallback documentado.
+
+### Guardrails Novo Produto
+- Escopo principal: `/Admin`, rotas/admin necessarias e arquivos de acompanhamento.
+- Nao criar novo layout publico de produto.
+- Nao copiar dados de outro produto; somente reutilizar a estrutura visual/runtime existente.
+- Categoria deve vir do banco por select/dropdown, sem digitacao livre.
+- Status inicial deve ser seguro (`inativo`, `rascunho` ou equivalente do schema).
+- Imagens devem iniciar vazias e ser preenchidas manualmente pelo usuario.
+
 ## Admin `/Admin` - filtros, massa, exclusoes e tema - 2026-06-15
 - [x] Confirmar cwd e escopo restrito ao painel admin.
 - [x] Usar Supabase plugin e confirmar projeto ativo antes de tocar produtos/pedidos/OS/categorias.
@@ -112,6 +146,31 @@ Identificar por que `https://tech-7.vercel.app/` demora para carregar em produca
 - [ ] Implementar somente correcao segura, se comprovada.
 - [ ] Rodar validacoes e repetir medicoes.
 - [ ] Relatorio final.
+
+---
+
+# Plano de execucao - cupons TECH7 (2026-06-20)
+
+## Objetivo
+Criar cupons no Admin, aplicar no carrinho, manter no checkout e salvar desconto no pedido.
+
+## Guardrails
+- Supabase e fonte real para schema/persistencia.
+- Tentar Chrome direto; se indisponivel, validar com fallback Chrome/Playwright registrado.
+- Desconto aplica no subtotal dos produtos, nao no frete.
+- Desconto nunca deixa total negativo.
+- Nao quebrar frete, carrinho, checkout, admin, pedido ou preco real.
+
+## Fases
+- [x] Confirmar cwd, skills, estado Git e ferramentas.
+- [x] Spawn subagentes read-only para schema, admin e carrinho/checkout.
+- [ ] Mapear Admin, carrinho, checkout e pedidos.
+- [ ] Criar schema/migration de cupons e campos de pedido.
+- [ ] Implementar APIs admin/publicas de cupom.
+- [ ] Implementar UI Admin de cupons.
+- [ ] Implementar UI do carrinho e persistencia local.
+- [ ] Integrar checkout/pedido com desconto.
+- [ ] Validar Supabase, Chrome/fallback e npm checks.
 
 ---
 
@@ -856,3 +915,63 @@ Phases:
 - [x] Adjust mobile dropdown positioning against the live input rectangle and visual viewport.
 - [x] Validate syntax and mobile visual geometry.
 - [x] Save visual evidence.
+
+## Admin real QA edicao/criacao - 2026-06-20
+- [x] Ler skills obrigatorias e memoria relevante.
+- [x] Confirmar Supabase/projeto ativo e estado local.
+- [x] Subir servidor local com npm run dev.
+- [x] Testar login e navegacao do painel com Chrome.
+- [x] Testar criacao de produto, edicao completa, salvar inline, salvar em lote, pagina publica e exclusao.
+- [x] Testar criacao/edicao/exclusao de OS.
+- [x] Testar filtros, ordenacao, tema e principais abas.
+- [x] Rodar validacoes e registrar evidencias.
+
+### Guardrails QA Admin
+- Dados QA devem ser removidos no final.
+- Validar persistencia real no Supabase, nao apenas UI.
+- Nao alterar codigo salvo neste ciclo salvo bug bloqueante e pedido implicito de correcao.
+# Plano de execucao - frete TECH7 (2026-06-20)
+
+## Objetivo
+Investigar e corrigir fluxo completo de frete no site: produto, carrinho, checkout, cálculo, seleção, total e persistência em pedido.
+
+## Guardrails
+- Usar `@supabase` para dados/campos de produtos/pedidos/frete.
+- Tentar `@chrome`; se indisponível, registrar fallback antes de validar por Playwright/Chrome local.
+- Preservar `Via Uber` e `Retirada na loja`.
+- Opções grátis continuam `R$0,00`; frete pago soma uma vez ao total.
+- Não esconder erro nem remover opção para mascarar problema.
+- Não quebrar produto, preço, carrinho ou checkout.
+
+## Fases
+- [x] Confirmar cwd, skills e estado Git.
+- [x] Confirmar disponibilidade de `@supabase` e indisponibilidade de `@chrome` direto.
+- [x] Mapear arquivos de frete/carrinho/checkout.
+- [x] Reproduzir falha e testar APIs.
+- [x] Consultar Supabase para campos/dados relacionados.
+- [x] Implementar correcao minima.
+- [x] Validar produto, carrinho, checkout, totais e persistencia.
+- [x] Rodar `validate:melhor-envio`, `validate:loggi`, `validate:build` e smokes.
+
+---
+
+# Plano de execucao - cupons TECH7 (2026-06-20)
+
+## Objetivo
+Adicionar cupons de desconto reais no Admin, carrinho, checkout e pedido.
+
+## Guardrails
+- Supabase e API do projeto sao a fonte de verdade.
+- Desconto fixo em reais aplica somente no subtotal dos produtos, nao no frete.
+- Total final nunca pode ficar negativo.
+- Cupom expirado, inativo, inexistente ou maior que subtotal deve ser rejeitado.
+- Preservar frete, carrinho, checkout, precos e pedidos existentes.
+
+## Fases
+- [x] Confirmar projeto Supabase ativo e schema atual.
+- [x] Criar migration/tabela `coupons` e campos de cupom em `orders`.
+- [x] Criar API publica de validacao de cupom.
+- [x] Criar CRUD/listagem/filtros de cupons no Admin.
+- [x] Integrar cupom no carrinho com aplicar/remover/mensagens.
+- [x] Integrar cupom no checkout, assinatura PIX e criacao do pedido.
+- [x] Validar API, Supabase, build e browser.

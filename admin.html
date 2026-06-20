@@ -899,6 +899,65 @@
       font-size: 11px;
       font-weight: 900;
     }
+    .product-image-editor {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .025);
+    }
+    .image-editor-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .image-editor-head strong {
+      display: block;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .image-editor-head small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    #productImageRows {
+      display: grid;
+      gap: 8px;
+    }
+    .product-image-row {
+      display: grid;
+      grid-template-columns: auto minmax(220px, 1fr) auto auto auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .image-primary-choice {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .image-url-input {
+      width: 100%;
+      min-width: 0;
+    }
+    @media (max-width: 760px) {
+      .product-image-row {
+        grid-template-columns: 1fr 1fr;
+      }
+      .product-image-row .image-url-input {
+        grid-column: 1 / -1;
+        order: -1;
+      }
+    }
     .os-form {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1194,6 +1253,15 @@
             </svg>
             <span>Pedidos</span>
           </button>
+          <button type="button" data-tab="coupons" aria-label="Cupons">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4Z"/>
+              <path d="M8 8v8"/>
+              <path d="m13 9 4 6"/>
+              <path d="m17 9-4 6"/>
+            </svg>
+            <span>Cupons</span>
+          </button>
           <button type="button" data-tab="service-orders" aria-label="Ordens de Servico">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
@@ -1290,6 +1358,7 @@
           <div class="tab-content active" id="tab-dashboard"></div>
           <div class="tab-content" id="tab-products"></div>
           <div class="tab-content" id="tab-orders"></div>
+          <div class="tab-content" id="tab-coupons"></div>
           <div class="tab-content" id="tab-service-orders"></div>
           <div class="tab-content" id="tab-pricing"></div>
           <div class="tab-content" id="tab-reports"></div>

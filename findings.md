@@ -1,4 +1,29 @@
-# Findings - performance producao TECH7 (2026-06-13)
+﻿# Findings - performance producao TECH7 (2026-06-13)
+
+## Admin `/Admin` - persistencia de edicao produto - 2026-06-20
+- Memoria relevante: criacao de produto admin usa `products.price_cents`, `primary_image_url`, ``metadata.images``, `product_images`, `product_categories`; pagina publica dinamica esta em `server/app.js`.
+- Estado inicial do worktree ja tinha alteracoes pendentes anteriores em admin/runtime e assets; preservar, nao reverter.
+- Codigo atual indica que `POST /api/admin/products` sincroniza `product_images` e `product_categories`, mas `PUT/PATCH /api/admin/products/:id` ainda atualiza apenas `products`.
+- Hipotese inicial a validar: edicao salva ``metadata.images``/`section`, mas nao sincroniza tabelas relacionais, e pode deixar caminhos publicos/admin inconsistentes apos categoria/imagem.
+
+## Admin `/Admin` - criar novo produto - 2026-06-20
+- Skills obrigatorias aplicadas: `caveman` e `planning-with-files`.
+- Skills uteis disponiveis e lidas para esta tarefa: `prompt-library`, `prompt-engineering`, `webapp-testing`, `Verification & Quality Assurance`, `app-builder`, `api-testing-observability-api-mock`, `accessibility-compliance-accessibility-audit`.
+- ONE: ferramentas de consulta/descoberta necessarias para validar Supabase nao ficaram disponiveis nesta sessao; fallback autorizado usado com `@supabase`.
+- `@supabase` confirmado: projeto ativo `supabase-bisque-bridge`, ref `lzsaaufsdcmqlasjrqck`, regiao `sa-east-1`, status `ACTIVE_HEALTHY`.
+- Schema validado no `@supabase`: `products` possui `price_cents`, `price`, `description_text`, `description_html`, `stock`, `availability`, `primary_image_url`, `metadata`, `active` e `is_active`; `categories` possui `slug/name`; `product_images` e `product_categories` existem.
+- Categorias reais do banco para select: `acessorios`, `iphones`, `apple-watch`, `macs`, `ipads`, `iphones-novos`, `iphones-seminovos`, `macs-novos`, `macs-seminovos`, `robos`, `xiaomi`.
+- `product_images` e `product_categories` tinham 0 linhas antes desta tarefa; runtime publico atual usa `products.`metadata.images``, `primary_image_url`, `image_url` e `section`.
+- Layout publico dinamico identificado em `server/app.js`: produto por `/{section}/{slug}` ou `/{section}/{brand}/{slug}`, com header, galeria, titulo, preco, descricao e compra no mesmo template dinamico.
+- O admin ja tinha um editor parcial, mas o novo produto nascia com categoria/preco/status preenchidos e imagens em textarea. Isso nao atendia ao requisito de campos em branco e controle claro de galeria.
+- Correcoes aplicadas: botao `+ Novo produto`, formulario com categoria placeholder, preco/estoque em branco, status inicial inativo, marca opcional e gerenciador de imagens com adicionar/remover/subir/descer/principal.
+- Backend alterado: `POST /api/admin/products` agora valida categoria existente no banco, exige slug globalmente unico para novos produtos, exige preco positivo, salva em transacao e sincroniza `product_images`/`product_categories`.
+- Durante o teste visual, `type="url"` nos campos de imagem bloqueou caminhos locais como `/_assets/...`; corrigido para `type="text"` com validacao no backend.
+- Durante a validacao publica, o template dinamico do produto criado tinha overflow horizontal e nao expunha botao/form de compra de forma robusta; `server/app.js` recebeu container responsivo, `#form_comprar`, `#bt_comprar` e bloco `.box-frete`.
+- Validacao final com Google Chrome via Playwright fallback criou produto real `prod_8dbe8f4788b35b36161e0696367930b0`, confirmou pagina publica com titulo, preco `R$ 123,45`, 2 imagens, 2 thumbs, header, galeria, compra, frete e sem overflow (`scrollWidth=1366`, `innerWidth=1366`).
+- Produto QA foi removido apos o teste. Supabase confirmou `qa_products_left = 0`.
+- Evidencias salvas em `_validation/admin-new-product/`: `admin-new-product-blank-form-final.png`, `admin-new-product-after-save-final.png`, `public-created-product-page-final.png`, `admin-new-product-validation-final.json`.
+- Estado inicial do git tem alteracoes preexistentes nao relacionadas em `_custom/tech7-theme.css`, `assets/js/tech7-local-runtime.js` e `_assets/tech7/apple-importados.jpg`; preservar e nao reverter.
 
 ## Admin `/Admin` - filtros, massa, exclusoes e tema - 2026-06-15
 - Supabase plugin disponivel e usado. Projeto ativo: `supabase-bisque-bridge`, ref `lzsaaufsdcmqlasjrqck`, regiao `sa-east-1`, status `ACTIVE_HEALTHY`.
@@ -45,14 +70,14 @@
 - A pagina `duvidas-servico-de-instalacao/index.html` ainda tinha condicoes antigas, prazo fixo de 1 dia util, endereco antigo e mencao a `X3 Distribuidora`.
 - A pagina foi reescrita para deixar explicito que cada aparelho/modelo possui valor proprio de mao de obra, que o reparo cobre somente o servico solicitado e que defeitos preexistentes precisam ser declarados antes do atendimento.
 - A responsabilidade foi limitada a peca vendida pela TECH 7 e ao servico contratado para essa peca; defeitos posteriores de placa, software, perifericos, oxidacao, queda, mau uso ou problemas nao ligados diretamente a peca vendida ficam fora da responsabilidade da loja.
-- O texto agora informa que prazos podem variar, trocas de tela e bateria normalmente sao feitas no mesmo dia quando a peca esta disponivel e nao ha defeitos adicionais, e que eventual restituição pode ser revertida em credito na loja, sem devolucao em especie.
+- O texto agora informa que prazos podem variar, trocas de tela e bateria normalmente sao feitas no mesmo dia quando a peca esta disponivel e nao ha defeitos adicionais, e que eventual restituiÃ§Ã£o pode ser revertida em credito na loja, sem devolucao em especie.
 - Ocorrencias institucionais antigas de `X3 Distribuidora` foram substituidas por `TECH 7`; a pagina de alerta de fraude tambem teve mencoes genericas a `X3` substituidas por `TECH 7`. Mencoes de produto como `Poco X3` foram preservadas.
 - Validacao local mobile 390x844 confirmou texto obrigatorio presente, textos antigos ausentes, `scrollWidth=390` e sem overflow horizontal. Evidencias: `_validation/installation-page/servico-instalacao-390x844-after.png` e `_validation/installation-page/servico-instalacao-390x844-after.json`.
 - Risco remanescente fora do escopo textual: o tema legado ainda solicita `http://127.0.0.1:3000/assets/store/img/fechar.png` e recebe 404. Esse asset nao foi introduzido por esta alteracao.
 
 ## Estado inicial
 - URL alvo confirmada pelo pedido: `https://tech-7.vercel.app/`.
-- Investigacao deve começar por medicao; nenhuma alteracao funcional feita ainda.
+- Investigacao deve comeÃ§ar por medicao; nenhuma alteracao funcional feita ainda.
 - Memoria relevante: producao TECH7 em Vercel ja teve historico de `/api/health`, envs Supabase, `PGSSL_REJECT_UNAUTHORIZED`, `WHATSAPP_APP_SECRET` opcional e necessidade de `vercel logs --expand`.
 - Worktree ja possui mudancas anteriores; preservar e nao reverter.
 
@@ -149,7 +174,7 @@
 - Botao visivel para mobile/desktop: `.button-filter`.
 - Form real: `form.smart-filter`; runtime de aplicacao backend fica em `assets/js/tech7-local-runtime.js`.
 - CSS legado do tema define `.filter__list`, `.filter__title`, `.filter__item`, `.filter__label`, mas nao adapta claramente `.box-fixed/.box-white` como drawer mobile.
-- Problema estrutural encontrado no HTML legado: alguns labels de categoria usam `for="c-APPLE"` enquanto inputs têm `id="APPLE"`, reduzindo area clicavel em mobile. Correção deve normalizar labels via JS sem editar todas as paginas.
+- Problema estrutural encontrado no HTML legado: alguns labels de categoria usam `for="c-APPLE"` enquanto inputs tÃªm `id="APPLE"`, reduzindo area clicavel em mobile. CorreÃ§Ã£o deve normalizar labels via JS sem editar todas as paginas.
 
 ## Evidencia antes
 - `_validation/mobile-filters/before-filters-390.json`: em 390x844, painel aberto tinha `.box-white` em `305x1121`, ultrapassando a viewport.
@@ -163,7 +188,7 @@
   - adiciona classe `body.t7-filter-open` para bloquear scroll do fundo;
   - aumenta area clicavel dos filtros para minimo de 44px;
   - normaliza `label[for]` para bater com `input.id`;
-  - gera texto legivel para faixas de preco vazias, ex. `Até R$ 349,99`;
+  - gera texto legivel para faixas de preco vazias, ex. `AtÃ© R$ 349,99`;
   - preserva o backend filter existente e nao altera rotas/produtos.
 
 ## Evidencia depois
@@ -236,7 +261,7 @@
 - Nenhum produto ativo Incell/Vivid foi encontrado dentro dos modelos confirmados; nenhum item foi atualizado para `R$ 450,00`.
 - API `/api/products/resolve-prices` retornou `price_cents=95000`, `price_status=available` e `found=true` para os quatro produtos.
 - Bug visual/compra encontrado no Note 20 Ultra: o form Tray legado podia desaparecer antes de `produto-comprar.js` recriar a UI; resultado era pagina sem preco principal/botao local em algumas execucoes.
-- Correção aplicada em `produto-comprar.js`: detectar pagina de produto por shell `.page-product`/`.fixed-info` alem do form legado, permitindo inserir `.t7-buy-wrapper` com preco e botao mesmo se o form ja tiver sido removido.
+- CorreÃ§Ã£o aplicada em `produto-comprar.js`: detectar pagina de produto por shell `.page-product`/`.fixed-info` alem do form legado, permitindo inserir `.t7-buy-wrapper` com preco e botao mesmo se o form ja tiver sido removido.
 - Validacao visual final por Playwright Chrome fallback em 390x844:
   - quatro paginas com `R$ 950,00` em `.t7-buy-wrapper .t7-buy-price`;
   - botao `.btn-comprar` habilitado;
@@ -291,7 +316,7 @@
 # Findings - Display/LCD Blocklist Matcher
 
 - `artifacts/tabela_precos_venda_telas.xlsx` tem 13 abas; `Tabela Completa` tem 589 linhas nao vazias, 585 precos numericos e 4 linhas `Consultar`.
-- Colunas reais: `Produto`, `Custo`, `Adicional`, `Preço de venda`.
+- Colunas reais: `Produto`, `Custo`, `Adicional`, `PreÃ§o de venda`.
 - A planilha e de telas, mas nomes como `Motorola E13 Sem aro` nao trazem `display/lcd/tela`; por isso a planilha inteira deve ser fonte de bloqueio por contexto.
 - `_assets/tech7/search-index.json` tem 3279 itens; categorias `display` 690, `display-e-lcd` 65 e `touchs-e-visores` 25.
 - O indice tem 37 itens com `display/lcd/tela` fora de categorias de display/touch, incluindo `Aro LCD`, `Flex LCD` e telas cadastradas em `baterias`.
@@ -300,7 +325,7 @@
 - `products` contem 2512 produtos; 2493 ativos; 27 com `price_cents` ausente/menor que 200.
 - Campo oficial usado pelo site/admin/carrinho e `products.price_cents`; campos legados `price` e `price_text` existem e devem ficar sincronizados quando uma linha for atualizada.
 - Secoes atuais: `pecas-e-componentes`, `display-e-lcd`, `tampas-e-carcacas`, `baterias-celular`, `Iphones`, `Macs`, `Ipads`.
-- Preview final: `Atualizar` 1894, `Bloqueado: Display/LCD/tela` 597, `Revisar: possível Display/LCD/tela` 7, `Revisar: produto duplicado ou ambíguo` 7, `Ignorar: preço Consultar` 7.
+- Preview final: `Atualizar` 1894, `Bloqueado: Display/LCD/tela` 597, `Revisar: possÃ­vel Display/LCD/tela` 7, `Revisar: produto duplicado ou ambÃ­guo` 7, `Ignorar: preÃ§o Consultar` 7.
 - Match independente com planilha de telas: 153 produtos; todos tambem cobertos por bloqueio forte, nenhum exclusivo por match.
 
 ---
@@ -423,7 +448,7 @@
 - Causa raiz compartilhada: itens antigos/atuais podiam salvar `image` com URL de variacao local inexistente, exemplo `...note_20_ultra..._variacao_3826...jpg` e `...s23_fe...7716_1...jpg`, ambas 404 no servidor local.
 - A recuperacao anterior falhava porque os itens salvos em `visitedProducts` tinham URL sem segmento de marca (`/display/tela...`) e o match por titulo do indice nao era identico ao nome exibido no card.
 - O indice `_assets/tech7/search-index.json` tem imagens reais validas para os mesmos slugs, exemplo `tela-display-lcd-samsung-note-20-ultra-n986-oled` e `tela-display-lcd-samsung-s23-fe-s771-original-retirada-sem-aro`.
-- Correção escolhida: resolver `Produtos visitados` por imagem canonica do produto atual (`og:image`/imagem principal) e, para itens antigos, reidratar por slug/rota/titulo usando o indice local antes de aceitar placeholder.
+- CorreÃ§Ã£o escolhida: resolver `Produtos visitados` por imagem canonica do produto atual (`og:image`/imagem principal) e, para itens antigos, reidratar por slug/rota/titulo usando o indice local antes de aceitar placeholder.
 - Nao foi necessario tocar em Supabase, produto, API ou dado remoto; portanto regra ONE-first nao foi acionada para alteracao de dados.
 - Validacao Chrome real desktop pos-fix: cards de `Produtos visitados` trocaram placeholder por imagens reais, com 0 placeholders no viewport.
 - Validacao Chrome real categoria `Display Samsung`: 10 primeiros cards continuam com imagens reais, 0 placeholders.
@@ -458,7 +483,7 @@
 - No mobile, a coluna de thumbnails herdava comportamento de desktop: `.nav-images` ficava parcialmente fora do viewport, exemplo reproduzido em 390px com `left=-120` e `right=0`.
 - A rota testada nao carregava `_custom/tech7-theme.css`, entao o CSS sozinho nao resolveria o problema; o runtime agora aplica inline os estilos criticos no breakpoint mobile.
 - A solucao mobile reposiciona os thumbnails abaixo da imagem principal, cria setas acessiveis sobre a imagem, mantem o indice ativo sincronizado e adiciona swipe horizontal com tolerancia para scroll vertical.
-- `setActiveGalleryIndex` preserva o scroll no mobile para evitar salto ao clicar em seta/thumb e mantém o desktop fora do caminho mobile.
+- `setActiveGalleryIndex` preserva o scroll no mobile para evitar salto ao clicar em seta/thumb e mantÃ©m o desktop fora do caminho mobile.
 - Desktop continua sem setas mobile e com thumbnails funcionando; comportamento novo fica limitado ao `max-width: 767px`.
 - O Chrome/plugin `@chrome` nao ficou callable nesta sessao; a validacao visual foi executada com Playwright usando `channel: chrome`.
 - Validacao mobile final em 320/375/390/430 confirmou proximo, anterior, swipe, thumbnail, setas visiveis, uma imagem principal visivel e ausencia de overflow horizontal.
@@ -536,3 +561,58 @@
 - The reported mobile bug is a placement issue, not a data issue: suggestions are rendered as an overlay but the mobile positioning only set `top`, leaving width/left/max-height insufficiently anchored to the input and viewport when the keyboard changes available space.
 - The legacy `suggestion-words` class still forced absolute positioning. Mobile now applies priority inline fixed positioning, left, top, width and max-height calculated from the live input and `visualViewport`.
 - Validation confirmed mobile 390x844 and keyboard-simulated 390x520 both keep the dropdown under the input, horizontally aligned, inside the viewport and without horizontal page overflow.
+
+## Admin edit persistence - Findings - 2026-06-20
+- Supabase confirmou o bug antes da correcao no produto QA prod_18112cf1de5aaf339c1619c94a1530b5: products recebeu title/name/description/section/image metadata novos, mas product_images permaneceu com /favicon.png e product_categories permaneceu com iphones.
+- Causa raiz: PUT/PATCH /api/admin/products/:id atualizava somente products. O endpoint de criacao ja chamava syncProductRelations, mas o endpoint de edicao nao sincronizava product_images nem product_categories.
+- Correcao aplicada: updateProduct agora valida categoria alterada contra categories e sincroniza product_images/product_categories dentro da mesma transacao do update em products.
+
+- Validacao apos correcao: save pelo admin retornou 200; Supabase mostrou products, product_images e product_categories alinhados. Valores finais: name/title Produto QA Persistencia Final 1781967717414, section/category ipads, imagens /favicon.png e /_assets/tech7/product-placeholder.svg, descricoes finais, preco 11111 centavos, estoque 4, ativo true.
+- Pagina publica validada em http://127.0.0.1:3001/ipads/qa/produto-qa-persistencia-1781967717414/index.html: status 200, titulo/descricao/preco/categoria/imagens exibidos, sem erro de console publico.
+- @chrome e Chrome DevTools nao expuseram ferramentas de navegacao/click nesta sessao; validacao visual foi feita com Playwright usando canal Chrome como fallback final.
+- Produto QA de teste foi removido do Supabase apos evidencias; qa_products_left=0.
+
+## Admin real QA edicao/criacao - Findings - 2026-06-20
+- Chrome QA real encontrou bug em Salvar todas as alteracoes: save inline de nome/preco/categoria preservava apenas a imagem principal e sobrescrevia `metadata.images`/product_images, removendo imagens secundarias.
+- Causa raiz: `buildProductPayload` sempre recalculava `metadata.images` usando fallback de `primary_image_url`/`image_url`, mesmo quando payload nao tinha `images`, `image_url` ou `primary_image_url`.
+- Correcao aplicada: `buildProductPayload` agora preserva `currentMeta.images` quando imagens nao foram tocadas pelo payload; so recalcula galeria quando imagem foi enviada ou na criacao.
+
+
+- Resultado final QA admin: funcoes testadas e aprovadas no Chrome apos correcao do bug de perda de imagens no save inline/salvar todas.
+- Console Chrome: apenas 401 esperado de /api/admin/session antes do login; sem requestfailed e sem erro publico na pagina do produto.
+- Evidencias finais em _validation/admin-real-qa/: screenshots 01-18, phase1-create-edit-results.json, phase2-delete-results.json.
+
+- Bulk price isolado validado no Chrome com produto QA filtrado: Preco fixo da pagina e Reajuste % da pagina passaram sem tocar catalogo real.
+
+---
+
+# Findings - frete TECH7
+
+- Backend principal de frete: server/routes/shipping.js com /api/shipping/melhor-envio/quote e /api/shipping/loggi/quote.
+- Checkout usa /api/shipping/melhor-envio/quote, deliveryMode shipping/uber/pickup e salva shipping em /api/orders.
+- Orders tem delivery_mode, shipping_total_cents, shipping_provider, shipping_quote_id, shipping_service_id, shipping_service_label e endereco de entrega.
+- Produto usa assets/js/tech7-local-runtime.js para calcular frete pelo Melhor Envio apos resolver id/preco do produto.
+- Supabase ativo confirmado: lzsaaufsdcmqlasjrqck. Tabelas shipping_quotes, provider_oauth_tokens, orders e shipments existem.
+- Supabase advisors reportou RLS desabilitado em tabelas sensiveis; registrar no relatorio final como risco separado.
+- Causa raiz corrigida 1: checkout reutilizava `tech7_checkout_pix_state_v1` quando pedido salvo estava pending/failed, sem comparar carrinho, cliente, endereco, modo de entrega, quoteId, opcao e total atuais. Isso podia manter PIX/pedido antigo com frete antigo apos troca de frete.
+- Causa raiz corrigida 2: normalizeMelhorEnvioOptions descartava cotacao com `price` numerico `0` antes de normalizar, porque filtrava com `quote.price || quote.custom_price`.
+- Patch: checkout agora gera assinatura de carrinho+cliente+frete e so reutiliza pedido PIX se a assinatura atual bater; tambem limpa sessao PIX quando carrinho, modo de entrega, cotacao ou opcao de frete mudam.
+- Patch: server/routes/shipping.js aceita preco zero real desde que o campo exista, mantendo validacao posterior `priceCents >= 0`.
+- API real local Melhor Envio retornou opcoes solicitadas: Correios - SEDEX, Jadlog (service .Package exibido como Jadlog) e Loggi (service Loggi Ponto exibido como Loggi).
+- Supabase validou pedidos QA: shipping pago Loggi via Melhor Envio total 35000 + 1459 = 36459; Uber total 35000 e frete 0; retirada total 35000 e frete 0. Pedidos QA foram cancelados depois da conferencia.
+- Validacao visual fallback Chrome/Playwright: produto aceitou CEP `30111070` sem hifen e nao recarregou; checkout trocou SEDEX/Loggi/Jadlog atualizando total sem duplicar; Uber/retirada continuaram R$0,00; mobile sem overflow.
+
+---
+
+# Findings - cupons TECH7
+
+- Supabase ativo confirmado: `lzsaaufsdcmqlasjrqck` (`supabase-bisque-bridge`).
+- Schema criado/confirmado: tabela `public.coupons` com `id`, `code`, `discount_cents`, `expires_at`, `active`, `created_at`, `updated_at`.
+- `public.orders` agora possui `discount_cents`, `coupon_id`, `coupon_code` e `coupon_discount_cents`.
+- O Admin real fica em `admin.html` + `assets/js/admin.js`, consumindo `/api/admin`; nao ha SPA separada ativa para esta tela.
+- Cupom e validado por `/api/coupons/validate`; o endpoint rejeita codigo ausente, inexistente, expirado, inativo e desconto maior que subtotal.
+- O carrinho guarda cupom aplicado em `localStorage` (`t7_coupon_v1`) com subtotal original; se o carrinho mudar, o cupom e removido para evitar total incorreto.
+- O checkout le o mesmo cupom, exibe desconto no resumo/revisao e envia `coupon` para `/api/orders`.
+- `/api/orders` revalida o cupom no servidor antes de salvar o pedido, entao o cliente nao consegue forcar desconto invalido pelo navegador.
+- O total do pedido e calculado como `subtotal - desconto + frete`; o frete continua baseado no subtotal original dos produtos.
+- A sessao PIX agora inclui assinatura de cupom para nao reaproveitar PIX antigo quando o cupom muda.

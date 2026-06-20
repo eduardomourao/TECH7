@@ -1,4 +1,25 @@
-# Progresso - performance producao TECH7 (2026-06-13)
+﻿# Progresso - performance producao TECH7 (2026-06-13)
+
+- 2026-06-20: iniciado objetivo de investigar por que edicoes admin de titulo, imagem, descricao e categoria nao aparecem no site.
+- 2026-06-20: skills obrigatorias lidas/aplicadas: `caveman` e `planning-with-files`.
+- 2026-06-20: memoria consultada para contexto do fluxo admin novo produto; final deve citar memoria usada.
+- 2026-06-20: worktree ja continha alteracoes pendentes de tarefas anteriores; escopo sera preservar e corrigir somente fluxo necessario.
+
+- 2026-06-20: iniciado objetivo `+ Novo produto` no `/Admin`.
+- 2026-06-20: cwd confirmado em `C:\Users\Admin\Downloads\TECH7\TECH7-main`.
+- 2026-06-20: ONE tentado primeiro, mas sem ferramentas de consulta Supabase utilizaveis nesta sessao; fallback para `@supabase` registrado.
+- 2026-06-20: `@supabase` instalado/ativado e projeto `supabase-bisque-bridge` (`lzsaaufsdcmqlasjrqck`) confirmado `ACTIVE_HEALTHY`.
+- 2026-06-20: arquivos obrigatorios de acompanhamento atualizados antes das alteracoes funcionais.
+- 2026-06-20: schema mapeado no `@supabase`: `products`, `categories`, `product_images`, `product_categories`, `product_variants`.
+- 2026-06-20: fluxo publico identificado em `server/app.js`; novo produto usa o template dinamico existente e nao um layout novo.
+- 2026-06-20: admin ajustado para `+ Novo produto`, campos iniciais vazios, categoria por select com placeholder e galeria editavel.
+- 2026-06-20: backend ajustado para criacao real com categoria valida, slug global unico, preco positivo e persistencia de imagens/categoria em transacao.
+- 2026-06-20: `node --check assets/js/admin.js` e `node --check server/routes/admin.js` passaram.
+- 2026-06-20: teste Chrome fallback encontrou bloqueio de URLs locais por `type="url"` no campo de imagem; corrigido para `type="text"` com validacao backend.
+- 2026-06-20: template dinamico de produto em `server/app.js` ajustado para nao ter overflow horizontal e incluir compra/frete no produto criado pelo admin.
+- 2026-06-20: validacao Chrome fallback final criou produto real, abriu pagina publica com layout dinamico existente, confirmou 2 imagens/2 thumbs, preco, titulo, compra, frete e sem overflow; evidencias em `_validation/admin-new-product/`.
+- 2026-06-20: produto QA removido apos o teste; Supabase confirmou `qa_products_left = 0`.
+- 2026-06-20: validacoes finais OK: `node --check assets/js/admin.js`, `node --check server/routes/admin.js`, `node --check server/app.js`, `npm run validate:assets`, `npm run validate:routes`, `npm run validate:endpoints`, `npm run validate:build`.
 
 - 2026-06-15: iniciado ajuste exclusivo do `/Admin`: filtros, ordenacao, salvar todas alteracoes, exclusoes, tema e select de categoria por banco.
 - Skills usadas: `caveman` e `planning-with-files`.
@@ -62,10 +83,10 @@
 - 2026-06-14: iniciado ajuste textual da pagina `duvidas-servico-de-instalacao/index.html`.
 - Skills aplicadas nesta tarefa: `caveman` e `planning-with-files`.
 - Condicoes de instalacao reescritas para explicitar variacao de mao de obra por aparelho/modelo, limites de responsabilidade por defeitos preexistentes, reparo especifico solicitado, garantia limitada a peca vendida pela TECH 7 e politica de credito em loja.
-- Endereco da pagina de servico corrigido para `Shopping Oiapoque Centro, Av. Oiapoque, Nº 156 - Centro - CEP 30111-070 - Belo Horizonte - MG - Brasil`.
+- Endereco da pagina de servico corrigido para `Shopping Oiapoque Centro, Av. Oiapoque, NÂº 156 - Centro - CEP 30111-070 - Belo Horizonte - MG - Brasil`.
 - Removidas ocorrencias institucionais de `X3 Distribuidora`/`X3` em paginas de duvidas; ocorrencias de produtos `Poco X3` foram mantidas.
 - Arquivos alterados nesta tarefa: `duvidas-servico-de-instalacao/index.html`, `duvidas-alerta-de-fraude/index.html`, `duvidas-politica-de-privacidade/index.html`, `duvidas-descontos-vigentes/index.html`, `duvidas-curso-tecnico-presencial/index.html`, `duvidas-trocas-e-devolucoes/index.html`, `duvidas-troca-de-pecas-de-celular/index.html`, `task_plan.md`, `findings.md`, `progress.md`.
-- Varredura textual OK: sem `X3 Distribuidora`, `Loja Virtual X3`, `CLIENTES X3`, `Rua Santos Dumont`, `Maringa` ou `Maringá` nas paginas HTML publicas verificadas.
+- Varredura textual OK: sem `X3 Distribuidora`, `Loja Virtual X3`, `CLIENTES X3`, `Rua Santos Dumont`, `Maringa` ou `MaringÃ¡` nas paginas HTML publicas verificadas.
 - Validacoes OK: `npm run validate:assets` e `npm run validate:routes`.
 - Browser MCP / Chrome DevTools MCP nao expuseram ferramentas de navegacao nesta sessao; validacao visual feita com Playwright usando Google Chrome como fallback final.
 - Evidencias salvas: `_validation/installation-page/servico-instalacao-390x844-after.png` e `_validation/installation-page/servico-instalacao-390x844-after.json`.
@@ -97,9 +118,9 @@
 - Skills usadas: `caveman`, `planning-with-files`.
 - Memoria consultada para historico TECH7/Vercel: validar dominio real, `/api/health`, Supabase envs e logs expandidos quando houver 503/lentidao.
 - Estado Git inicial ja estava sujo: `findings.md`, `progress.md`, `server/routes/admin.js`, `task_plan.md` modificados e `_assets/tech7/os-logo.jpg` untracked.
-- Plano/finding/progresso atualizados antes de medicões profundas.
+- Plano/finding/progresso atualizados antes de medicÃµes profundas.
 - ONE MCP nao apareceu na descoberta de ferramentas. Fallback direto Supabase usado para confirmar projeto: `supabase-bisque-bridge`, ref `lzsaaufsdcmqlasjrqck`, regiao `sa-east-1`, status `ACTIVE_HEALTHY`.
-- Browser MCP / `@chrome` nao expôs navegacao/click/screenshot. Chrome DevTools MCP tambem nao expôs comandos de performance/navegacao. Playwright com Chrome sera fallback final para waterfall.
+- Browser MCP / `@chrome` nao expÃ´s navegacao/click/screenshot. Chrome DevTools MCP tambem nao expÃ´s comandos de performance/navegacao. Playwright com Chrome sera fallback final para waterfall.
 - Vercel confirmado por `.vercel/project.json`: projectId `prj_UDDtUcUUQaEg4m01BhsnR5eSjjhI`, team `team_yKRleuToOM89NQWd3zIxD5kc`, projeto `tech-7`.
 - Vercel runtime logs consultados para producao: deployment `dpl_9TArEFFboVnUKLtQdwMSKpvvVrTN`, dominio `tech-7.vercel.app`, logs recentes 200 em `/api/products/resolve-prices` e `/api/cart/...`, 401 esperado em `/api/admin/session`.
 - Medicao HTTP inicial salva: `_validation/production-performance/http-baseline.json`.
@@ -386,7 +407,7 @@
 - 2026-06-11: nova correcao apos relato de que ainda nao girava: motor trocado para `requestAnimationFrame`, com `animation:none!important` inline no trilho mobile para o JS controlar o `transform`.
 - 2026-06-11: cache-buster aplicado no `index.html`: `/assets/js/tech7-local-runtime.js?v=20260611-js-ticker`.
 - 2026-06-11: Chrome final validou script versionado, `computedAnimation=none`, movimento automatico sem toque, reset de loop em 390px, sem overflow em 320/390/430; evidencia `artifacts/benefits-js-ticker-final-validation.json`.
-- 2026-06-11: apos versionar `index.html`, encoding do arquivo foi reparado e validado: `Dúvidas frequentes` servido corretamente, sem mojibake.
+- 2026-06-11: apos versionar `index.html`, encoding do arquivo foi reparado e validado: `DÃºvidas frequentes` servido corretamente, sem mojibake.
 - 2026-06-11: smoke final Chrome 390px OK: ticker JS moveu `-951 -> -622`, CSS animation ficou `none!important`, runtime versionado carregado, sem overflow; evidencia `artifacts/benefits-js-ticker-smoke-validation.json`.
 
 ---
@@ -525,7 +546,7 @@
 - Planning files updated with current scope and constraints.
 - Added `server/db/migrations/005_service_orders.sql`.
 - Updated `server/routes/admin.js` with OS CRUD, order-to-OS creation, richer metrics, and server-side PDF generation.
-- Updated `admin.html` navigation/styles for Dashboard, Produtos, Pedidos, Ordens de Serviço, Preços, Relatórios and Configurações.
+- Updated `admin.html` navigation/styles for Dashboard, Produtos, Pedidos, Ordens de ServiÃ§o, PreÃ§os, RelatÃ³rios and ConfiguraÃ§Ãµes.
 - Updated `assets/js/admin.js` with dashboard V2, product alert chips, OS list/form/PDF/print/WhatsApp, settings tab, CSV support and pagination.
 - Fixed `server/db/migrate.js` to load `.env`.
 - Ran `npm run db:migrate`; applied `005_service_orders.sql`.
@@ -579,3 +600,66 @@
 - Visual fallback validation passed using Playwright with Chrome channel when available: `_validation/search-autocomplete/mobile-search-position-390x844.png`, `_validation/search-autocomplete/mobile-search-position-keyboard-sim-390x520.png`, `_validation/search-autocomplete/desktop-search-position-1366.png`.
 - Geometry reports passed: `_validation/search-autocomplete/mobile-search-position-report.json` and `_validation/search-autocomplete/desktop-search-position-report.json`.
 - `npm run validate:build` passed.
+
+## Admin edit persistence - Progress - 2026-06-20
+- Supabase usado para confirmar projeto lzsaaufsdcmqlasjrqck e divergencia real entre products, product_images e product_categories.
+- Endpoint PUT/PATCH /api/admin/products/:id corrigido para sincronizar relacoes de imagem e categoria no save real.
+
+- Validacao visual fallback Chrome/Playwright concluiu save pelo admin, reabertura visual do editor e pagina publica.
+- Evidencias salvas em _validation/admin-edit-persistence/: edit-reproduction-before-fix.json, before-edit-admin.png, after-edit-admin.png, after-fix-products-filtered.png, after-fix-editor-before-save.png, after-fix-admin-after-save.png, after-fix-admin-reopened.png, after-fix-public-page.png, edit-validation-after-fix.json.
+- Checks passaram: node --check server/routes/admin.js, node --check assets/js/admin.js, npm run validate:assets, npm run validate:routes, npm run validate:endpoints.
+- Produto QA removido do banco depois da validacao; qa_products_left=0.
+
+## Admin real QA edicao/criacao - Progress - 2026-06-20
+- Pedido iniciado: teste real de funcoes de edicao/criacao do painel admin usando Chrome.
+- Skills lidas: caveman, planning-with-files.
+- Memoria consultada para fluxo admin/produto, Supabase e limpeza QA.
+- Chrome MCP direto nao expôs namespace proprio; usarei Chrome plugin via node_repl/Playwright channel=chrome, conforme ferramenta disponivel.
+
+- Primeira execucao Chrome falhou em seletor ambiguo para OS: `aside [data-tab=service-orders]` encontrou botao `Nova OS` e item `Ordens de Servico`. Proxima tentativa usara seletor por aria-label.
+
+- Bug real identificado e corrigido: save inline/salvar todas nao pode perder imagens secundarias. Patch aplicado em server/routes/admin.js e sintaxe sera validada antes de repetir QA.
+
+- Erro Supabase na validacao intermediaria: coluna fisica service_orders.code nao existe; codigo da OS e derivado no backend. Repetindo consulta sem code.
+
+- QA Chrome completo passou apos patch: login, dashboard, produto novo em branco, criacao produto, edicao completa, salvar todas alteracoes, pagina publica, filtros/ordenacao, tema, criacao/edicao OS, cancelamento OS e exclusao produto.
+- Supabase validou persistencia real: produto com categoria xiaomi, preco 34567, estoque 9, duas imagens preservadas em metadata/product_images, categoria em product_categories; OS status pronta, tecnico editado, item manual e total 11100.
+- Limpeza final Supabase OK: qa_products_left=0, qa_service_orders_left=0, qa_service_items_left=0.
+- Validacoes OK: node --check server/routes/admin.js, node --check assets/js/admin.js, npm run validate:assets, validate:routes, validate:endpoints, validate:product-cards.
+
+- Teste adicional Chrome OK: produto QA filtrado testou Preco fixo da pagina e Reajuste % da pagina; ambos chamaram /api/admin/prices/bulk com 200 e produto QA foi excluido pela UI.
+- Limpeza final Supabase apos bulk price OK: qa_products_left=0, qa_service_orders_left=0, qa_service_items_left=0.
+
+# Progresso - frete TECH7 (2026-06-20)
+- Skills usadas: caveman e planning-with-files.
+- @supabase disponivel; projeto ativo lzsaaufsdcmqlasjrqck (supabase-bisque-bridge).
+- @chrome direto nao ficou callable; fallback planejado: Playwright/Chrome local via node_repl.
+- Worktree ja estava sujo antes da tarefa; preservar alteracoes existentes.
+- Servidor local nao estava ativo em 127.0.0.1:3000 na primeira checagem de readiness.
+- Servidor local iniciado em 127.0.0.1:3000, PID 12260, logs em `_validation/shipping/server.*.log`.
+- Readiness local: Melhor Envio pronto via env token; Loggi API direta retorna 503 por `LOGGI_*` ausentes.
+- API real Melhor Envio local retornou 3 opcoes: Correios - SEDEX, Jadlog, Loggi.
+- API `/api/orders` local criou pedidos QA com shipping pago, Uber e retirada; frete pago somou uma vez, Uber/retirada salvaram R$0,00.
+- Chrome direto nao exposto; tentativa fallback Playwright/Chrome iniciou QA, mas seletor de radio oculto exigiu clique no card visual `[data-delivery-option]`.
+- Correcao aplicada em `server/routes/shipping.js`: cotacoes com preco numerico zero nao sao descartadas antes da normalizacao.
+- Correcao aplicada em `checkout/index.html`: sessao PIX/pedido pendente agora tem assinatura de carrinho+cliente+frete; pedido antigo so e reutilizado quando a assinatura bate.
+- Checkout tambem limpa sessao PIX ao trocar carrinho, modo de entrega, cotacao ou opcao de frete.
+- Validacao Supabase confirmou pedidos QA com shipping pago, Uber e retirada salvos corretamente; os 3 pedidos QA foram marcados como `cancelled` apos conferencia.
+- Validacao visual fallback Chrome/Playwright final salva em `_validation/shipping/browser-shipping-final.json` e screenshots `final-product-freight.png`, `final-cart.png`, `final-checkout-shipping.png`, `final-checkout-uber.png`, `final-checkout-pickup.png`, `final-checkout-mobile.png`.
+- Resultado visual: CEP sem hifen funciona no produto sem reload; checkout mostra SEDEX/Jadlog/Loggi; troca de frete atualiza total sem duplicar; Uber e retirada ficam em R$350,00 com frete R$0,00; mobile sem overflow.
+- Validacoes finais OK: `node --check server/routes/shipping.js`, sintaxe do JS inline do checkout, `npm run validate:melhor-envio`, `npm run validate:loggi`, `npm run validate:build`.
+
+# Progresso - cupons TECH7 (2026-06-20)
+- Skills obrigatorias do projeto consideradas: caveman e planning-with-files.
+- @supabase disponivel e usado; projeto ativo confirmado: `lzsaaufsdcmqlasjrqck` (`supabase-bisque-bridge`).
+- @chrome direto nao expôs ferramenta navegavel nesta sessao; fallback usado: Playwright via `node_repl` com canal Chrome.
+- Migration local criada: `server/db/migrations/006_coupons.sql`.
+- Schema real Supabase confirmado para `coupons` e campos de cupom em `orders`.
+- APIs implementadas: `/api/coupons/validate` e CRUD de cupons em `/api/admin/coupons`.
+- Admin implementado com aba Cupons, listagem, filtros, criar, editar e ativar/desativar.
+- Carrinho implementado com campo Cupom de desconto, aplicar/remover, mensagens e resumo subtotal/desconto/frete/total.
+- Checkout implementado com desconto no resumo/revisao, persistencia do cupom e envio para `/api/orders`.
+- Pedido de teste local com cupom validou persistencia: subtotal 35000, desconto 1000, cupom CODEX10, frete 0, total 34000.
+- Dados temporarios de QA removidos do Supabase; confirmacao final: `qa_coupons=0`, `qa_orders=0`.
+- Evidencias visuais salvas em `_validation/coupons/`: `admin-coupons.png`, `cart-coupon-applied.png`, `cart-coupon-expired.png`, `checkout-coupon-summary.png`, `checkout-coupon-mobile.png`.
+- Validacoes OK: `node --check server/routes/orders.js`, `node --check server/routes/coupons.js`, `node --check server/routes/admin.js`, `node --check assets/js/admin.js`, parse JS inline de carrinho/checkout, API de cupom valido/invalido/expirado/inativo/maior que subtotal, `npm run validate:product-cards`, `npm run validate:melhor-envio`, `npm run validate:build`.

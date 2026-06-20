@@ -5,6 +5,7 @@ import { router as cart } from "./cart.js";
 import { router as orders } from "./orders.js";
 import { router as payments } from "./payments.js";
 import { router as shipping } from "./shipping.js";
+import { router as coupons } from "./coupons.js";
 import { router as webhooks } from "./webhooks.js";
 import { router as admin } from "./admin.js";
 import { rateLimit } from "../middleware/rate_limit.js";
@@ -39,6 +40,7 @@ router.use("/products", products);
 router.use("/search", search);
 router.use("/cart", rateLimit({ keyPrefix: "cart", windowMs: 60_000, limit: 120 }), cart);
 router.use("/shipping", rateLimit({ keyPrefix: "shipping", windowMs: 60_000, limit: 40 }), shipping);
+router.use("/coupons", rateLimit({ keyPrefix: "coupons", windowMs: 60_000, limit: 60 }), coupons);
 router.post("/newsletter", (_req, res) => {
   res.status(204).end();
 });

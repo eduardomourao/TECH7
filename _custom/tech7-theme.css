@@ -100,6 +100,81 @@ html, body {
   background: var(--nav_bg_hover, #ff6a00) !important;
 }
 
+/* Link externo Tech 7 Importados dentro da barra de categorias */
+.header .nav .list > li.t7-importados-nav {
+  min-width: 0 !important;
+}
+
+.header .nav .list > li.t7-importados-nav > a.vertical-icon {
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+.header .nav .list > li.t7-importados-nav > a .name {
+  max-width: 170px !important;
+  margin: 0 auto !important;
+  white-space: normal !important;
+  line-height: 1.08 !important;
+  letter-spacing: 0 !important;
+}
+
+.header .nav .list > li.t7-importados-nav .t7-importados-icon,
+.content-nav .t7-importados-mobile .icon img {
+  object-fit: cover !important;
+  object-position: center !important;
+  border-radius: 4px !important;
+  background: #000000 !important;
+}
+
+@media (min-width: 768px) {
+  .header .nav .list > li.t7-importados-nav > a .name {
+    font-size: 11px !important;
+  }
+
+  .header .nav .list > li.t7-importados-nav .t7-importados-icon {
+    width: 34px !important;
+    height: 34px !important;
+    max-width: 34px !important;
+    max-height: 34px !important;
+  }
+}
+
+.content-nav .t7-importados-mobile .icon img {
+  width: 36px !important;
+  height: 36px !important;
+}
+
+.content-nav .t7-importados-mobile {
+  height: auto !important;
+}
+
+.content-nav .t7-importados-mobile-sub {
+  display: block !important;
+  height: auto !important;
+  max-height: 0 !important;
+  margin: 0 0 0 64px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  list-style: none !important;
+  transition: max-height 180ms ease !important;
+}
+
+.content-nav .t7-importados-mobile.active .t7-importados-mobile-sub {
+  max-height: 130px !important;
+  margin-bottom: 10px !important;
+}
+
+.content-nav .t7-importados-mobile-sub a {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+}
+
 /* Menu mobile: fundo escuro */
 .nav-mobile,
 .nav-mobile .header-nav,

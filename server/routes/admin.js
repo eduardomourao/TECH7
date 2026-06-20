@@ -671,7 +671,27 @@ function mapAdminProduct(row) {
   };
 }
 
-async function assertSlugAvailable({ slug, section, brand, id = "" }) {
+async function assertSlugAvailable({ slug, section, brand, id = "", global = false }) {
+  if (global) {
+    const { rows } = await pool.query(
+      `
+        select id
+        from products
+        where lower(slug) = lower($1)
+          and id <> $2
+        limit 1
+      `,
+      [slug, id || ""]
+    );
+    if (rows.length) {
+      const error = new Error("Slug ja existe em outro produto");
+      error.statusCode = 409;
+      error.code = "slug_duplicate";
+      throw error;
+    }
+    return;
+  }
+
   const { rows } = await pool.query(
     `
       select id
@@ -689,6 +709,41 @@ async function assertSlugAvailable({ slug, section, brand, id = "" }) {
     error.statusCode = 409;
     error.code = "slug_duplicate";
     throw error;
+  }
+}
+
+async function getCategoryBySlug(slug) {
+  const normalized = canonicalSection(slug);
+  if (!normalized) return null;
+  const { rows } = await pool.query(
+    "select id, slug, name from categories where slug = $1 limit 1",
+    [normalized]
+  );
+  return rows[0] || null;
+}
+
+async function syncProductRelations(client, productId, productValues, categoryRow = null) {
+  const images = normalizeImages(productValues?.metadata?.images || [], productValues?.primary_image_url || productValues?.image_url || "");
+  await client.query("delete from product_images where product_id = $1", [productId]);
+  for (const [index, url] of images.entries()) {
+    await client.query(
+      `
+        insert into product_images (
+          product_id, url, alt, source, source_kind, position, is_primary,
+          is_gallery, is_placeholder, metadata, created_at, updated_at
+        )
+        values ($1,$2,$3,'admin','gallery',$4,$5,true,false,'{}'::jsonb,now(),now())
+      `,
+      [productId, url, productValues?.name || "Produto TECH 7", index, index === 0]
+    );
+  }
+
+  if (categoryRow?.id) {
+    await client.query("delete from product_categories where product_id = $1", [productId]);
+    await client.query(
+      "insert into product_categories (product_id, category_id, position, created_at) values ($1,$2,0,now()) on conflict do nothing",
+      [productId, categoryRow.id]
+    );
   }
 }
 
@@ -712,17 +767,16 @@ function buildProductPayload(input, existing = null, requireAll = false) {
   if (rawSection != null) next.section = nextSection;
 
   const rawBrand = patch.brand;
-  const nextBrand = rawBrand != null ? slugify(rawBrand) : existing?.brand;
-  if (requireAll && !nextBrand) throw Object.assign(new Error("Marca obrigatória"), { statusCode: 400, code: "brand_required" });
+  const nextBrand = rawBrand != null ? slugify(rawBrand) : (existing?.brand || "");
   if (rawBrand != null) next.brand = nextBrand;
 
   if (patch.price != null || patch.price_cents != null || requireAll) {
     const cents = patch.price_cents != null ? Math.max(0, Math.round(Number(patch.price_cents))) : priceToCents(patch.price);
-    if (!Number.isFinite(cents) || cents < 0) throw Object.assign(new Error("Preço inválido"), { statusCode: 400, code: "invalid_price" });
+    if (!Number.isFinite(cents) || cents < 0 || (requireAll && cents <= 0)) throw Object.assign(new Error("Preço inválido"), { statusCode: 400, code: "invalid_price" });
     next.price_cents = cents;
   }
 
-  const active = parseOptionalBoolean(patch.active, existing ? (existing.active !== false && existing.is_active !== false) : true);
+  const active = parseOptionalBoolean(patch.active, existing ? (existing.active !== false && existing.is_active !== false) : false);
   if (patch.active != null || requireAll) {
     next.active = active;
     next.is_active = active;
@@ -737,8 +791,12 @@ function buildProductPayload(input, existing = null, requireAll = false) {
   const full = patch.description_full ?? patch.description_html;
   if (full != null || requireAll) next.description_html = sanitizeDescriptionHtml(full || next.description_text || existing?.description_html || "");
 
-  const images = normalizeImages(patch.images, patch.primary_image_url || patch.image_url || existing?.primary_image_url || existing?.image_url || "");
-  if (patch.images != null || patch.primary_image_url != null || patch.image_url != null || requireAll) {
+  const imagesTouched = patch.images != null || patch.primary_image_url != null || patch.image_url != null || requireAll;
+  const existingImages = normalizeImages(currentMeta.images || [], existing?.primary_image_url || existing?.image_url || "");
+  const images = imagesTouched
+    ? normalizeImages(patch.images, patch.primary_image_url || patch.image_url || existing?.primary_image_url || existing?.image_url || "")
+    : existingImages;
+  if (imagesTouched) {
     next.image_url = images[0] || "";
     next.primary_image_url = images[0] || "";
   }
@@ -930,6 +988,162 @@ router.get("/categories", adminAuth, asyncRoute(async (_req, res) => {
   });
 }));
 
+function normalizeCouponCode(value) {
+  return String(value || "").trim().toUpperCase().replace(/\s+/g, "");
+}
+
+function parseCouponDiscountCents(input) {
+  if (input?.discount_cents != null) {
+    const cents = Math.round(Number(input.discount_cents));
+    return Number.isFinite(cents) ? cents : 0;
+  }
+  return priceToCents(input?.discount);
+}
+
+function mapCoupon(row) {
+  const expiresAt = row.expires_at ? new Date(row.expires_at) : null;
+  const expired = expiresAt ? expiresAt.getTime() < Date.now() : false;
+  const discountCents = Number(row.discount_cents || 0);
+  return {
+    id: row.id,
+    code: row.code,
+    discount_cents: discountCents,
+    discount: Number((discountCents / 100).toFixed(2)),
+    expires_at: row.expires_at,
+    active: Boolean(row.active),
+    expired,
+    valid: Boolean(row.active) && !expired,
+    created_at: row.created_at,
+    updated_at: row.updated_at
+  };
+}
+
+function validateCouponPayload(input, partial = false) {
+  const out = {};
+  if (!partial || Object.prototype.hasOwnProperty.call(input, "code")) {
+    out.code = normalizeCouponCode(input.code);
+    if (!out.code) {
+      const error = new Error("coupon_code_required");
+      error.status = 400;
+      throw error;
+    }
+  }
+  if (!partial || Object.prototype.hasOwnProperty.call(input, "discount") || Object.prototype.hasOwnProperty.call(input, "discount_cents")) {
+    out.discount_cents = parseCouponDiscountCents(input);
+    if (!Number.isFinite(out.discount_cents) || out.discount_cents <= 0) {
+      const error = new Error("invalid_coupon_discount");
+      error.status = 400;
+      throw error;
+    }
+  }
+  if (!partial || Object.prototype.hasOwnProperty.call(input, "expires_at")) {
+    const expiresAt = new Date(input.expires_at || "");
+    if (Number.isNaN(expiresAt.getTime())) {
+      const error = new Error("invalid_coupon_expires_at");
+      error.status = 400;
+      throw error;
+    }
+    out.expires_at = expiresAt.toISOString();
+  }
+  if (Object.prototype.hasOwnProperty.call(input, "active")) {
+    out.active = input.active === true || input.active === "true" || input.active === 1 || input.active === "1";
+  } else if (!partial) {
+    out.active = true;
+  }
+  return out;
+}
+
+router.get("/coupons", adminAuth, asyncRoute(async (req, res) => {
+  const limit = Math.max(1, Math.min(200, Number(req.query.limit || 100)));
+  const offset = Math.max(0, Number(req.query.offset || 0));
+  const q = String(req.query.q || "").trim();
+  const status = String(req.query.status || "").trim();
+  const filters = ["1=1"];
+  const params = [];
+  if (q) {
+    params.push(`%${q}%`);
+    filters.push(`code ilike $${params.length}`);
+  }
+  if (status === "active") filters.push("active = true");
+  if (status === "inactive") filters.push("active = false");
+  if (status === "expired") filters.push("expires_at < now()");
+  if (status === "valid") filters.push("active = true and expires_at >= now()");
+
+  const countRes = await pool.query(`select count(*)::int as total from coupons where ${filters.join(" and ")}`, params);
+  params.push(limit, offset);
+  const { rows } = await pool.query(
+    `
+      select id, code, discount_cents, expires_at, active, created_at, updated_at
+      from coupons
+      where ${filters.join(" and ")}
+      order by created_at desc
+      limit $${params.length - 1} offset $${params.length}
+    `,
+    params
+  );
+  res.json({ total: countRes.rows[0]?.total || 0, limit, offset, items: rows.map(mapCoupon) });
+}));
+
+router.post("/coupons", adminAuth, asyncRoute(async (req, res) => {
+  const payload = validateCouponPayload(req.body || {});
+  try {
+    const { rows } = await pool.query(
+      `
+        insert into coupons (id, code, discount_cents, expires_at, active)
+        values ($1, $2, $3, $4, $5)
+        returning id, code, discount_cents, expires_at, active, created_at, updated_at
+      `,
+      [newId("coupon"), payload.code, payload.discount_cents, payload.expires_at, payload.active]
+    );
+    res.status(201).json(mapCoupon(rows[0]));
+  } catch (error) {
+    if (error?.code === "23505") return res.status(409).json({ error: "coupon_code_exists" });
+    throw error;
+  }
+}));
+
+router.put("/coupons/:id", adminAuth, asyncRoute(async (req, res) => {
+  const payload = validateCouponPayload(req.body || {});
+  try {
+    const { rows } = await pool.query(
+      `
+        update coupons
+        set code = $2, discount_cents = $3, expires_at = $4, active = $5, updated_at = now()
+        where id = $1
+        returning id, code, discount_cents, expires_at, active, created_at, updated_at
+      `,
+      [String(req.params.id || ""), payload.code, payload.discount_cents, payload.expires_at, payload.active]
+    );
+    if (!rows.length) return res.status(404).json({ error: "coupon_not_found" });
+    res.json(mapCoupon(rows[0]));
+  } catch (error) {
+    if (error?.code === "23505") return res.status(409).json({ error: "coupon_code_exists" });
+    throw error;
+  }
+}));
+
+router.patch("/coupons/:id", adminAuth, asyncRoute(async (req, res) => {
+  const payload = validateCouponPayload(req.body || {}, true);
+  const sets = [];
+  const params = [String(req.params.id || "")];
+  for (const [key, value] of Object.entries(payload)) {
+    params.push(value);
+    sets.push(`${key} = $${params.length}`);
+  }
+  if (!sets.length) return res.status(400).json({ error: "coupon_update_empty" });
+  const { rows } = await pool.query(
+    `
+      update coupons
+      set ${sets.join(", ")}, updated_at = now()
+      where id = $1
+      returning id, code, discount_cents, expires_at, active, created_at, updated_at
+    `,
+    params
+  );
+  if (!rows.length) return res.status(404).json({ error: "coupon_not_found" });
+  res.json(mapCoupon(rows[0]));
+}));
+
 router.get("/products/:id", adminAuth, async (req, res) => {
   const row = await getProductOr404(String(req.params.id || ""), res);
   if (!row) return;
@@ -937,9 +1151,17 @@ router.get("/products/:id", adminAuth, async (req, res) => {
 });
 
 router.post("/products", adminAuth, async (req, res) => {
+  const client = await pool.connect();
   try {
     const payload = buildProductPayload(req.body || {}, null, true);
-    await assertSlugAvailable(payload.identity);
+    const category = await getCategoryBySlug(payload.identity.section);
+    if (!category) {
+      return res.status(400).json({
+        error: "category_required",
+        message: "Categoria obrigatoria ou inexistente no banco"
+      });
+    }
+    await assertSlugAvailable({ ...payload.identity, global: true });
     const id = cleanText(req.body?.id, 120) || newId("prod");
     const vals = [
       id,
@@ -961,7 +1183,8 @@ router.post("/products", adminAuth, async (req, res) => {
       {},
       payload.values.metadata || {}
     ];
-    const { rows } = await pool.query(
+    await client.query("begin");
+    const { rows } = await client.query(
       `
         insert into products (
           id, slug, name, brand, section, price_cents, currency, image_url, primary_image_url,
@@ -973,12 +1196,17 @@ router.post("/products", adminAuth, async (req, res) => {
       `,
       vals
     );
+    await syncProductRelations(client, id, payload.values, category);
+    await client.query("commit");
     return res.status(201).json(mapAdminProduct(rows[0]));
   } catch (error) {
+    await client.query("rollback").catch(() => {});
     return res.status(error.statusCode || 500).json({
       error: error.code || "product_create_failed",
       message: error.statusCode ? error.message : "Falha ao criar produto"
     });
+  } finally {
+    client.release();
   }
 });
 
@@ -987,8 +1215,23 @@ async function updateProduct(req, res) {
   const existing = await getProductOr404(id, res);
   if (!existing) return;
 
+  const hasOwn = (key) => Object.prototype.hasOwnProperty.call(req.body || {}, key);
+  const categoryTouched = hasOwn("category") || hasOwn("section");
+  const imagesTouched = hasOwn("images") || hasOwn("image_url") || hasOwn("primary_image_url");
+  const client = await pool.connect();
   try {
     const payload = buildProductPayload(req.body || {}, existing, false);
+    let category = null;
+    if (categoryTouched) {
+      category = await getCategoryBySlug(payload.identity.section);
+      if (!category && payload.identity.section !== existing.section) {
+        return res.status(400).json({
+          error: "category_required",
+          message: "Categoria obrigatoria ou inexistente no banco"
+        });
+      }
+    }
+
     if (
       payload.identity.slug !== existing.slug
       || payload.identity.section !== existing.section
@@ -1007,7 +1250,8 @@ async function updateProduct(req, res) {
     if (!updates.length) return res.status(400).json({ error: "no_changes", message: "Nenhuma alteração enviada" });
 
     vals.push(id);
-    const { rows } = await pool.query(
+    await client.query("begin");
+    const { rows } = await client.query(
       `
         update products
         set ${updates.join(", ")}, title = coalesce($${vals.length + 1}, title), updated_at = now()
@@ -1016,12 +1260,19 @@ async function updateProduct(req, res) {
       `,
       [...vals, payload.values.name ?? existing.title ?? existing.name]
     );
+    if (imagesTouched || (categoryTouched && category?.id)) {
+      await syncProductRelations(client, id, rows[0], category);
+    }
+    await client.query("commit");
     return res.json(mapAdminProduct(rows[0]));
   } catch (error) {
+    await client.query("rollback").catch(() => {});
     return res.status(error.statusCode || 500).json({
       error: error.code || "product_update_failed",
       message: error.statusCode ? error.message : "Falha ao salvar produto"
     });
+  } finally {
+    client.release();
   }
 }
 
@@ -1757,6 +2008,7 @@ router.get("/orders/:id", adminAuth, async (req, res) => {
   const ordRes = await pool.query(
     `
       select id, status, total_cents, subtotal_cents, shipping_total_cents,
+             discount_cents, coupon_code, coupon_discount_cents,
              customer_name, customer_email, customer_phone, customer_document, delivery_mode,
              shipping_provider, shipping_service_label, shipping_slo_days,
              shipping_zipcode, shipping_address, shipping_number, shipping_complement,
@@ -1811,6 +2063,9 @@ router.get("/orders/:id", adminAuth, async (req, res) => {
     shipping_service_label: o.shipping_service_label || "-",
     shipping_slo_days: o.shipping_slo_days,
     subtotal: Number((Number(o.subtotal_cents || o.total_cents || 0) / 100).toFixed(2)),
+    discount: Number((Number(o.discount_cents || o.coupon_discount_cents || 0) / 100).toFixed(2)),
+    coupon_code: o.coupon_code || "",
+    coupon_discount: Number((Number(o.coupon_discount_cents || o.discount_cents || 0) / 100).toFixed(2)),
     shipping_total: Number((Number(o.shipping_total_cents || 0) / 100).toFixed(2)),
     total: Number((Number(o.total_cents || 0) / 100).toFixed(2)),
     payment_provider: "-",

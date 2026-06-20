@@ -16,9 +16,11 @@
     metrics: null,
     productsPage: 0,
     ordersPage: 0,
+    couponsPage: 0,
     serviceOrdersPage: 0,
     products: [],
     orders: [],
+    coupons: [],
     serviceOrders: [],
     categories: [],
     categoriesLoaded: false,
@@ -27,6 +29,9 @@
     theme: localStorage.getItem('tech7-admin-theme') || 'dark',
     editingProduct: null,
     orderStatus: '',
+    couponStatus: '',
+    couponSearch: '',
+    editingCoupon: null,
     selectedOrderId: null,
     serviceOrderStatus: '',
     serviceOrderSearch: '',
@@ -37,6 +42,7 @@
 
   const PRODUCTS_PER_PAGE = 20;
   const ORDERS_PER_PAGE = 20;
+  const COUPONS_PER_PAGE = 20;
   const SERVICE_ORDERS_PER_PAGE = 20;
   const OS_STATUSES = [
     ['aberta', 'Aberta'],
@@ -77,7 +83,13 @@
       category_required: 'Categoria obrigatoria',
       brand_required: 'Marca obrigatoria',
       name_required: 'Nome obrigatorio',
-      invalid_price: 'Preco invalido'
+      invalid_price: 'Preco invalido',
+      coupon_code_required: 'Codigo do cupom obrigatorio',
+      coupon_code_exists: 'Codigo de cupom ja existe',
+      invalid_coupon_discount: 'Valor de desconto invalido',
+      invalid_coupon_expires_at: 'Data de validade invalida',
+      coupon_not_found: 'Cupom nao encontrado',
+      coupon_update_empty: 'Informe algum dado para alterar'
     };
     if (code === 'http_404') return 'Rota da API nao encontrada. Reinicie o servidor ou publique a API atual.';
     if (code === 'order_not_found') return 'Pedido origem nao encontrado. Deixe o campo vazio para OS manual.';
@@ -515,7 +527,7 @@
       '<button class="btn btn-primary btn-sm" id="applyProductSearch">Buscar</button>' +
       '<button class="btn btn-outline btn-sm" id="clearProductFilters">Limpar</button>' +
       '</div><div class="toolbar-group">' +
-      '<button class="btn btn-primary btn-sm" id="newProduct">Adicionar produto</button>' +
+      '<button class="btn btn-primary btn-sm" id="newProduct">+ Novo produto</button>' +
       '<button class="btn btn-green btn-sm" id="saveAllProducts">Salvar todas as alteracoes</button>' +
       '<button class="btn btn-outline btn-sm" id="bulkPercent">Reajuste % da página</button>' +
       '<button class="btn btn-outline btn-sm" id="bulkFixed">Preço fixo da página</button>' +
@@ -528,10 +540,10 @@
       name: '',
       slug: '',
       brand: '',
-      category: 'display-e-lcd',
-      price: 0,
-      stock: 0,
-      active: true,
+      category: '',
+      price: '',
+      stock: '',
+      active: false,
       image_url: '',
       images: [],
       description_short: '',
@@ -541,7 +553,7 @@
     };
   }
 
-  function categoryOptions(current, includeCurrent) {
+  function categoryOptions(current, includeCurrent, placeholder) {
     const rows = state.categories.length
       ? state.categories.map((row) => [row.slug, row.name || row.slug])
       : [
@@ -556,7 +568,22 @@
     const extra = includeCurrent && current && !seen.has(String(current))
       ? [[current, String(current) + ' (atual)']]
       : [];
-    return extra.concat(rows).map((row) => '<option value="' + esc(row[0]) + '"' + selected(current, row[0]) + '>' + esc(row[1]) + '</option>').join('');
+    const prefix = placeholder ? '<option value=""' + selected(current, '') + '>' + esc(placeholder) + '</option>' : '';
+    return prefix + extra.concat(rows).map((row) => '<option value="' + esc(row[0]) + '"' + selected(current, row[0]) + '>' + esc(row[1]) + '</option>').join('');
+  }
+
+  function imageEditorRows(images, primary) {
+    const rows = Array.isArray(images) && images.length ? images : [''];
+    const primaryValue = primary || rows[0] || '';
+    return rows.map((url, index) => (
+      '<div class="product-image-row" data-image-row>' +
+      '<label class="image-primary-choice"><input type="radio" name="productPrimaryImage" value="' + index + '"' + (url === primaryValue || (!primaryValue && index === 0) ? ' checked' : '') + '> Principal</label>' +
+      '<input class="image-url-input" type="text" aria-label="URL da imagem" placeholder="/_assets/... ou https://..." value="' + esc(url) + '">' +
+      '<button class="btn btn-outline btn-sm" type="button" data-move-image="-1" aria-label="Mover imagem para cima">Subir</button>' +
+      '<button class="btn btn-outline btn-sm" type="button" data-move-image="1" aria-label="Mover imagem para baixo">Descer</button>' +
+      '<button class="btn btn-red btn-sm" type="button" data-remove-image aria-label="Remover imagem">Remover</button>' +
+      '</div>'
+    )).join('');
   }
 
   function productEditor() {
@@ -570,13 +597,15 @@
       '<form id="productEditorForm" class="grid-2" autocomplete="off">' +
       '<label>Nome<input id="editName" required value="' + esc(p.name) + '"></label>' +
       '<label>Slug<input id="editSlug" required value="' + esc(p.slug) + '"></label>' +
-      '<label>Marca<input id="editBrand" required placeholder="apple, samsung, motorola" value="' + esc(p.brand) + '"></label>' +
-      '<label>Categoria<select id="editCategory" required>' + categoryOptions(p.category || p.section, true) + '</select></label>' +
-      '<label>Preco em reais<input id="editPrice" required type="number" step="0.01" min="0" value="' + Number(p.price || 0).toFixed(2) + '"></label>' +
-      '<label>Estoque<input id="editStock" type="number" step="1" min="0" value="' + esc(p.stock == null ? 0 : p.stock) + '"></label>' +
-      '<label>Imagem principal<input id="editPrimaryImage" placeholder="/_assets/... ou https://..." value="' + esc(previewImage === '/_assets/tech7/product-placeholder.svg' ? '' : previewImage) + '"></label>' +
+      '<label>Marca<input id="editBrand" placeholder="apple, samsung, motorola" value="' + esc(p.brand) + '"></label>' +
+      '<label>Categoria<select id="editCategory" required>' + categoryOptions(p.category || p.section || '', true, 'Selecione uma categoria') + '</select></label>' +
+      '<label>Preco em reais<input id="editPrice" required type="number" step="0.01" min="0.01" value="' + esc(p.price === '' || p.price == null ? '' : Number(p.price || 0).toFixed(2)) + '" placeholder="0,00"></label>' +
+      '<label>Estoque<input id="editStock" type="number" step="1" min="0" value="' + esc(p.stock === '' || p.stock == null ? '' : p.stock) + '" placeholder="0"></label>' +
       '<label>Status<select id="editActive"><option value="true"' + selected(String(p.active), 'true') + '>Ativo</option><option value="false"' + selected(String(p.active), 'false') + '>Inativo</option></select></label>' +
-      '<label style="grid-column:1/-1">Galeria (uma URL por linha)<textarea id="editImages" rows="4">' + esc(images.join('\n')) + '</textarea></label>' +
+      '<div class="product-image-editor" style="grid-column:1/-1">' +
+      '<div class="image-editor-head"><div><strong>Imagens do produto</strong><small>Adicione URLs, reordene e marque a imagem principal. O produto novo começa sem imagem.</small></div><button class="btn btn-outline btn-sm" type="button" id="addProductImage">Adicionar imagem</button></div>' +
+      '<div id="productImageRows">' + imageEditorRows(images, previewImage === '/_assets/tech7/product-placeholder.svg' ? '' : previewImage) + '</div>' +
+      '</div>' +
       '<label style="grid-column:1/-1">Descricao curta<textarea id="editDescriptionShort" rows="3">' + esc(p.description_short || p.description_text || '') + '</textarea></label>' +
       '<label style="grid-column:1/-1">Descricao completa<textarea id="editDescriptionFull" rows="5">' + esc(p.description_full || '') + '</textarea></label>' +
       '<label><input id="editFeatured" type="checkbox"' + (p.featured ? ' checked' : '') + '> Destaque</label>' +
@@ -591,9 +620,10 @@
   }
 
   function productPreviewUrl(p) {
-    const category = document.getElementById('editCategory')?.value || p.category || p.section || 'display-e-lcd';
+    const category = document.getElementById('editCategory')?.value || p.category || p.section || '';
     const brand = document.getElementById('editBrand')?.value || p.brand || '';
     const slug = document.getElementById('editSlug')?.value || p.slug || '';
+    if (!category || !slug) return 'Selecione categoria e informe o slug';
     return '/' + [category, brand, slug].filter(Boolean).join('/');
   }
 
@@ -755,10 +785,11 @@
       slug.value = slugify(slug.value);
       syncProductPreview();
     });
-    ['editBrand', 'editCategory', 'editPrice', 'editStock', 'editPrimaryImage', 'editImages', 'editDescriptionShort', 'editDescriptionFull', 'editActive', 'editFeatured', 'editLaunch'].forEach((id) => {
+    ['editBrand', 'editCategory', 'editPrice', 'editStock', 'editDescriptionShort', 'editDescriptionFull', 'editActive', 'editFeatured', 'editLaunch'].forEach((id) => {
       document.getElementById(id)?.addEventListener('input', syncProductPreview);
       document.getElementById(id)?.addEventListener('change', syncProductPreview);
     });
+    bindProductImageEditor();
     document.getElementById('cancelProductEdit')?.addEventListener('click', () => {
       state.editingProduct = null;
       renderProducts();
@@ -766,6 +797,7 @@
     document.getElementById('previewProductPage')?.addEventListener('click', () => {
       const p = collectProductEditor(false);
       if (!p) return;
+      if (!state.editingProduct?.id) return toast('Salve o produto antes de abrir a pagina publica', 'error');
       window.open(productPreviewUrl(p), '_blank');
     });
     document.getElementById('deactivateProduct')?.addEventListener('click', () => deactivateProduct());
@@ -773,11 +805,66 @@
     syncProductPreview();
   }
 
+  function readImageEditorRows() {
+    return Array.from(document.querySelectorAll('[data-image-row]')).map((row, index) => ({
+      url: row.querySelector('.image-url-input')?.value.trim() || '',
+      primary: !!row.querySelector('input[name="productPrimaryImage"]')?.checked,
+      index
+    }));
+  }
+
+  function renderImageEditorRows(rows) {
+    const target = document.getElementById('productImageRows');
+    if (!target) return;
+    const clean = rows.length ? rows : [{ url: '', primary: true }];
+    const primary = clean.find((row) => row.primary)?.url || clean[0]?.url || '';
+    target.innerHTML = imageEditorRows(clean.map((row) => row.url), primary);
+    bindProductImageEditor();
+    syncProductPreview();
+  }
+
+  function bindProductImageEditor() {
+    const rowsEl = document.getElementById('productImageRows');
+    if (!rowsEl) return;
+    rowsEl.querySelectorAll('.image-url-input, input[name="productPrimaryImage"]').forEach((input) => {
+      input.oninput = syncProductPreview;
+      input.onchange = syncProductPreview;
+    });
+    if (rowsEl.dataset.bound === '1') return;
+    rowsEl.dataset.bound = '1';
+    document.getElementById('addProductImage')?.addEventListener('click', () => {
+      const rows = readImageEditorRows();
+      rows.push({ url: '', primary: !rows.some((row) => row.primary) });
+      renderImageEditorRows(rows);
+    });
+    rowsEl.addEventListener('click', (event) => {
+      const remove = event.target.closest('[data-remove-image]');
+      const move = event.target.closest('[data-move-image]');
+      if (!remove && !move) return;
+      const rowEl = event.target.closest('[data-image-row]');
+      const rows = readImageEditorRows();
+      const index = Array.from(rowsEl.querySelectorAll('[data-image-row]')).indexOf(rowEl);
+      if (index < 0) return;
+      if (remove) {
+        rows.splice(index, 1);
+        if (rows.length && !rows.some((row) => row.primary)) rows[0].primary = true;
+        renderImageEditorRows(rows);
+        return;
+      }
+      const dir = Number(move.dataset.moveImage || 0);
+      const nextIndex = index + dir;
+      if (nextIndex < 0 || nextIndex >= rows.length) return;
+      const [row] = rows.splice(index, 1);
+      rows.splice(nextIndex, 0, row);
+      renderImageEditorRows(rows);
+    });
+  }
+
   function collectProductEditor(validate) {
     const current = state.editingProduct || emptyProduct();
-    const imagesRaw = document.getElementById('editImages')?.value || '';
-    const primary = document.getElementById('editPrimaryImage')?.value.trim() || '';
-    const images = [primary].concat(imagesRaw.split(/\r?\n|,/)).map((v) => v.trim()).filter(Boolean);
+    const imageRows = readImageEditorRows().filter((row) => row.url);
+    const primary = imageRows.find((row) => row.primary)?.url || imageRows[0]?.url || '';
+    const images = [primary].concat(imageRows.map((row) => row.url)).map((v) => v.trim()).filter(Boolean);
     const deduped = Array.from(new Map(images.map((url) => [url.toLowerCase(), url])).values());
     const payload = {
       id: current.id || '',
@@ -785,8 +872,8 @@
       slug: slugify(document.getElementById('editSlug')?.value || ''),
       brand: slugify(document.getElementById('editBrand')?.value || ''),
       category: document.getElementById('editCategory')?.value || '',
-      price: Number(document.getElementById('editPrice')?.value || 0),
-      stock: Number(document.getElementById('editStock')?.value || 0),
+      price: Number(document.getElementById('editPrice')?.value || NaN),
+      stock: document.getElementById('editStock')?.value === '' ? 0 : Number(document.getElementById('editStock')?.value || 0),
       active: document.getElementById('editActive')?.value === 'true',
       image_url: deduped[0] || '',
       primary_image_url: deduped[0] || '',
@@ -799,9 +886,8 @@
     if (validate) {
       if (!payload.name) throw new Error('Nome obrigatorio');
       if (!payload.slug) throw new Error('Slug obrigatorio');
-      if (!payload.brand) throw new Error('Marca obrigatoria');
       if (!payload.category) throw new Error('Categoria obrigatoria');
-      if (!Number.isFinite(payload.price) || payload.price < 0) throw new Error('Preco invalido');
+      if (!Number.isFinite(payload.price) || payload.price <= 0) throw new Error('Preco invalido');
       if (!Number.isFinite(payload.stock) || payload.stock < 0) throw new Error('Estoque invalido');
     }
     return payload;
@@ -1003,6 +1089,170 @@
     }
   }
 
+  function emptyCoupon() {
+    const tomorrow = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
+    tomorrow.setHours(23, 59, 0, 0);
+    return { id: '', code: '', discount: '', expires_at: tomorrow.toISOString(), active: true };
+  }
+
+  function couponStatusLabel(coupon) {
+    if (!coupon.active) return 'Inativo';
+    if (coupon.expired) return 'Expirado';
+    return 'Valido';
+  }
+
+  function couponBadge(coupon) {
+    const cls = !coupon.active ? 'badge-bad' : coupon.expired ? 'badge-pending' : 'badge-paid';
+    return '<span class="badge ' + cls + '">' + esc(couponStatusLabel(coupon)) + '</span>';
+  }
+
+  function couponToolbar() {
+    return '<div class="toolbar"><div class="toolbar-group">' +
+      '<input id="couponSearch" placeholder="Buscar codigo" value="' + esc(state.couponSearch) + '">' +
+      '<button class="btn btn-outline btn-sm" id="applyCouponSearch">Buscar</button>' +
+      '<select id="couponStatus"><option value="">Todos</option>' +
+      ['valid', 'active', 'inactive', 'expired'].map((s) => '<option value="' + s + '"' + selected(state.couponStatus, s) + '>' + esc({ valid: 'Validos', active: 'Ativos', inactive: 'Inativos', expired: 'Expirados' }[s]) + '</option>').join('') +
+      '</select>' +
+      '<button class="btn btn-outline btn-sm" id="clearCouponFilters">Limpar</button>' +
+      '</div><div class="toolbar-group"><button class="btn btn-primary btn-sm" id="newCoupon">Novo cupom</button></div></div>';
+  }
+
+  function dateInputValue(value) {
+    if (!value) return '';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return '';
+    const pad = (n) => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+
+  function couponEditor() {
+    const c = state.editingCoupon;
+    if (!c) return '';
+    return '<div class="sub-card" style="margin:16px 0 18px">' +
+      '<div class="panel-head" style="padding:0 0 14px"><div><h2>' + esc(c.id ? 'Editar cupom' : 'Novo cupom') + '</h2><p>Desconto fixo em reais aplicado ao subtotal dos produtos.</p></div><button class="btn btn-outline btn-sm" id="cancelCouponEdit">Fechar</button></div>' +
+      '<form id="couponEditorForm" class="grid-2" autocomplete="off">' +
+      '<label>Codigo<input id="editCouponCode" required placeholder="TECH7OFF" value="' + esc(c.code || '') + '"></label>' +
+      '<label>Desconto em reais<input id="editCouponDiscount" required type="number" min="0.01" step="0.01" value="' + esc(c.discount === '' || c.discount == null ? '' : Number(c.discount || 0).toFixed(2)) + '"></label>' +
+      '<label>Validade<input id="editCouponExpiresAt" required type="date" value="' + esc(dateInputValue(c.expires_at)) + '"></label>' +
+      '<label>Status<select id="editCouponActive"><option value="true"' + selected(String(c.active), 'true') + '>Ativo</option><option value="false"' + selected(String(c.active), 'false') + '>Inativo</option></select></label>' +
+      '<div class="toolbar-group" style="grid-column:1/-1"><button class="btn btn-primary" type="submit">Salvar cupom</button></div>' +
+      '</form></div>';
+  }
+
+  function couponTable(items) {
+    if (!items.length) return '<div class="empty">Nenhum cupom encontrado.</div>';
+    return '<div class="table-wrap"><table><thead><tr><th>Codigo</th><th>Desconto</th><th>Validade</th><th>Status</th><th>Criado em</th><th>Acoes</th></tr></thead><tbody>' +
+      items.map((c) => '<tr><td class="mono"><strong>' + esc(c.code) + '</strong></td><td>' + money(c.discount) + '</td><td>' + dateStr(c.expires_at) + '</td><td>' + couponBadge(c) + '</td><td>' + dateStr(c.created_at) + '</td><td><div class="toolbar-group"><button class="btn btn-primary btn-sm" data-edit-coupon="' + esc(c.id) + '">Editar</button><button class="btn btn-outline btn-sm" data-toggle-coupon="' + esc(c.id) + '" data-active="' + String(!c.active) + '">' + (c.active ? 'Desativar' : 'Ativar') + '</button></div></td></tr>').join('') +
+      '</tbody></table></div>';
+  }
+
+  async function renderCoupons() {
+    setHead('Cupons', 'Crie e gerencie descontos aplicados ao carrinho e checkout.');
+    const el = document.getElementById('tab-coupons');
+    el.innerHTML = '<div class="loading">Carregando cupons...</div>';
+    try {
+      const params = new URLSearchParams({ limit: COUPONS_PER_PAGE, offset: state.couponsPage * COUPONS_PER_PAGE });
+      if (state.couponSearch) params.set('q', state.couponSearch);
+      if (state.couponStatus) params.set('status', state.couponStatus);
+      const data = await api('/coupons?' + params.toString());
+      state.coupons = data.items || [];
+      const totalPages = Math.max(1, Math.ceil((data.total || 0) / COUPONS_PER_PAGE));
+      const activeCount = state.coupons.filter((c) => c.active && !c.expired).length;
+      const expiredCount = state.coupons.filter((c) => c.expired).length;
+      el.innerHTML = '<div class="grid-4">' +
+        metric('Cupons nesta pagina', number(state.coupons.length), 'Filtro atual', icon('money')) +
+        metric('Validos', number(activeCount), 'Ativos e dentro da validade', icon('trend')) +
+        metric('Expirados', number(expiredCount), 'Fora da validade', icon('alert')) +
+        metric('Pagina', (state.couponsPage + 1) + '/' + totalPages, 'Navegacao', icon('file')) +
+        '</div>' +
+        couponEditor() +
+        panel('Lista de cupons', 'Codigos unicos com validade e status', couponToolbar() + couponTable(state.coupons) + pagination('coupons', state.couponsPage, totalPages));
+      bindCouponEvents();
+    } catch (e) {
+      el.innerHTML = '<div class="error-state">Erro ao carregar cupons: ' + esc(e.message) + '</div>';
+    }
+  }
+
+  function collectCouponEditor() {
+    const code = document.getElementById('editCouponCode')?.value.trim().toUpperCase().replace(/\s+/g, '') || '';
+    const discount = Number(document.getElementById('editCouponDiscount')?.value || 0);
+    const date = document.getElementById('editCouponExpiresAt')?.value || '';
+    const active = document.getElementById('editCouponActive')?.value === 'true';
+    if (!code) throw new Error('Codigo do cupom obrigatorio');
+    if (!Number.isFinite(discount) || discount <= 0) throw new Error('Valor de desconto invalido');
+    if (!date) throw new Error('Data de validade obrigatoria');
+    return { code, discount, expires_at: date + 'T23:59:59-03:00', active };
+  }
+
+  function bindCouponEvents() {
+    const search = document.getElementById('couponSearch');
+    search?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        state.couponSearch = search.value.trim();
+        state.couponsPage = 0;
+        renderCoupons();
+      }
+    });
+    document.getElementById('applyCouponSearch')?.addEventListener('click', () => {
+      state.couponSearch = search ? search.value.trim() : '';
+      state.couponsPage = 0;
+      renderCoupons();
+    });
+    document.getElementById('couponStatus')?.addEventListener('change', (e) => {
+      state.couponStatus = e.target.value;
+      state.couponsPage = 0;
+      renderCoupons();
+    });
+    document.getElementById('clearCouponFilters')?.addEventListener('click', () => {
+      state.couponSearch = '';
+      state.couponStatus = '';
+      state.couponsPage = 0;
+      renderCoupons();
+    });
+    document.getElementById('newCoupon')?.addEventListener('click', () => {
+      state.editingCoupon = emptyCoupon();
+      renderCoupons();
+    });
+    document.getElementById('cancelCouponEdit')?.addEventListener('click', () => {
+      state.editingCoupon = null;
+      renderCoupons();
+    });
+    document.getElementById('couponEditorForm')?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      try {
+        const payload = collectCouponEditor();
+        const id = state.editingCoupon && state.editingCoupon.id;
+        await api(id ? '/coupons/' + encodeURIComponent(id) : '/coupons', {
+          method: id ? 'PUT' : 'POST',
+          body: JSON.stringify(payload)
+        });
+        state.editingCoupon = null;
+        toast('Cupom salvo');
+        renderCoupons();
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    });
+    document.querySelectorAll('[data-edit-coupon]').forEach((btn) => btn.addEventListener('click', () => {
+      const coupon = state.coupons.find((c) => String(c.id) === String(btn.dataset.editCoupon));
+      state.editingCoupon = coupon ? { ...coupon } : null;
+      renderCoupons();
+    }));
+    document.querySelectorAll('[data-toggle-coupon]').forEach((btn) => btn.addEventListener('click', async () => {
+      try {
+        await api('/coupons/' + encodeURIComponent(btn.dataset.toggleCoupon), {
+          method: 'PATCH',
+          body: JSON.stringify({ active: btn.dataset.active === 'true' })
+        });
+        toast('Status do cupom atualizado');
+        renderCoupons();
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }));
+    bindPagination('coupons');
+  }
+
   function orderToolbar() {
     return '<div class="toolbar"><div class="toolbar-group"><select id="orderStatus"><option value="">Todos status</option>' +
       ['pending', 'paid', 'cancelled', 'failed', 'refunded'].map((s) => '<option value="' + s + '"' + selected(state.orderStatus, s) + '>' + statusLabel(s) + '</option>').join('') +
@@ -1063,7 +1313,7 @@
         panel('Pedido ' + o.id, 'Dados e atualização de status',
           '<div class="order-detail">' +
             field('Cliente', o.customer_name) + field('Email', o.customer_email) + field('Telefone', o.customer_phone) + field('Documento', o.customer_document) +
-            field('Subtotal', money(o.subtotal)) + field('Frete', money(o.shipping_total)) + field('Total', money(o.total)) + field('Status', statusLabel(o.status)) +
+            field('Subtotal', money(o.subtotal)) + field('Cupom', o.coupon_code || '-') + field('Desconto', money(o.discount || o.coupon_discount || 0)) + field('Frete', money(o.shipping_total)) + field('Total', money(o.total)) + field('Status', statusLabel(o.status)) +
             field('Pagamento', o.payment_provider || '-') + field('Criado em', dateStr(o.created_at)) +
           '</div><div class="toolbar" style="margin-top:14px"><div class="toolbar-group"><select id="detailStatus">' +
           ['pending', 'paid', 'cancelled', 'failed', 'refunded'].map((s) => '<option value="' + s + '"' + selected(o.status, s) + '>' + statusLabel(s) + '</option>').join('') +
@@ -1105,7 +1355,7 @@
         panel('Pedido ' + o.id, 'Dados e atualizacao de status',
           '<div class="order-detail">' +
             field('Cliente', o.customer_name) + field('Email', o.customer_email) + field('Telefone', o.customer_phone) + field('Documento', o.customer_document) +
-            field('Subtotal', money(o.subtotal)) + field('Frete', money(o.shipping_total)) + field('Total', money(o.total)) + field('Status', statusLabel(o.status)) +
+            field('Subtotal', money(o.subtotal)) + field('Cupom', o.coupon_code || '-') + field('Desconto', money(o.discount || o.coupon_discount || 0)) + field('Frete', money(o.shipping_total)) + field('Total', money(o.total)) + field('Status', statusLabel(o.status)) +
             field('Pagamento', o.payment_provider || '-') + field('Criado em', dateStr(o.created_at)) +
           '</div><div class="toolbar" style="margin-top:14px"><div class="toolbar-group"><select id="detailStatus">' +
           ['pending', 'paid', 'cancelled', 'failed', 'refunded'].map((s) => '<option value="' + s + '"' + selected(o.status, s) + '>' + statusLabel(s) + '</option>').join('') +
@@ -1559,6 +1809,9 @@
       if (kind === 'products') {
         state.productsPage = dir === 'prev' ? Math.max(0, state.productsPage - 1) : state.productsPage + 1;
         renderProducts();
+      } else if (kind === 'coupons') {
+        state.couponsPage = dir === 'prev' ? Math.max(0, state.couponsPage - 1) : state.couponsPage + 1;
+        renderCoupons();
       } else if (kind === 'serviceOrders') {
         state.serviceOrdersPage = dir === 'prev' ? Math.max(0, state.serviceOrdersPage - 1) : state.serviceOrdersPage + 1;
         renderServiceOrders();
@@ -1577,6 +1830,7 @@
     if (tab === 'dashboard') renderDashboardV2();
     if (tab === 'products') renderProducts();
     if (tab === 'orders') renderOrders();
+    if (tab === 'coupons') renderCoupons();
     if (tab === 'service-orders') renderServiceOrders();
     if (tab === 'pricing') renderPricing();
     if (tab === 'reports') renderReports();
@@ -1589,6 +1843,8 @@
       rows = [['id', 'cliente', 'email', 'total', 'status', 'pagamento', 'data']].concat(state.orders.map((o) => [o.id, o.customer_name, o.customer_email, o.total, o.status, o.payment_provider, o.created_at]));
     } else if (state.tab === 'products') {
       rows = [['id', 'nome', 'marca', 'categoria', 'preco', 'ativo', 'url']].concat(state.products.map((p) => [p.id, p.name, p.brand, p.category, p.price, p.active, p.url]));
+    } else if (state.tab === 'coupons') {
+      rows = [['id', 'codigo', 'desconto', 'validade', 'ativo', 'status', 'criado_em']].concat(state.coupons.map((c) => [c.id, c.code, c.discount, c.expires_at, c.active, couponStatusLabel(c), c.created_at]));
     } else if (state.tab === 'service-orders') {
       rows = [['id', 'codigo', 'cliente', 'telefone', 'aparelho', 'status', 'total', 'data']].concat(state.serviceOrders.map((o) => [o.id, o.code, o.customer_name, o.customer_phone, [o.device_brand, o.device_model].filter(Boolean).join(' '), o.status, o.total, o.created_at]));
     } else {
