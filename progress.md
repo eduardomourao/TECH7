@@ -663,3 +663,39 @@
 - Dados temporarios de QA removidos do Supabase; confirmacao final: `qa_coupons=0`, `qa_orders=0`.
 - Evidencias visuais salvas em `_validation/coupons/`: `admin-coupons.png`, `cart-coupon-applied.png`, `cart-coupon-expired.png`, `checkout-coupon-summary.png`, `checkout-coupon-mobile.png`.
 - Validacoes OK: `node --check server/routes/orders.js`, `node --check server/routes/coupons.js`, `node --check server/routes/admin.js`, `node --check assets/js/admin.js`, parse JS inline de carrinho/checkout, API de cupom valido/invalido/expirado/inativo/maior que subtotal, `npm run validate:product-cards`, `npm run validate:melhor-envio`, `npm run validate:build`.
+
+# Progresso - atualizacao AGENTS.md Ruflo (2026-06-20)
+- Skills usadas: caveman e planning-with-files.
+- Ruflo verificado com `npx ruflo@latest --version`: `ruflo v3.12.4`.
+- `AGENTS.md` atualizado com contexto do owner, skills obrigatorias, fluxo correto de Chrome autenticado e workflow Ruflo.
+
+## Admin upload imagens produto - Progress - 2026-06-20
+- Pedido iniciado: adicionar upload real de imagens no Admin criar/editar produto e exemplos de descricao.
+- Skills lidas: caveman, planning-with-files.
+- Memoria consultada: fluxo admin produto, product_images/product_categories, Chrome fallback.
+- @supabase usado para confirmar schema real de products/product_images e ausencia de buckets em storage.
+- Implementado endpoint upload em server/routes/admin.js.
+- Implementada UI de upload em assets/js/admin.js e estilos em admin.html.
+- Adicionados textos auxiliares com exemplos de descricao curta e descricao completa, sem autopreencher campos.
+- QA via Chrome fallback/Playwright passou: criar produto com upload, reordenar/principal, salvar, pagina publica, editar produto com novo upload, remover imagem, salvar e pagina publica.
+- Evidencias salvas em _validation/admin-upload/: 01-create-upload-preview.png, 02-create-upload-reordered.png, 03-public-after-create-upload.png, 04-edit-upload-preview.png, 05-edit-upload-remove-before-save.png, 06-public-after-edit-upload.png, 07-product-before-delete-upload-qa.png e upload-qa-results.json.
+- Produto QA removido via UI e registro remanescente de QA anterior removido via @supabase; reconsulta final qa_products_remaining=0.
+- Pastas locais de teste qa-upload-* removidas de _assets/uploads/products.
+- Validacoes OK: node --check assets/js/admin.js, node --check server/routes/admin.js, node --check _validation/admin-upload/run-upload-qa.mjs, npm run validate:assets, validate:routes, validate:product-cards, validate:endpoints, validate:product-images, validate:product-gallery.
+
+## Migracao Admin upload para Supabase Storage - Progress - 2026-06-20
+- Pedido iniciado: implementar plano de migracao do upload de imagens do Admin para Supabase Storage.
+- Skills usadas: caveman e planning-with-files.
+- ONE procurado via tool_search; nao ficou disponivel. @supabase usado como fallback.
+- @supabase confirmou projeto ativo `lzsaaufsdcmqlasjrqck`.
+- Migration remota `ensure_product_images_storage_bucket` aplicada com sucesso.
+- Bucket `product-images` verificado: publico, 5MB, JPG/PNG/WebP/GIF.
+- `server/routes/admin.js` alterado para upload Storage REST com `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` e bucket `SUPABASE_PRODUCT_IMAGES_BUCKET || product-images`.
+- `scripts/migrate-product-images-to-storage.mjs` criado para migrar somente `/_assets/uploads/products/`.
+- `package.json` ganhou script `migrate:product-images:storage`.
+- Checks OK: node --check server/routes/admin.js, assets/js/admin.js e scripts/migrate-product-images-to-storage.mjs.
+- `npm run migrate:product-images:storage -- --dry-run` OK: 0 imagens locais para migrar porque `_assets/uploads/products` nao existe.
+- Validacoes OK: validate:assets, validate:routes, validate:endpoints, validate:product-cards, validate:product-images, validate:product-gallery, validate:build.
+- Smoke endpoint local em 127.0.0.1:3002 OK: login 200, upload autenticado sem service key retornou 503 `supabase_storage_not_configured`.
+- Vercel configurado via CLI/plugin: `SUPABASE_PRODUCT_IMAGES_BUCKET=product-images` adicionado em Production, Preview e Development no projeto `tech-7`.
+- Vercel env verificado: `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` ja existem em Production, Preview e Development.

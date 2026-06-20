@@ -44,6 +44,8 @@
   const ORDERS_PER_PAGE = 20;
   const COUPONS_PER_PAGE = 20;
   const SERVICE_ORDERS_PER_PAGE = 20;
+  const PRODUCT_IMAGE_UPLOAD_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
   const OS_STATUSES = [
     ['aberta', 'Aberta'],
     ['em_analise', 'Em análise'],
@@ -604,10 +606,15 @@
       '<label>Status<select id="editActive"><option value="true"' + selected(String(p.active), 'true') + '>Ativo</option><option value="false"' + selected(String(p.active), 'false') + '>Inativo</option></select></label>' +
       '<div class="product-image-editor" style="grid-column:1/-1">' +
       '<div class="image-editor-head"><div><strong>Imagens do produto</strong><small>Adicione URLs, reordene e marque a imagem principal. O produto novo começa sem imagem.</small></div><button class="btn btn-outline btn-sm" type="button" id="addProductImage">Adicionar imagem</button></div>' +
+      '<div class="image-upload-box">' +
+      '<label>Enviar imagens<input id="productImageUpload" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple></label>' +
+      '<button class="btn btn-primary btn-sm" type="button" id="uploadProductImages">Enviar imagens</button>' +
+      '<small id="productImageUploadStatus">JPG, PNG, WebP ou GIF. Maximo 5MB por imagem.</small>' +
+      '</div>' +
       '<div id="productImageRows">' + imageEditorRows(images, previewImage === '/_assets/tech7/product-placeholder.svg' ? '' : previewImage) + '</div>' +
       '</div>' +
-      '<label style="grid-column:1/-1">Descricao curta<textarea id="editDescriptionShort" rows="3">' + esc(p.description_short || p.description_text || '') + '</textarea></label>' +
-      '<label style="grid-column:1/-1">Descricao completa<textarea id="editDescriptionFull" rows="5">' + esc(p.description_full || '') + '</textarea></label>' +
+      '<label style="grid-column:1/-1">Descricao curta<textarea id="editDescriptionShort" rows="3">' + esc(p.description_short || p.description_text || '') + '</textarea><small class="field-help">Resumo rapido usado em cards, listas e previews. Exemplos: Tela Display LCD Realme C35 RMX3511 com aro, pronta para instalacao. | Bateria iPhone 11 com boa autonomia e encaixe compativel. | Carcaca compativel com iPhone 11, acabamento premium e encaixe preciso.</small></label>' +
+      '<label style="grid-column:1/-1">Descricao completa<textarea id="editDescriptionFull" rows="5">' + esc(p.description_full || '') + '</textarea><small class="field-help">Descricao completa usada na pagina do produto, com detalhes, compatibilidade, qualidade e observacoes. Exemplo: Tela Display LCD Realme C35 RMX3511 com aro, indicada para reposicao em aparelhos compativeis. Produto testado antes do envio, com encaixe adequado e acabamento de qualidade. Ideal para manutencao tecnica. Recomendamos instalacao por profissional especializado. Garantia conforme politica da loja.</small></label>' +
       '<label><input id="editFeatured" type="checkbox"' + (p.featured ? ' checked' : '') + '> Destaque</label>' +
       '<label><input id="editLaunch" type="checkbox"' + (p.launch ? ' checked' : '') + '> Lancamento</label>' +
       '<div class="toolbar-group" style="grid-column:1/-1"><button class="btn btn-primary" type="submit">Salvar produto</button>' +
@@ -823,6 +830,72 @@
     syncProductPreview();
   }
 
+  function setImageUploadStatus(message, type) {
+    const target = document.getElementById('productImageUploadStatus');
+    if (!target) return;
+    target.textContent = message || '';
+    target.className = type ? 'upload-status ' + type : 'upload-status';
+  }
+
+  function validateImageFiles(files) {
+    const list = Array.from(files || []);
+    if (!list.length) throw new Error('Selecione uma ou mais imagens');
+    for (const file of list) {
+      if (!PRODUCT_IMAGE_UPLOAD_TYPES.includes(file.type)) throw new Error('Tipo invalido: use JPG, PNG, WebP ou GIF');
+      if (file.size > PRODUCT_IMAGE_MAX_BYTES) throw new Error('Imagem maior que 5MB: ' + file.name);
+    }
+    return list;
+  }
+
+  async function uploadProductImages() {
+    const input = document.getElementById('productImageUpload');
+    const button = document.getElementById('uploadProductImages');
+    let files;
+    try {
+      files = validateImageFiles(input?.files);
+    } catch (error) {
+      setImageUploadStatus(error.message, 'error');
+      return toast(error.message, 'error');
+    }
+
+    const current = collectProductEditor(false) || {};
+    const form = new FormData();
+    files.forEach((file) => form.append('images', file));
+    if (state.editingProduct?.id) form.append('productId', state.editingProduct.id);
+    if (current.slug) form.append('slug', current.slug);
+
+    if (button) button.disabled = true;
+    setImageUploadStatus('Enviando imagens...', 'loading');
+    try {
+      const res = await fetch(API + '/product-images/upload', {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: form
+      });
+      const text = await res.text();
+      let json = {};
+      try { json = text ? JSON.parse(text) : {}; } catch (_) { json = { message: 'Falha ao enviar imagem' }; }
+      if (!res.ok) throw new Error(json.message || 'Falha ao enviar imagem');
+
+      const uploaded = (json.items || []).map((item) => item.url).filter(Boolean);
+      const currentRows = readImageEditorRows().filter((row) => row.url);
+      const existing = new Set(currentRows.map((row) => row.url.toLowerCase()));
+      const merged = currentRows.slice();
+      uploaded.forEach((url) => {
+        if (!existing.has(url.toLowerCase())) merged.push({ url, primary: !merged.length });
+      });
+      renderImageEditorRows(merged);
+      if (input) input.value = '';
+      setImageUploadStatus(uploaded.length + ' imagem(ns) enviada(s). Salve o produto para vincular.', 'ok');
+      toast('Imagem enviada');
+    } catch (error) {
+      setImageUploadStatus(error.message, 'error');
+      toast(error.message, 'error');
+    } finally {
+      if (button) button.disabled = false;
+    }
+  }
+
   function bindProductImageEditor() {
     const rowsEl = document.getElementById('productImageRows');
     if (!rowsEl) return;
@@ -830,6 +903,8 @@
       input.oninput = syncProductPreview;
       input.onchange = syncProductPreview;
     });
+    const uploadButton = document.getElementById('uploadProductImages');
+    if (uploadButton) uploadButton.onclick = uploadProductImages;
     if (rowsEl.dataset.bound === '1') return;
     rowsEl.dataset.bound = '1';
     document.getElementById('addProductImage')?.addEventListener('click', () => {

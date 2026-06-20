@@ -616,3 +616,39 @@
 - `/api/orders` revalida o cupom no servidor antes de salvar o pedido, entao o cliente nao consegue forcar desconto invalido pelo navegador.
 - O total do pedido e calculado como `subtotal - desconto + frete`; o frete continua baseado no subtotal original dos produtos.
 - A sessao PIX agora inclui assinatura de cupom para nao reaproveitar PIX antigo quando o cupom muda.
+
+## Findings - atualizacao AGENTS.md Ruflo (2026-06-20)
+
+- O `AGENTS.md` local ja continha as regras duraveis principais do TECH7: npm, projetos root/backend, ONE-first para Supabase e Chrome-first para QA visual.
+- Ruflo ja responde no projeto como `ruflo v3.12.4`; nao foi necessario rodar `init` para esta atualizacao documental.
+- As skills `caveman` e `planning-with-files` existem em `C:\Users\Admin\.codex\skills` e foram lidas antes da edicao.
+
+## Admin upload imagens produto - Findings - 2026-06-20
+- Supabase Storage consultado via @supabase: nao ha buckets em storage.buckets.
+- Persistencia real de imagens de produto neste projeto usa products.image_url, products.primary_image_url, products.metadata.images e public.product_images.url/position/is_primary.
+- Como nao ha bucket/chave Storage no runtime, upload foi implementado em pasta estatica do projeto: _assets/uploads/products/<slug-ou-id>/arquivo, com URL publica /_assets/uploads/products/... e posterior vinculo no save do produto.
+- Endpoint criado: POST /api/admin/product-images/upload, protegido por adminAuth, aceita multipart/form-data, valida JPG/PNG/WebP/GIF, maximo 5MB por imagem e 24MB por lote.
+- Admin agora permite upload multiplo tanto em produto novo quanto em produto existente, mantendo tambem entrada manual por URL.
+- O upload mostra preview no editor, permite marcar imagem principal, remover e reordenar antes de salvar; o vinculo final acontece no save de produto em products/product_images.
+- Exemplos de descricao curta e descricao completa aparecem como ajuda visual abaixo dos campos e nao preenchem automaticamente os valores.
+- Primeiro QA encontrou falso negativo no upload de edicao porque o script anexava arquivo antes do editor terminar de re-renderizar; handler do botao foi tornado idempotente e o QA passou.
+- QA final criou produto `qa-upload-prod-1781979398832`, enviou duas imagens, salvou, validou pagina publica, editou, enviou nova imagem, removeu/redefiniu principal, salvou e validou pagina publica novamente.
+- Console do QA teve apenas 401 esperado de /api/admin/session antes do login; sem requestfailed.
+- Dados QA foram removidos do Supabase e pastas locais `qa-upload-*` foram removidas depois da validacao.
+
+## Migracao Admin upload para Supabase Storage - Findings - 2026-06-20
+- ONE nao expôs ferramenta callable nesta sessao; fallback @supabase usado conforme regra.
+- @supabase confirmou projeto ativo `supabase-bisque-bridge`, ref `lzsaaufsdcmqlasjrqck`, status `ACTIVE_HEALTHY`, regiao `sa-east-1`.
+- Bucket `product-images` criado/atualizado em Supabase Storage: publico, limite 5242880 bytes, MIME types image/jpeg, image/png, image/webp, image/gif.
+- Politica `Public read product images` criada em `storage.objects` para leitura publica do bucket.
+- Runtime root nao tinha `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` nem `SUPABASE_PRODUCT_IMAGES_BUCKET` no ambiente local; upload real exige service role no servidor.
+- Endpoint `POST /api/admin/product-images/upload` agora envia imagens para Supabase Storage via REST API usando service role server-side, sem dependencia nova.
+- URLs retornadas seguem `https://<project>.supabase.co/storage/v1/object/public/product-images/...` e continuam persistidas no save em `products`/`product_images`.
+- Script `scripts/migrate-product-images-to-storage.mjs` migra apenas URLs locais `/_assets/uploads/products/`, preservando ordem/principal e gerando relatorio em `_validation/storage-migration/`.
+- Smoke local autenticado sem service key retornou 503 com `supabase_storage_not_configured`, confirmando falha clara e sem gravar em filesystem.
+- Teste de upload real para Storage nao foi executado localmente porque `SUPABASE_SERVICE_ROLE_KEY` nao esta disponivel no ambiente desta sessao.
+
+## Vercel config/deploy Storage - Findings - 2026-06-20
+- Projeto Vercel local confirmado: `tech-7`, projectId `prj_UDDtUcUUQaEg4m01BhsnR5eSjjhI`, team `team_yKRleuToOM89NQWd3zIxD5kc`, dominio `tech-7.vercel.app`.
+- Vercel ja possuia `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` em Production, Preview e Development.
+- `SUPABASE_PRODUCT_IMAGES_BUCKET=product-images` foi adicionado em Production, Preview e Development.

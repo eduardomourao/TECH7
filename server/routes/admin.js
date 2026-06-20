@@ -15,6 +15,15 @@ const sessions = new Map();
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8;
 const SESSION_COOKIE = "tech7_admin_session";
 const MAX_TEXT = 12000;
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+const MAX_UPLOAD_TOTAL_BYTES = 24 * 1024 * 1024;
+const SUPABASE_PRODUCT_IMAGES_BUCKET = process.env.SUPABASE_PRODUCT_IMAGES_BUCKET || "product-images";
+const IMAGE_UPLOAD_TYPES = new Map([
+  ["image/jpeg", "jpg"],
+  ["image/png", "png"],
+  ["image/webp", "webp"],
+  ["image/gif", "gif"]
+]);
 const COMPLETED_ORDER_STATUS_SQL = "('paid', 'completed')";
 const SERVICE_ORDER_STATUSES = new Set(["aberta", "em_analise", "aguardando_peca", "em_servico", "pronta", "entregue", "cancelada"]);
 const SERVICE_ORDER_STATUS_LABELS = {
@@ -988,6 +997,18 @@ router.get("/categories", adminAuth, asyncRoute(async (_req, res) => {
   });
 }));
 
+router.post("/product-images/upload", adminAuth, asyncRoute(async (req, res) => {
+  try {
+    const items = await saveUploadedProductImages(req);
+    return res.status(201).json({ items });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      error: error.code || "image_upload_failed",
+      message: error.statusCode ? error.message : "Falha ao enviar imagem"
+    });
+  }
+}));
+
 function normalizeCouponCode(value) {
   return String(value || "").trim().toUpperCase().replace(/\s+/g, "");
 }
@@ -1051,6 +1072,192 @@ function validateCouponPayload(input, partial = false) {
     out.active = true;
   }
   return out;
+}
+
+function parseContentDisposition(value) {
+  const out = {};
+  String(value || "").split(";").forEach((part) => {
+    const [rawKey, ...rawValue] = part.trim().split("=");
+    const key = String(rawKey || "").trim().toLowerCase();
+    if (!key) return;
+    let val = rawValue.join("=").trim();
+    if (val.startsWith("\"") && val.endsWith("\"")) val = val.slice(1, -1);
+    out[key] = val;
+  });
+  return out;
+}
+
+function readRequestBuffer(req, maxBytes = MAX_UPLOAD_TOTAL_BYTES) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    req.on("data", (chunk) => {
+      size += chunk.length;
+      if (size > maxBytes) {
+        reject(Object.assign(new Error("Upload maior que o limite permitido"), { statusCode: 413, code: "upload_too_large" }));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on("end", () => resolve(Buffer.concat(chunks)));
+    req.on("error", reject);
+  });
+}
+
+function parseMultipartForm(buffer, boundary) {
+  const text = buffer.toString("latin1");
+  const marker = `--${boundary}`;
+  const parts = text.split(marker).slice(1, -1);
+  const fields = {};
+  const files = [];
+
+  for (let part of parts) {
+    if (part.startsWith("\r\n")) part = part.slice(2);
+    if (part.endsWith("\r\n")) part = part.slice(0, -2);
+    const separator = part.indexOf("\r\n\r\n");
+    if (separator < 0) continue;
+    const headerText = part.slice(0, separator);
+    const bodyText = part.slice(separator + 4);
+    const headers = {};
+    for (const line of headerText.split("\r\n")) {
+      const idx = line.indexOf(":");
+      if (idx > -1) headers[line.slice(0, idx).trim().toLowerCase()] = line.slice(idx + 1).trim();
+    }
+    const disposition = parseContentDisposition(headers["content-disposition"]);
+    const name = disposition.name || "";
+    const filename = disposition.filename || "";
+    const data = Buffer.from(bodyText, "latin1");
+    if (filename) {
+      files.push({ name, filename, type: headers["content-type"] || "", data });
+    } else if (name) {
+      fields[name] = data.toString("utf8").trim();
+    }
+  }
+
+  return { fields, files };
+}
+
+function assertImageUpload(file) {
+  const mime = String(file?.type || "").toLowerCase();
+  if (!IMAGE_UPLOAD_TYPES.has(mime)) {
+    throw Object.assign(new Error("Tipo de imagem nao permitido. Use JPG, PNG, WebP ou GIF."), { statusCode: 400, code: "invalid_image_type" });
+  }
+  if (!file.data?.length) {
+    throw Object.assign(new Error("Imagem vazia ou corrompida"), { statusCode: 400, code: "empty_image" });
+  }
+  if (file.data.length > MAX_UPLOAD_BYTES) {
+    throw Object.assign(new Error("Imagem maior que 5MB"), { statusCode: 413, code: "image_too_large" });
+  }
+}
+
+function normalizeSupabaseUrl(value) {
+  return String(value || "").trim().replace(/\/+$/, "");
+}
+
+function deriveSupabaseUrlFromDatabase() {
+  const raw = String(process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.SUPABASE_DB_URL || "").trim();
+  if (!raw) return "";
+  try {
+    const parsed = new URL(raw);
+    const hostMatch = parsed.hostname.match(/(?:db\.|pooler\.)?([a-z0-9]{20})\.supabase\.co$/i);
+    if (hostMatch?.[1]) return `https://${hostMatch[1]}.supabase.co`;
+    const userMatch = decodeURIComponent(parsed.username || "").match(/postgres\.([a-z0-9]{20})/i);
+    if (userMatch?.[1]) return `https://${userMatch[1]}.supabase.co`;
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+function getSupabaseStorageConfig() {
+  const url = normalizeSupabaseUrl(process.env.SUPABASE_URL || deriveSupabaseUrlFromDatabase());
+  const serviceKey = String(process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+  if (!url || !serviceKey) {
+    throw Object.assign(new Error("Supabase Storage nao configurado. Defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no servidor."), {
+      statusCode: 503,
+      code: "supabase_storage_not_configured"
+    });
+  }
+  return { url, serviceKey, bucket: SUPABASE_PRODUCT_IMAGES_BUCKET };
+}
+
+function encodeStoragePath(value) {
+  return String(value || "")
+    .split("/")
+    .filter(Boolean)
+    .map((part) => encodeURIComponent(part))
+    .join("/");
+}
+
+async function uploadProductImageToStorage(file, objectPath) {
+  const config = getSupabaseStorageConfig();
+  const encodedPath = encodeStoragePath(objectPath);
+  const endpoint = `${config.url}/storage/v1/object/${encodeURIComponent(config.bucket)}/${encodedPath}`;
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${config.serviceKey}`,
+      apikey: config.serviceKey,
+      "Content-Type": file.type,
+      "Cache-Control": "31536000, immutable",
+      "x-upsert": "false"
+    },
+    body: file.data
+  });
+  if (!response.ok) {
+    let details = "";
+    try {
+      const payload = await response.json();
+      details = payload?.message || payload?.error || "";
+    } catch {
+      details = await response.text().catch(() => "");
+    }
+    throw Object.assign(new Error(details || "Falha ao enviar imagem para Supabase Storage"), {
+      statusCode: response.status >= 400 && response.status < 500 ? response.status : 502,
+      code: "supabase_storage_upload_failed"
+    });
+  }
+  return `${config.url}/storage/v1/object/public/${encodeURIComponent(config.bucket)}/${encodedPath}`;
+}
+
+async function saveUploadedProductImages(req) {
+  const contentType = String(req.headers["content-type"] || "");
+  const match = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/i);
+  if (!/^multipart\/form-data/i.test(contentType) || !match) {
+    throw Object.assign(new Error("Envie imagens usando multipart/form-data"), { statusCode: 400, code: "invalid_upload" });
+  }
+
+  const buffer = await readRequestBuffer(req);
+  const form = parseMultipartForm(buffer, match[1] || match[2]);
+  const uploadFiles = form.files.filter((file) => file.name === "images" || file.name === "files" || file.name === "image");
+  if (!uploadFiles.length) {
+    throw Object.assign(new Error("Nenhuma imagem enviada"), { statusCode: 400, code: "no_images" });
+  }
+  if (uploadFiles.length > 10) {
+    throw Object.assign(new Error("Envie no maximo 10 imagens por vez"), { statusCode: 400, code: "too_many_images" });
+  }
+
+  const productId = cleanText(form.fields.productId || "", 120);
+  const draftSlug = slugify(form.fields.slug || "draft") || "draft";
+  const folder = productId ? `products/${slugify(productId) || productId}` : `drafts/${draftSlug}`;
+
+  const saved = [];
+  for (const file of uploadFiles) {
+    assertImageUpload(file);
+    const ext = IMAGE_UPLOAD_TYPES.get(String(file.type || "").toLowerCase());
+    const filename = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}.${ext}`;
+    const objectPath = `${folder}/${filename}`;
+    const url = await uploadProductImageToStorage(file, objectPath);
+    saved.push({
+      url,
+      filename,
+      originalName: cleanText(file.filename, 180),
+      size: file.data.length,
+      type: file.type
+    });
+  }
+  return saved;
 }
 
 router.get("/coupons", adminAuth, asyncRoute(async (req, res) => {

@@ -12,6 +12,7 @@
     "db:migrate": "node server/db/migrate.js",
     "db:seed": "node server/db/seed.js",
     "db:import-catalog": "node server/db/import_catalog_from_index.js",
+    "migrate:product-images:storage": "node scripts/migrate-product-images-to-storage.mjs",
     "validate:links": "node scripts/validate-links.js",
     "validate:assets": "node scripts/validate-assets.js",
     "validate:routes": "node scripts/validate-routes.js",

@@ -975,3 +975,59 @@ Adicionar cupons de desconto reais no Admin, carrinho, checkout e pedido.
 - [x] Integrar cupom no carrinho com aplicar/remover/mensagens.
 - [x] Integrar cupom no checkout, assinatura PIX e criacao do pedido.
 - [x] Validar API, Supabase, build e browser.
+
+---
+
+# Plano de execucao - atualizacao AGENTS.md Ruflo (2026-06-20)
+
+## Objetivo
+Registrar no `AGENTS.md` as regras globais fornecidas pelo usuario, incluindo Ruflo, skills obrigatorias e fluxo Chrome autenticado.
+
+## Fases
+- [x] Ler memoria relevante do TECH7 e arquivo `AGENTS.md` atual.
+- [x] Verificar Ruflo com `npx ruflo@latest --version`.
+- [x] Ler skills `caveman` e `planning-with-files`.
+- [x] Atualizar `AGENTS.md` preservando regras existentes.
+- [x] Registrar findings/progresso.
+
+## Admin upload imagens produto - 2026-06-20
+- [x] Ler skills obrigatorias e memoria relevante.
+- [x] Confirmar Supabase/schema/storage e variaveis locais.
+- [x] Mapear admin atual e fluxo de imagens.
+- [x] Implementar endpoint upload com validacao tipo/tamanho.
+- [x] Implementar UI upload criar/editar, preview, progresso, erro, principal/remover/reordenar.
+- [x] Adicionar exemplos de descricao curta/longa sem autopreencher.
+- [x] Testar criar produto com upload no Chrome.
+- [x] Testar editar produto com upload no Chrome.
+- [x] Confirmar pagina publica e persistencia Supabase.
+- [x] Rodar validacoes e limpar QA.
+
+### Guardrails Upload
+- Manter suporte a URL manual.
+- Nao quebrar ordem/principal/remover imagens.
+- Dados QA devem ser removidos no final.
+
+### Resultado Upload
+- Teste real via Chrome fallback/Playwright criou produto, enviou duas imagens, reordenou, salvou, abriu pagina publica, editou produto, enviou nova imagem, removeu uma imagem, salvou novamente e validou pagina publica.
+- Produto QA e imagens locais `qa-upload-*` foram removidos apos a evidencia.
+
+## Migracao Admin upload para Supabase Storage - 2026-06-20
+- [x] Ler skills obrigatorias e confirmar worktree.
+- [x] Tentar ONE; indisponivel nesta sessao, usar @supabase fallback.
+- [x] Confirmar projeto Supabase ativo `lzsaaufsdcmqlasjrqck`.
+- [x] Criar/atualizar bucket publico `product-images`.
+- [x] Alterar endpoint admin de upload para Supabase Storage.
+- [x] Criar script seguro para migrar somente URLs locais `/_assets/uploads/products/`.
+- [x] Rodar checks de sintaxe e validacoes npm.
+- [x] Validar fluxo de upload no navegador conforme env permitir.
+
+### Guardrails Storage
+- `SUPABASE_SERVICE_ROLE_KEY` somente servidor.
+- Upload admin continua protegido por `adminAuth`.
+- Novas imagens nao devem gravar em filesystem local.
+- Script de migracao deve ignorar assets antigos e externos.
+
+### Resultado Storage
+- Bucket Supabase configurado e validado.
+- Endpoint autenticado retorna erro claro quando `SUPABASE_SERVICE_ROLE_KEY` ausente no ambiente local.
+- Upload real pelo Admin depende de configurar `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` no servidor/Vercel.
