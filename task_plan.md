@@ -1031,3 +1031,15 @@ Registrar no `AGENTS.md` as regras globais fornecidas pelo usuario, incluindo Ru
 - Bucket Supabase configurado e validado.
 - Endpoint autenticado retorna erro claro quando `SUPABASE_SERVICE_ROLE_KEY` ausente no ambiente local.
 - Upload real pelo Admin depende de configurar `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` no servidor/Vercel.
+
+## Admin produtos invalid_session ao abrir aba - 2026-06-20
+- [x] Investigar fluxo `/session` -> aba Produtos -> `/api/admin/products`.
+- [x] Identificar dependencia de sessao em memoria no serverless.
+- [x] Trocar login para cookie assinado/stateless.
+- [x] Validar que cookie sobrevive restart do servidor local.
+- [x] Rodar checks e validar aba Produtos no navegador.
+
+### Guardrails Sessao Admin
+- Nao alterar dados de produtos.
+- Manter `adminAuth` protegendo rotas admin.
+- Preservar compatibilidade temporaria com sessoes antigas em memoria quando existir.

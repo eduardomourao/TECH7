@@ -14,10 +14,11 @@ export const router = express.Router();
 const sessions = new Map();
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8;
 const SESSION_COOKIE = "tech7_admin_session";
+const SESSION_TOKEN_VERSION = "v1";
 const MAX_TEXT = 12000;
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 const MAX_UPLOAD_TOTAL_BYTES = 24 * 1024 * 1024;
-const SUPABASE_PRODUCT_IMAGES_BUCKET = process.env.SUPABASE_PRODUCT_IMAGES_BUCKET || "product-images";
+const DEFAULT_PRODUCT_IMAGES_BUCKET = "product-images";
 const IMAGE_UPLOAD_TYPES = new Map([
   ["image/jpeg", "jpg"],
   ["image/png", "png"],
@@ -82,6 +83,66 @@ function hashSessionToken(token) {
   return crypto.createHash("sha256").update(String(token || "")).digest("hex");
 }
 
+function base64UrlEncode(value) {
+  return Buffer.from(value).toString("base64url");
+}
+
+function base64UrlDecode(value) {
+  return Buffer.from(String(value || ""), "base64url").toString("utf8");
+}
+
+function sessionSecret() {
+  const configured = String(process.env.ADMIN_SESSION_SECRET || "").trim();
+  if (configured) return configured;
+  const admin = resolveAdminCredentials();
+  return [admin?.username || "admin", admin?.passwordHash || "tech7-admin-session"].join(":");
+}
+
+function signSessionPayload(payload) {
+  return crypto
+    .createHmac("sha256", sessionSecret())
+    .update(`${SESSION_TOKEN_VERSION}.${payload}`)
+    .digest("base64url");
+}
+
+function createSessionToken(username) {
+  const payload = base64UrlEncode(JSON.stringify({
+    username,
+    iat: Date.now(),
+    exp: Date.now() + SESSION_TTL_MS,
+    nonce: crypto.randomBytes(12).toString("hex")
+  }));
+  return `${SESSION_TOKEN_VERSION}.${payload}.${signSessionPayload(payload)}`;
+}
+
+function safeEqual(a, b) {
+  const left = Buffer.from(String(a || ""));
+  const right = Buffer.from(String(b || ""));
+  return left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
+function verifySessionToken(token) {
+  const raw = String(token || "");
+  const parts = raw.split(".");
+  if (parts.length !== 3 || parts[0] !== SESSION_TOKEN_VERSION) return null;
+  const expected = signSessionPayload(parts[1]);
+  if (!safeEqual(parts[2], expected)) return null;
+  let data;
+  try {
+    data = JSON.parse(base64UrlDecode(parts[1]));
+  } catch {
+    return null;
+  }
+  if (!data || typeof data !== "object") return null;
+  if (!data.exp || Number(data.exp) < Date.now()) return null;
+  const admin = resolveAdminCredentials();
+  if (admin?.username && data.username !== admin.username) return null;
+  return {
+    username: String(data.username || ""),
+    expiresAt: Number(data.exp)
+  };
+}
+
 function parseCookies(header) {
   return String(header || "")
     .split(";")
@@ -126,6 +187,13 @@ function clearSessionCookie(req, res) {
 function adminAuth(req, res, next) {
   const sessionToken = readSessionToken(req);
   if (!sessionToken) return res.status(401).json({ error: "missing_session" });
+  const verified = verifySessionToken(sessionToken);
+  if (verified) {
+    req.adminSessionKey = hashSessionToken(sessionToken);
+    req.adminUser = verified.username;
+    return next();
+  }
+
   const sessionKey = hashSessionToken(sessionToken);
   const found = sessions.get(sessionKey);
   if (!found || found.expiresAt < Date.now()) {
@@ -875,11 +943,7 @@ router.post("/login", rateLimit({
       message: "Senha incorreta"
     });
   }
-  const sessionToken = crypto.randomBytes(32).toString("hex");
-  sessions.set(hashSessionToken(sessionToken), {
-    username: admin.username,
-    expiresAt: Date.now() + SESSION_TTL_MS
-  });
+  const sessionToken = createSessionToken(admin.username);
   setSessionCookie(req, res, sessionToken);
   return res.json({ ok: true, username: admin.username });
 });
@@ -1155,6 +1219,19 @@ function normalizeSupabaseUrl(value) {
   return String(value || "").trim().replace(/\/+$/, "");
 }
 
+function normalizeStorageBucketName(value) {
+  const bucket = String(value || DEFAULT_PRODUCT_IMAGES_BUCKET)
+    .trim()
+    .replace(/^['"`]+|['"`]+$/g, "");
+  if (!/^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$/.test(bucket)) {
+    throw Object.assign(new Error("Nome do bucket Supabase Storage invalido. Use product-images em SUPABASE_PRODUCT_IMAGES_BUCKET."), {
+      statusCode: 500,
+      code: "supabase_storage_bucket_invalid"
+    });
+  }
+  return bucket;
+}
+
 function deriveSupabaseUrlFromDatabase() {
   const raw = String(process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.SUPABASE_DB_URL || "").trim();
   if (!raw) return "";
@@ -1173,13 +1250,14 @@ function deriveSupabaseUrlFromDatabase() {
 function getSupabaseStorageConfig() {
   const url = normalizeSupabaseUrl(process.env.SUPABASE_URL || deriveSupabaseUrlFromDatabase());
   const serviceKey = String(process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+  const bucket = normalizeStorageBucketName(process.env.SUPABASE_PRODUCT_IMAGES_BUCKET);
   if (!url || !serviceKey) {
     throw Object.assign(new Error("Supabase Storage nao configurado. Defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no servidor."), {
       statusCode: 503,
       code: "supabase_storage_not_configured"
     });
   }
-  return { url, serviceKey, bucket: SUPABASE_PRODUCT_IMAGES_BUCKET };
+  return { url, serviceKey, bucket };
 }
 
 function encodeStoragePath(value) {

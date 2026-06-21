@@ -652,3 +652,15 @@
 - Projeto Vercel local confirmado: `tech-7`, projectId `prj_UDDtUcUUQaEg4m01BhsnR5eSjjhI`, team `team_yKRleuToOM89NQWd3zIxD5kc`, dominio `tech-7.vercel.app`.
 - Vercel ja possuia `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` em Production, Preview e Development.
 - `SUPABASE_PRODUCT_IMAGES_BUCKET=product-images` foi adicionado em Production, Preview e Development.
+
+## Admin produtos invalid_session ao abrir aba - Findings - 2026-06-20
+- Causa raiz: `server/routes/admin.js` guardava sessoes admin em `const sessions = new Map()`.
+- Em Vercel/serverless, `/api/admin/session` e `/api/admin/products` podem cair em instancias diferentes; a segunda instancia nao conhece o token criado na primeira e retorna `invalid_session`.
+- Isso explica o bug intermitente: primeira abertura da aba Produtos falha, mas atualizar depois funciona quando a chamada cai em instancia quente que ja conhece a sessao.
+- Correcao: login agora emite cookie de sessao assinado/stateless com HMAC; `adminAuth` valida assinatura/expiracao sem depender de memoria.
+- Compatibilidade mantida: tokens antigos ainda podem validar pelo `sessions Map` enquanto existirem na mesma instancia.
+
+## Admin upload erro bucket NAME invalid - Findings - 2026-06-20
+- Causa provavel: `SUPABASE_PRODUCT_IMAGES_BUCKET` vindo do ambiente com aspas ou caractere extra; backend usava o valor cru na URL `/storage/v1/object/<bucket>/...`.
+- Correcao aplicada: backend agora normaliza o bucket, remove aspas/backticks ao redor e valida o nome antes de chamar Supabase Storage.
+- Nome canonico mantido: `product-images`.

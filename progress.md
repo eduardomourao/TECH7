@@ -699,3 +699,18 @@
 - Smoke endpoint local em 127.0.0.1:3002 OK: login 200, upload autenticado sem service key retornou 503 `supabase_storage_not_configured`.
 - Vercel configurado via CLI/plugin: `SUPABASE_PRODUCT_IMAGES_BUCKET=product-images` adicionado em Production, Preview e Development no projeto `tech-7`.
 - Vercel env verificado: `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` ja existem em Production, Preview e Development.
+
+## Admin produtos invalid_session ao abrir aba - Progress - 2026-06-20
+- Pedido iniciado apos screenshot: aba Produtos mostra `Erro ao carregar produtos: Sessao invalida` na primeira abertura e carrega apos atualizar.
+- Investigacao local: `adminAuth` dependia de `sessions = new Map()` no processo Node.
+- Patch aplicado em `server/routes/admin.js`: token admin assinado/stateless (`v1.payload.signature`) com HMAC e expiracao de 8h.
+- `adminAuth` agora valida token stateless antes do fallback legado em memoria.
+- Validacao API de restart OK: login no servidor local 3003, servidor reiniciado, mesmo cookie acessou `/api/admin/session` 200 e `/api/admin/products?limit=1&offset=0` 200.
+- Validacao visual fallback Playwright/Chrome OK: aba Produtos carregou 20 linhas sem `Erro ao carregar produtos`; evidencia em `_validation/admin-session/products-tab-no-invalid-session.png`.
+- `@chrome` direto/node_repl falhou com `missing field sandboxPolicy`; fallback final Playwright com Chrome foi usado.
+- Checks OK: `node --check server/routes/admin.js`, `npm run validate:endpoints`, `npm run validate:api-security`, `npm run validate:build`, `git diff --check`.
+
+## Admin upload erro bucket NAME invalid - Progress - 2026-06-20
+- Pedido iniciado: upload de imagem retorna `bucket NAME invalid`.
+- Patch aplicado em `server/routes/admin.js`: `normalizeStorageBucketName()` limpa aspas/backticks e valida regex segura para bucket Supabase.
+- `getSupabaseStorageConfig()` agora usa bucket normalizado, com fallback `product-images`.
