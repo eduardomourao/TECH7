@@ -783,4 +783,9 @@
 - Validacao local real: `POST /api/shipping/melhor-envio/quote` retornou 201 para CEP `30111070` e produto S24, com opcoes Correios SEDEX, Jadlog e Loggi.
 - Validacao navegador real via Playwright+Chrome instalado: produto exibiu SEDEX/Jadlog/Loggi; checkout com produto no carrinho exibiu as mesmas opcoes e somou frete no fluxo.
 - Evidencias locais: `_validation/shipping-api/local-quote-after.json`, `_validation/shipping-api/product-shipping-smoke.json`, `_validation/shipping-api/checkout-shipping-smoke.json`.
-- Deploy novo e necessario para Vercel carregar envs novas; sera feito por commit/push em `main` conforme pedido.
+- Deploy via GitHub/Vercel concluido apos push para `main`.
+- Producao apos deploy: readiness retornou HTTP 200 com `ready=true`, `missingConfig=[]`, `authSource=env`, `quoteOnly=true`, `apiHost=melhorenvio.com.br`.
+- Cotacao real em producao retornou HTTP 201 com SEDEX `R$ 25,69`, Jadlog `R$ 40,76`, Loggi `R$ 22,49`, `selectedServiceId=2`.
+- Checkout em producao validado com navegador fallback Chrome: carrinho com produto S24, CEP `30111070`, frete SEDEX somado no resumo (`R$ 25,69`) e endpoint `/api/shipping/melhor-envio/quote` com 201.
+- Evidencias de producao: `_validation/shipping-api/production-quote-after.json`, `_validation/shipping-api/production-checkout-shipping-smoke.json`, `_validation/shipping-api/production-checkout-shipping-after.png`.
+- Risco restante fora do escopo do frete: a URL publica de produto dinamico usada no smoke de produto em producao respondeu 404; a API de frete e checkout em producao estao funcionais, mas a rota publica desse produto especifico deve ser tratada em uma rodada separada de rotas/catalogo.

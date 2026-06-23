@@ -1185,10 +1185,13 @@ Resultado:
 - [complete] Corrigir causa raiz operacional: envs `MELHOR_ENVIO_*` ausentes no Vercel Production.
 - [complete] Validar endpoint de frete, produto e checkout em navegador real local.
 - [complete] Rodar validadores finais antes do deploy.
-- [in_progress] Commitar e fazer push para `main` para disparar deploy GitHub.
-- [pending] Verificar resultado do deploy quando possivel.
+- [complete] Commitar e fazer push para `main` para disparar deploy GitHub.
+- [complete] Verificar resultado do deploy em producao.
 
-Resultado parcial:
+Resultado:
 - Producao antes: readiness 503 por `MELHOR_ENVIO_ORIGIN_ZIPCODE` e `MELHOR_ENVIO_TOKEN_OR_OAUTH` ausentes.
 - Local apos env: Melhor Envio live OK; produto e checkout mostram SEDEX/Jadlog/Loggi.
 - `npm run validate:build` OK.
+- Deploy GitHub/Vercel apos push: `https://tech-7.vercel.app/api/shipping/melhor-envio/readiness` retornou 200, `ready=true`, `authSource=env`, `apiHost=melhorenvio.com.br`.
+- Producao apos: cotacao real para CEP `30111070` retornou SEDEX `R$ 25,69`, Jadlog `R$ 40,76` e Loggi `R$ 22,49`.
+- Checkout em producao validado por navegador fallback Chrome: frete somado no resumo e chamada `/api/shipping/melhor-envio/quote` retornando 201.

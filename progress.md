@@ -855,4 +855,8 @@
 - Vercel Production atualizado via `npx vercel env add`: `MELHOR_ENVIO_API_URL`, `MELHOR_ENVIO_ORIGIN_ZIPCODE`, `MELHOR_ENVIO_TOKEN`.
 - Local real OK: `npm run validate:melhor-envio`, `npm run validate:melhor-envio:live` e `POST /api/shipping/melhor-envio/quote` retornaram cotacao.
 - Navegador real OK: produto e checkout exibiram opcoes Correios SEDEX, Jadlog e Loggi; evidencias em `_validation/shipping-api/`.
-- Proximo passo: rodar `validate:build`, commit/push em `main`, aguardar deploy e revalidar producao.
+- `npm run validate:build` OK antes do deploy.
+- Commit `c50934316` enviado para `origin/main`, disparando deploy Vercel de producao.
+- Producao apos deploy OK: readiness HTTP 200 com `ready=true`, cotacao HTTP 201 para CEP `30111070` com SEDEX `R$ 25,69`, Jadlog `R$ 40,76` e Loggi `R$ 22,49`.
+- Checkout em producao OK via navegador fallback Chrome: carrinho com S24, calculo de frete exibido e somado no resumo; evidencia em `_validation/shipping-api/production-checkout-shipping-smoke.json`.
+- Observacao: smoke de produto em producao encontrou 404 na URL dinamica do produto testado; isso nao bloqueia a API/checkout de frete, mas deve ser investigado como problema separado de roteamento/catalogo.
