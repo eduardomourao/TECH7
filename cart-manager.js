@@ -31,6 +31,12 @@
     return Number(_parseMoney(value)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }
 
+  function _cartPriceLabel(value) {
+    if (global.T7_CART_PRICES_STATUS === 'pending') return 'Atualizando preco';
+    if (global.T7_CART_PRICES_STATUS === 'error') return 'Preco indisponivel';
+    return _formatMoney(value);
+  }
+
   function _normalizeItem(raw, idx) {
     var id = String(raw.id || raw.productId || raw.sku || 'prod-' + idx);
     return {
@@ -74,9 +80,8 @@
     return produto;
   }
 
-  function _resultFromResolvePayload(payload, fallback) {
-    var items = Array.isArray(payload && payload.items) ? payload.items : [];
-    var item = items[0] || {};
+  function _resultFromResolveItem(item, fallback) {
+    item = item || {};
     var cents = Number(item.price_cents || 0);
     var price = Number.isFinite(cents) ? cents / 100 : 0;
     return {
@@ -86,6 +91,11 @@
       marca: item.brand || fallback.marca,
       slug: item.slug || fallback.slug
     };
+  }
+
+  function _resultFromResolvePayload(payload, fallback) {
+    var items = Array.isArray(payload && payload.items) ? payload.items : [];
+    return _resultFromResolveItem(items[0], fallback);
   }
 
   function _resolveOfficialPrice(produto) {
@@ -123,6 +133,53 @@
     });
   }
 
+  function _resolveOfficialPrices(produtos) {
+    if (!Array.isArray(produtos) || !produtos.length) return Promise.resolve([]);
+
+    var lookups = produtos.map(function (produto) {
+      return _cartLookup(produto || {});
+    });
+    var requestItems = lookups.map(function (lookup) {
+      return {
+        id: lookup.id,
+        productId: lookup.id,
+        slug: lookup.slug,
+        section: lookup.secao,
+        brand: lookup.marca,
+        secao: lookup.secao,
+        marca: lookup.marca
+      };
+    });
+
+    var canUseFrontendBatch = requestItems.every(function (item) { return !!item.slug; });
+    var resolver = canUseFrontendBatch && global.Tech7Prices && typeof global.Tech7Prices.resolveBatch === 'function'
+      ? global.Tech7Prices.resolveBatch(requestItems)
+      : _fetchJson('/api/products/resolve-prices', {
+          method: 'POST',
+          cache: 'no-store',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ items: requestItems })
+        }).then(function (payload) {
+          return Array.isArray(payload && payload.items) ? payload.items : [];
+        });
+
+    return resolver.then(function (results) {
+      results = Array.isArray(results) ? results : [];
+      return produtos.map(function (produto, index) {
+        var lookup = lookups[index] || {};
+        var hasLookup = !!(lookup.slug || lookup.id);
+        return _applyOfficialPrice(produto, hasLookup ? _resultFromResolveItem(results[index], lookup) : { found: false, price: 0 });
+      });
+    }).catch(function (err) {
+      console.warn('[cartManager] falha ao resolver precos em lote no backend', err);
+      return produtos.map(function (produto) {
+        produto.preco = 0;
+        produto.price = 0;
+        return produto;
+      });
+    });
+  }
+
   /* ------------------------------------------------------------------ */
   /* Persistência                                                        */
   /* ------------------------------------------------------------------ */
@@ -153,9 +210,7 @@
     }
 
     _setCartPriceStatus('pending');
-    return Promise.all(items.map(function (item) {
-      return _resolveOfficialPrice(item);
-    })).then(function (resolved) {
+    return _resolveOfficialPrices(items).then(function (resolved) {
       _save(resolved);
       _dispatch(resolved);
       _setCartPriceStatus('ready');
@@ -330,7 +385,6 @@
         if (current.url) mapped.url = current.url;
         if (current.variacao) mapped.variacao = current.variacao;
         if (current.imagem && !mapped.imagem) mapped.imagem = current.imagem;
-        if (current.preco > 0 && mapped.preco <= 0) mapped.preco = current.preco;
       }
       return mapped;
     }).filter(function (it) { return !!it.id; });
@@ -691,13 +745,13 @@
         'text-overflow:ellipsis;">' + it.nome + '</div>' +
         '<div style="font-size:12px;color:#6b7280;">Qtd: ' + it.quantidade + '</div></div>' +
         '<div style="font-weight:800;font-size:14px;color:#ff6a00;white-space:nowrap;">' +
-        _formatMoney(it.preco * it.quantidade) + '</div></div>';
+        _cartPriceLabel(it.preco * it.quantidade) + '</div></div>';
     }
 
     // Total
     html += '<div style="display:flex;justify-content:space-between;padding:14px 16px;' +
       'font-weight:800;font-size:16px;border-bottom:1px solid #e5e7eb;">' +
-      '<span>Total</span><span style="color:#ff6a00;">' + _formatMoney(cartManager.total()) + '</span></div>';
+      '<span>Total</span><span style="color:#ff6a00;">' + _cartPriceLabel(cartManager.total()) + '</span></div>';
 
     // Ações
     html += '<div style="display:grid;gap:8px;padding:14px 16px;">' +

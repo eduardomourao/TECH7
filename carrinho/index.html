@@ -670,7 +670,13 @@
       }
 
       function cartPriceStatus() {
-        return window.T7_CART_PRICES_STATUS || 'ready';
+        if (window.T7_CART_PRICES_STATUS) return window.T7_CART_PRICES_STATUS;
+        try {
+          var raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+          return Array.isArray(raw) && raw.length ? 'pending' : 'ready';
+        } catch (_error) {
+          return 'ready';
+        }
       }
 
       function cartPricesReady() {
@@ -831,7 +837,7 @@
 
           article.querySelector('.cart-item-name').textContent = item.nome;
           article.querySelector('.cart-item-variant').textContent = item.variacao || 'Sem variacao selecionada';
-          article.querySelector('.unit-price').textContent = cartPriceLabel(item.preco);
+          article.querySelector('.unit-price').textContent = cartPricesReady() ? cartPriceLabel(item.preco) : cartPriceLabel(0);
           article.querySelector('input').value = item.qty;
           article.dataset.index = String(index);
           cartList.appendChild(article);

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { supabase, isSupabaseConfigured, mockDb, mockFilter, mockInsert } from "../services/supabase.js";
 import { sanitizeString, validateEmail } from "../services/validators.js";
+import { adminAuth } from "../middleware/adminAuth.js";
 
 export const router = Router();
 
@@ -159,7 +160,7 @@ router.post("/", async (req, res, next) => {
 });
 
 // GET /api/orders — list
-router.get("/", async (req, res, next) => {
+router.get("/", adminAuth, async (req, res, next) => {
   try {
     const limit = Math.max(1, Math.min(100, Number(req.query.limit) || 20));
     const offset = Math.max(0, Number(req.query.offset) || 0);

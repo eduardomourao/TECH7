@@ -16,6 +16,26 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const STATIC_DIR = path.resolve(__dirname, "..");
 
+function isSensitivePublicPath(requestPath) {
+  const parts = String(requestPath || "")
+    .split(/[?#]/)[0]
+    .split("/")
+    .filter(Boolean)
+    .map((part) => part.toLowerCase());
+  if (!parts.length) return false;
+  if (parts.some((part) => part.startsWith("."))) return true;
+  const blocked = new Set([
+    "_validation",
+    "validation-artifacts",
+    "backup",
+    "backups",
+    "node_modules",
+    ".agents",
+    ".codex"
+  ]);
+  return parts.some((part) => blocked.has(part));
+}
+
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -29,6 +49,11 @@ app.use("/api/checkout/webhook", express.raw({ type: "*/*", limit: "2mb" }));
 app.use(express.json({ limit: "1mb" }));
 
 // Serve static files (frontend, admin.html, assets/)
+app.use((req, res, next) => {
+  if (!["GET", "HEAD"].includes(req.method)) return next();
+  if (!isSensitivePublicPath(req.path)) return next();
+  return res.status(404).type("text").send("Not found");
+});
 app.use(express.static(STATIC_DIR, { extensions: ["html"] }));
 
 // Health check

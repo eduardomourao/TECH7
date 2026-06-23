@@ -2013,7 +2013,13 @@
       }
 
       function cartPriceStatus() {
-        return window.T7_CART_PRICES_STATUS || 'ready';
+        if (window.T7_CART_PRICES_STATUS) return window.T7_CART_PRICES_STATUS;
+        try {
+          var raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+          return Array.isArray(raw) && raw.length ? 'pending' : 'ready';
+        } catch (_error) {
+          return 'ready';
+        }
       }
 
       function cartPricesReady() {
@@ -2510,8 +2516,8 @@
           row.children[0].querySelector('strong').textContent = item.nome;
           if (item.variacao) row.children[0].querySelector('small').textContent = item.variacao;
           row.children[1].textContent = 'Qtd. ' + item.qty;
-          row.children[2].textContent = cartPriceLabel(item.preco);
-          row.children[3].textContent = cartPriceLabel(item.preco * item.qty);
+          row.children[2].textContent = cartPricesReady() ? cartPriceLabel(item.preco) : cartPriceLabel(0);
+          row.children[3].textContent = cartPricesReady() ? cartPriceLabel(item.preco * item.qty) : cartPriceLabel(0);
           reviewList.appendChild(row);
         });
         updateTotals();
@@ -2532,7 +2538,7 @@
             '<div class="summary-price"></div>';
           row.querySelector('.summary-name').textContent = item.nome;
           row.querySelector('.summary-qty').textContent = 'Qtd. ' + item.qty;
-          row.querySelector('.summary-price').textContent = cartPriceLabel(item.preco * item.qty);
+          row.querySelector('.summary-price').textContent = cartPricesReady() ? cartPriceLabel(item.preco * item.qty) : cartPriceLabel(0);
           summaryList.appendChild(row);
         });
         updateTotals();

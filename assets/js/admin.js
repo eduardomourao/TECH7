@@ -97,8 +97,9 @@
     if (code === 'order_not_found') return 'Pedido origem nao encontrado. Deixe o campo vazio para OS manual.';
     if (productErrors[code]) return productErrors[code];
     return {
-      username_incorrect: 'Usuário incorreto',
-      password_incorrect: 'Senha incorreta',
+      invalid_credentials: 'Usuário ou senha inválidos',
+      username_incorrect: 'Usuário ou senha inválidos',
+      password_incorrect: 'Usuário ou senha inválidos',
       database_connection_error: 'Falha de conexão com o banco',
       admin_not_configured: 'Administrador não configurado',
       missing_session: 'Sessão expirada',

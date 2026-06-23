@@ -430,6 +430,8 @@
     price.className = 't7-buy-price';
     price.style.cssText = 'font-size:30px;line-height:1.15;font-weight:900;color:#ff6a00;letter-spacing:-.02em;';
     price.textContent = dados.preco >= 2 ? formatMoney(dados.preco) : 'Preco sob consulta';
+    price.dataset.tech7PriceReady = '1';
+    price.dataset.tech7PriceLoading = '0';
     container.appendChild(price);
 
     if (dados.preco < 2) {

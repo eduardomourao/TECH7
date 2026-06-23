@@ -664,3 +664,123 @@
 - Causa provavel: `SUPABASE_PRODUCT_IMAGES_BUCKET` vindo do ambiente com aspas ou caractere extra; backend usava o valor cru na URL `/storage/v1/object/<bucket>/...`.
 - Correcao aplicada: backend agora normaliza o bucket, remove aspas/backticks ao redor e valida o nome antes de chamar Supabase Storage.
 - Nome canonico mantido: `product-images`.
+## 2026-06-21 - missing-samsung-s-models-agent
+
+- Ruflo verificado: `ruflo v3.12.4`.
+- Worktree inicial limpo.
+- Memória do projeto confirma regra Tech7: Supabase/DB deve ser ONE-first; se ONE falhar, fallback documentado para Supabase direto.
+- ONE indisponível na descoberta MCP desta sessão; Composio também não apareceu. Fallback usado: `@supabase`.
+- Supabase ativo confirmado: `lzsaaufsdcmqlasjrqck` / `supabase-bisque-bridge` / `ACTIVE_HEALTHY`.
+- Tabelas reais relevantes: `products`, `product_images`, `categories`, `product_categories`.
+- Aviso do Supabase: várias tabelas com RLS desativado; não faz parte do escopo de importação e não será alterado neste fluxo.
+- Modelos Tech7 existentes no escopo: S20, S20 FE, S20 Plus, S20 Ultra, S21, S21 FE, S21 Plus, S21 Ultra, S22, S22 Plus, S22 Ultra, S23, S23 FE, S23 Plus, S23 Ultra, S24, S24 FE, S24 Plus, S24 Ultra, S25, S25 Plus, S25 Ultra.
+- Firecrawl encontrou produtos fonte para modelos já existentes e também `S8`, `S10 Plus`, `S26 Plus`, `S26 Ultra`.
+- `S8` e `S10 Plus`: fora da lista S20-S25 do prompt. Não importar.
+- `S26 Plus` e `S26 Ultra`: `BLOQUEADO_MODELO_INCERTO`; fora da lista-alvo e sem equivalência validada no Tech7.
+- Produtos aprovados para importação: 0.
+- Manifest imagem-produto: vazio, porque nenhum produto foi aprovado.
+- Validação visual fallback: `/display-e-lcd/samsung/tela-display-lcd-samsung-s25-ultra-s938-original-retirada-sem-aro`, `/display-e-lcd/samsung/tela-display-lcd-samsung-s23-ultra-5g-s918-oled-com-aro`, `/busca?q=samsung%20s25%20ultra` retornaram 200, sem overflow mobile, sem console errors.
+- Evidências visuais: `_validation/missing-samsung-s-models/visual-smoke-1.png`, `visual-smoke-2.png`, `visual-smoke-3.png`, `visual-smoke-results.json`.
+- Correção de escopo do usuário: análise deve considerar somente modelos Samsung linha S com qualidade `Original` ou `Original Retirada`, especialmente telas/display; demais peças não contam como modelo existente.
+- Análise estrita concluída:
+  - Tech7 já tem display/tela original/retirada: S20, S20 Plus, S20 Ultra, S21, S21 Plus, S21 Ultra, S22, S22 Plus, S23, S23 FE, S24 FE, S24 Plus, S25 Ultra.
+  - Tech7 não tem display/tela original/retirada: S20 FE, S21 FE, S22 Ultra, S23 Plus, S23 Ultra, S24, S24 Ultra, S25, S25 Plus.
+  - Fonte Firecrawl tem candidatos válidos para importar: S20 FE, S22 Ultra, S23 Ultra, S24, S24 Ultra, S25, S25 Plus.
+  - Faltam no Tech7 mas não encontrei fonte válida clara: S21 FE, S23 Plus.
+  - Nenhuma importação feita nesta etapa; relatório salvo para confirmação.
+
+### Importacao de candidatos aprovados - 2026-06-21
+- Usuario confirmou importacao dos candidatos aprovados.
+- Supabase ativo reconfirmado: `lzsaaufsdcmqlasjrqck` / `supabase-bisque-bridge`.
+- ONE e Composio continuam sem ferramenta callable nesta sessao; fallback `@supabase` usado e registrado.
+- Duplicidade pre-insert: nenhum dos 7 ids/slugs propostos existia em `products`.
+- `public.categories` nao possui `display-e-lcd`; padrao real do catalogo de pecas usa `products.section='display-e-lcd'`, entao nao foi criada categoria nova nem relacao em `product_categories`.
+- Firecrawl confirmou por pagina individual todos os 7 produtos como frontal/tela/display Samsung linha S qualidade Original.
+- Produtos criados em `products`: S20 FE, S22 Ultra, S23 Ultra, S24, S24 Ultra, S25, S25 Plus.
+- Imagens criadas em `product_images`: 31 linhas, todas com `source='firecrawl:x3'`, `source_kind='gallery'`, `is_primary=true` apenas na primeira imagem de cada produto.
+- Descricoes foram reescritas para o padrao Tech 7; nao foi copiado o texto institucional longo da fonte.
+- Validacao Supabase pos-insert: 7 produtos ativos e `is_active=true`, precos persistidos e contagem de imagens por produto confirmada.
+- Validacao visual fallback Playwright mobile 390x844: todas as 7 paginas publicas retornaram 200, exibiram titulo, preco, imagens, descricao, sem overflow, sem console errors e sem request failures relevantes.
+- Busca local `/busca?q=s25%20plus%20original` retornou 200 e exibiu S25 Plus.
+- Validacoes npm OK: `validate:routes`, `validate:product-images`, `validate:product-cards`.
+
+### Layout unico de produto para novos produtos - 2026-06-21
+- Causa raiz: produtos novos criados via banco eram servidos por `renderDynamicProductHtml()` em `server/app.js`, que montava um HTML proprio e mais simples, com header `t7-dynamic-header` e estrutura diferente das paginas estaticas antigas.
+- Correcao: renderer dinamico agora carrega um template real de produto existente (`display-e-lcd/xiaomi-redmi/tela-display-lcd-xiaomi-redmi-note-14-pro-5g-poco-x7-incell/index.html`) e substitui somente a area de produto pelos dados do produto novo.
+- Estrutura visual preservada: header/footer do tema, CSS original, scripts do tema, galeria com `box-gallery`, coluna de produto, caixa de preco, botao comprar, frete, descricao geral e ficha tecnica.
+- Fallback antigo foi mantido como `renderMinimalDynamicProductHtml()` caso o template estatico nao esteja disponivel.
+- Validacao em servidor novo `127.0.0.1:3010`: produto novo S25 Plus retornou shell estatico, sem `t7-dynamic-header`, com preco, imagens, comprar, frete, footer e sem overflow.
+- Validacao visual fallback Playwright: `_validation/product-layout-parity/layout-parity-validation.json` e screenshots mobile/desktop.
+- `@chrome` direto nao apareceu como ferramenta callable; usada validacao final com Playwright fallback.
+
+### Correcao para template Samsung de referencia - Findings - 2026-06-21
+- Causa raiz refinada: a primeira correcao usava um shell estatico real, mas nao o shell exato do produto Samsung indicado como referencia pelo usuario.
+- Correcao aplicada: `PRODUCT_PAGE_TEMPLATE_PATH` agora aponta para `display/samsung/tela-display-lcd-samsung-note-20-ultra-n986-oled/index.html`.
+- O renderer dinamico continua trocando somente o bloco de produto, mantendo header, menu, scripts, relacionados e footer do template de referencia.
+- Blocos reforcados para paridade com a referencia: `list-seal-product`, `line-info`, `produto-bonus`, `produto-formas-pagamento`, `box-price`, `bt_comprar`, `box-frete`, `page-info-product`.
+- Supabase confirmou projeto ativo `lzsaaufsdcmqlasjrqck` e 7 produtos importados de `firecrawl:x3`.
+- Imagens confirmadas em `product_images`: S20 FE 3, S22 Ultra 6, S23 Ultra 3, S24 7, S24 Ultra 4, S25 4, S25 Plus 4; todos com imagem principal.
+- Validacao HTTP local em `127.0.0.1:3012`: todos os 7 produtos retornaram 200, sem `t7-dynamic-header`, com `box-col-product`, `box-gallery`, frete, relacionados e footer.
+- `@chrome` nao foi exposto nesta sessao; validacao visual foi feita com Playwright fallback em desktop 1366x900 e mobile 390x844.
+- Evidencias: `_validation/product-layout-reference/layout-reference-validation.json`, `reference-*.png`, `s24-fixed-*.png`, `s25-plus-fixed-*.png`.
+- Console/Network: o unico warning foi `JQMIGRATE: jQuery.isFunction() is deprecated`, tambem presente no produto de referencia; falhas de request foram chamadas externas de Google/analytics abortadas no ambiente local.
+
+### Layout Samsung S Original Retirada - Findings - 2026-06-21
+- O renderer dinamico ja usa o shell Samsung de referencia, mas o bloco gerado em `server/app.js` ainda omitia secoes presentes nas paginas antigas, especialmente formas de pagamento ocultas e comentarios/avaliacoes.
+- Para atender "todas as paginas devem ser iguais", a correcao deve ser compartilhada no renderer dinamico e manter os blocos estruturais da pagina de referencia em todos os novos produtos.
+- Correcao aplicada: `server/app.js` agora inclui no bloco dinamico as secoes antigas de formas de pagamento e comentarios/avaliacoes, mantendo os IDs/seletores esperados no HTML cru para todos os novos produtos.
+- Validacao final: os 7 produtos importados passaram em 14 casos desktop/mobile, sem `t7-dynamic-header`, sem overflow, com a mesma assinatura de seletores da referencia apos JS e com HTML cru contendo compra/preco/pagamento/botao.
+- Evidencia final: `_validation/product-layout-reference/layout-reference-final-validation.json` e screenshots `final-*.png`.
+- Novo problema visual reportado por imagem: uma aba local mostrava novamente o layout minimo branco com logo grande e link `Carrinho`, indicando que o fluxo ainda podia cair em `renderMinimalDynamicProductHtml()` quando o shell de referencia nao era encontrado/carregado no processo em execucao.
+- Correcao final: `renderDynamicProductHtml()` agora localiza o bloco de produto por regex tolerante e nao usa mais o fallback minimo; se o template antigo faltar, falha explicitamente em vez de renderizar uma pagina diferente.
+- Chrome real via plugin/node_repl validou S24, S25 Plus e referencia em desktop/mobile: layout antigo completo, header/menu pretos, galeria, compra, frete, descricao, ficha, relacionados e footer; sem `t7-dynamic-header`, sem overflow e sem erros de console internos.
+- Evidencia Chrome real: `_validation/product-layout-reference/real-chrome-product-layout-report.json` e screenshots `real-chrome-*.png`.
+
+### Produtos visitados sem imagens - Findings - 2026-06-21
+- Causa raiz: os cards de `Produtos visitados` eram montados dinamicamente com `class="swiper-lazy transform"`. O tema deixa essas imagens opacas ate o lazy-loader/carrossel marcar o carregamento; como a secao e recriada pelo runtime, alguns cards ficavam com area branca apesar de terem `src`.
+- Correcao aplicada: imagens de cards visitados agora saem com classe `lazyloaded`, CSS da secao forca `visibility: visible` e `opacity: 1`, e `ensureProductCardImagesVisible()` roda imediatamente apos o HTML do carrossel ser inserido.
+- Robustez adicional: itens antigos do `localStorage` sem imagem real passam por hidratacao assincrona; o runtime busca a URL do produto, extrai `og:image` ou imagem principal e atualiza o historico salvo.
+- Validacao Chrome real: os cards testados passaram a carregar imagem com `naturalWidth > 0` e `opacity: 1`; o item S25 Plus sem imagem armazenada recebeu imagem recuperada da pagina.
+
+### Veja tambem com faixa laranja vazia - Findings - 2026-06-21
+- Causa raiz: em `Veja tambem`, o hover/focus do tema aplicava fundo laranja e cor laranja ao proprio `<p>Produto Indisponível</p>`, tornando o texto invisivel e deixando apenas uma faixa laranja vazia.
+- A correcao deve ficar limitada a `.product-related`, porque selos como `DESTAQUE` e botoes globais ainda precisam manter fundo laranja.
+- Correcao aplicada: o CSS injetado de cards relacionados agora zera o background de `.box-price`, `.price`, `.product-price`, `.price-off` e `<p>` e reforca texto laranja em hover/focus.
+- Validacao Chrome real confirmou que cards indisponiveis e cards com preco continuam legiveis, sem faixa laranja vazia.
+
+### Performance/correcao de carregamento de precos - Findings - 2026-06-22
+- Causa raiz: paginas estaticas exibiam preco antigo/mockado do HTML/localStorage antes do `preco-loader`; o loader ainda aguardava debounce de 160ms, podia executar duas vezes por script relativo/absoluto e carrinho/checkout preservavam preco local quando o backend ainda nao tinha confirmado.
+- Fonte correta confirmada no Supabase `lzsaaufsdcmqlasjrqck`: `products.price_cents` e o unico campo completo de preco; `products.price` e parcial.
+- Produto de validacao: `display-e-lcd-samsung-frontal-tela-display-samsung-s24-s921-com-aro-original`, `price_cents=119900`, `price_text=R$ 1.199,00`.
+- Correcao: loading neutro antes de qualquer preco estatico, `Tech7Prices.resolve` usando o mesmo batch/cache dos cards, loader idempotente, dedupe de sync identico, carrinho em lote e sem fallback para preco local antigo.
+- Busca/listagens dinamicas usam `price_cents` ja no payload inicial (`/api/search` e `/api/products`); o re-sync extra apos filtro backend foi removido.
+- Endpoint `/api/products/resolve-prices` agora seleciona somente os campos necessarios para preco/URL/imagem.
+- Medicao antes: home desktop mostrava `R$ 50,00` estatico aos 816ms; produto mostrava `R$ 750,00` aos 208ms e ate `R$ 1,23` vindo de historico; carrinho/checkout mostravam `R$ 1,23` antes do backend.
+- Medicao final Chrome fallback: `wrongFlashCount=0` em home, categoria, busca, produto, carrinho e checkout, desktop/mobile. Evidencia em `_validation/price-load-performance/after-price-load.json` e screenshots `final2-*.png`.
+- Tempos finais ate primeiro preco correto: home desktop 1840ms, categoria desktop 2534ms, busca desktop 1639ms, produto desktop 1188ms, carrinho desktop 639ms, checkout desktop 525ms; mobile: home 1886ms, categoria 2860ms, busca 1503ms, produto 1143ms, carrinho 771ms, checkout 679ms.
+- Validacoes finais OK: `validate:backend-prices`, `validate:product-cards`, `validate:endpoints`, `validate:routes`, `validate:build`.
+
+### Regressao geral apos correcao de precos - Findings - 2026-06-23
+- Smoke real de navegador nao encontrou impacto em home, categoria, busca, pagina de produto, produtos visitados, compra pelo botao, carrinho, checkout ou mobile.
+- O painel Admin nao foi alterado funcionalmente pelas mudancas de preco; a tela de login carregou, endpoints protegidos continuaram retornando 401 sem sessao e login invalido falhou sem crash.
+- O falso positivo inicial do Admin era apenas o Chrome registrando os 401 esperados como mensagens de recurso; revalidacao filtrando esses 401 ficou 6/6 OK.
+- Evidencias salvas em `_validation/price-regression/regression-smoke.json`, `_validation/price-regression/admin-smoke.json` e screenshots.
+- Validadores finais do projeto passaram, incluindo `validate:build`.
+
+### Regressao avancada pos-precos - Findings - 2026-06-23
+- Achado real 1: `preco-loader.js` marcava nos visiveis como loading antes de detectar que a assinatura de catalogo ja tinha sido sincronizada. Em DOM novo com mesmos produtos, isso podia deixar card em `Carregando preco`. Correcao: reaplicar valores do cache verificado na saida `cached`.
+- Achado real 2: `assets/js/tech7-local-runtime.js` extraia slug de visitados assumindo URL `secao/marca/slug`; URL `secao/slug` ficava sem slug e nao chamava hidratacao. Correcao: parser aceita 1, 2 ou 3 segmentos e hidrata historico salvo mesmo sem `.visited-section` na pagina atual.
+- Validacao real Chrome fallback: `_validation/price-regression/advanced-regression.json` terminou `passed=9`, `failed=0`, `localBrowserEvents=[]`.
+- Evidencia de preco correto: produto S24 usado na validacao retornou `price_cents=119900` no endpoint em lote e apareceu como `R$ 1.199,00` em produto, carrinho, checkout e produto visitado.
+- Busca/categoria: `/api/search?q=s24` retornou 15 resultados; categoria real `/display-e-lcd/samsung/` carregou 48 cards, 102 ocorrencias de preco e `loadingCount=0`.
+- Admin: endpoint protegido `/api/admin/products` continuou retornando 401 sem sessao, comportamento esperado para usuario nao autenticado.
+- Risco fora do escopo: `backend/src/routes/orders.js` ainda tem detalhe de pedido por ID publico enquanto lista usa `adminAuth`. Nao foi alterado porque pode envolver fluxo de rastreio/cliente e nao foi causado pelo patch de preco.
+
+### API de frete Melhor Envio - Findings - 2026-06-23
+- Causa raiz em producao: Vercel nao tinha `MELHOR_ENVIO_ORIGIN_ZIPCODE` nem `MELHOR_ENVIO_TOKEN`/OAuth. `/api/shipping/melhor-envio/readiness` retornava 503 com `missingConfig=["MELHOR_ENVIO_ORIGIN_ZIPCODE","MELHOR_ENVIO_TOKEN_OR_OAUTH"]`.
+- Local ja funcionava com `.env`: readiness `ready=true`, `authSource=env`, `apiHost=melhorenvio.com.br`.
+- Correcao operacional aplicada no Vercel Production via CLI autenticada: adicionadas `MELHOR_ENVIO_API_URL`, `MELHOR_ENVIO_ORIGIN_ZIPCODE`, `MELHOR_ENVIO_TOKEN`; `MELHOR_ENVIO_SERVICE_IDS` tentou ser sincronizada, mas e opcional porque o codigo usa default `2,3,34`.
+- Validacao local real: `POST /api/shipping/melhor-envio/quote` retornou 201 para CEP `30111070` e produto S24, com opcoes Correios SEDEX, Jadlog e Loggi.
+- Validacao navegador real via Playwright+Chrome instalado: produto exibiu SEDEX/Jadlog/Loggi; checkout com produto no carrinho exibiu as mesmas opcoes e somou frete no fluxo.
+- Evidencias locais: `_validation/shipping-api/local-quote-after.json`, `_validation/shipping-api/product-shipping-smoke.json`, `_validation/shipping-api/checkout-shipping-smoke.json`.
+- Deploy novo e necessario para Vercel carregar envs novas; sera feito por commit/push em `main` conforme pedido.

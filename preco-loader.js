@@ -1,6 +1,9 @@
 (function() {
   'use strict';
 
+  if (window.__TECH7_PRECO_LOADER_ACTIVE) return;
+  window.__TECH7_PRECO_LOADER_ACTIVE = true;
+
   function markPricesLoading() {
     if (!document.documentElement) return;
     document.documentElement.classList.add('t7-prices-loading');
@@ -234,21 +237,9 @@
     var slug = normalizeProductId(input.slug || '');
     if (!slug) return Promise.resolve({ found: false, price: 0, secao: section, marca: brand, slug: slug });
 
-    return fetch('/api/products/resolve-prices', {
-      method: 'POST',
-      cache: 'no-store',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        items: [{ section: section, brand: brand, slug: slug }]
-      })
-    })
-      .then(function(res) {
-        if (!res.ok) throw new Error('http_' + res.status);
-        return res.json();
-      })
-      .then(function(payload) {
-        var items = Array.isArray(payload && payload.items) ? payload.items : [];
-        var item = items[0] || {};
+    return resolveCatalogPricesBatch([{ secao: section, marca: brand, slug: slug }])
+      .then(function(items) {
+        var item = Array.isArray(items) ? (items[0] || {}) : {};
         var cents = Number(item.price_cents || 0);
         var price = Number.isFinite(cents) ? cents / 100 : 0;
         var available = !!item.found && price >= 2;
@@ -271,7 +262,43 @@
 
   function updateScopedText(selector, text) {
     var nodes = document.querySelectorAll(selector);
-    for (var i = 0; i < nodes.length; i++) nodes[i].textContent = text;
+    for (var i = 0; i < nodes.length; i++) markPriceNodeReady(nodes[i], text);
+  }
+
+  function setNodesLoading(nodes) {
+    for (var i = 0; i < nodes.length; i++) {
+      if (!nodes[i] || nodes[i].dataset.tech7PriceReady === '1') continue;
+      nodes[i].dataset.tech7PriceLoading = '1';
+      nodes[i].textContent = 'Carregando preco';
+    }
+  }
+
+  function setPaymentNodesLoading(nodes) {
+    for (var i = 0; i < nodes.length; i++) {
+      if (!nodes[i] || nodes[i].dataset.tech7PriceReady === '1') continue;
+      nodes[i].dataset.tech7PriceLoading = '1';
+      nodes[i].innerHTML = '';
+    }
+  }
+
+  function markPriceNodeReady(node, text) {
+    if (!node) return;
+    node.dataset.tech7PriceReady = '1';
+    node.dataset.tech7PriceLoading = '0';
+    node.textContent = text;
+  }
+
+  function markPaymentNodeReady(node, html) {
+    if (!node) return;
+    node.dataset.tech7PriceReady = '1';
+    node.dataset.tech7PriceLoading = '0';
+    node.innerHTML = html || '';
+  }
+
+  function markVisiblePricesLoading(root) {
+    var scope = root && root.querySelectorAll ? root : document;
+    setNodesLoading(scope.querySelectorAll('#product-priceBox .price-off, #form_comprar .price-off, .t7-buy-price, #product-priceBox #variacaoPreco, #form_comprar #variacaoPreco, #produto_preco #variacaoPreco, .product-price .price-off, .t7-carousel-price'));
+    setPaymentNodesLoading(scope.querySelectorAll('.product-payment span, .product-payment'));
   }
 
   function normalizeVisitedUrl(value) {
@@ -296,6 +323,10 @@
             parsed[i].price = label;
             changed = true;
           }
+          if (parsed[i].priceVerified !== true) {
+            parsed[i].priceVerified = true;
+            changed = true;
+          }
         }
         if (changed) localStorage.setItem('visitedProducts', JSON.stringify(parsed));
       } catch (_err) {}
@@ -310,6 +341,10 @@
           if (!parsed[i] || normalizeVisitedUrl(parsed[i].url) !== currentRoute) continue;
           if (parsed[i].price !== label) {
             parsed[i].price = label;
+            changed = true;
+          }
+          if (parsed[i].priceVerified !== true) {
+            parsed[i].priceVerified = true;
             changed = true;
           }
         }
@@ -422,6 +457,7 @@
   var catalogBatchInflight = new Map();
   var catalogSyncInflight = null;
   var catalogSyncSignature = '';
+  var catalogLastCompletedSignature = '';
 
   function catalogEntryKey(entry) {
     return [
@@ -539,6 +575,7 @@
   }
 
   function updateCatalogPrices(root) {
+    markVisiblePricesLoading(root || document);
     var entries = collectCatalogEntries(root);
     if (!entries.length) {
       markPricesReady();
@@ -547,6 +584,11 @@
 
     var signature = entries.map(catalogEntryKey).sort().join('||');
     if (catalogSyncInflight && signature === catalogSyncSignature) return catalogSyncInflight;
+    if (signature && signature === catalogLastCompletedSignature) {
+      var cachedUpdated = applyCachedCatalogPrices(entries);
+      markPricesReady();
+      return Promise.resolve({ updated: cachedUpdated, total: entries.length, cached: true });
+    }
 
     var byKey = new Map();
     for (var i = 0; i < entries.length; i++) {
@@ -580,23 +622,24 @@
 
           var formatted = item.found && Number.isFinite(price) && price >= 2 ? formatMoney(price) : 'Preco sob consulta';
           for (var n = 0; n < match.nodes.length; n++) {
-            match.nodes[n].textContent = formatted;
+            markPriceNodeReady(match.nodes[n], formatted);
           }
           var payment = item.found && Number.isFinite(price) && price >= 2 ? installmentHtml(price) : '';
           for (var payNode = 0; payNode < match.paymentNodes.length; payNode++) {
-            match.paymentNodes[payNode].innerHTML = payment;
+            markPaymentNodeReady(match.paymentNodes[payNode], payment);
           }
           updated += match.nodes.length;
         }
 
         markPricesReady();
+        catalogLastCompletedSignature = signature;
         return { updated: updated, total: entries.length };
       })
       .catch(function(err) {
         console.warn('preco-loader: falha ao sincronizar precos de cards', err);
         for (var i = 0; i < entries.length; i++) {
-          for (var n = 0; n < entries[i].nodes.length; n++) entries[i].nodes[n].textContent = 'Preco sob consulta';
-          for (var p = 0; p < entries[i].paymentNodes.length; p++) entries[i].paymentNodes[p].innerHTML = '';
+          for (var n = 0; n < entries[i].nodes.length; n++) markPriceNodeReady(entries[i].nodes[n], 'Preco sob consulta');
+          for (var p = 0; p < entries[i].paymentNodes.length; p++) markPaymentNodeReady(entries[i].paymentNodes[p], '');
         }
         markPricesReady();
         return { updated: 0, total: entries.length };
@@ -607,11 +650,31 @@
     return catalogSyncInflight;
   }
 
+  function applyCachedCatalogPrices(entries) {
+    var updated = 0;
+    for (var i = 0; i < entries.length; i++) {
+      var item = catalogCacheGet(entries[i]) || {};
+      var price = Number(item.price_cents || 0) / 100;
+      var available = !!item.found && Number.isFinite(price) && price >= 2;
+      var formatted = available ? formatMoney(price) : 'Preco sob consulta';
+      for (var n = 0; n < entries[i].nodes.length; n++) {
+        markPriceNodeReady(entries[i].nodes[n], formatted);
+        updated += 1;
+      }
+      var payment = available ? installmentHtml(price) : '';
+      for (var p = 0; p < entries[i].paymentNodes.length; p++) {
+        markPaymentNodeReady(entries[i].paymentNodes[p], payment);
+      }
+    }
+    return updated;
+  }
+
   var catalogSyncTimer = null;
   var catalogSyncObserver = null;
   var catalogSyncRunning = false;
 
-  function scheduleCatalogPriceSync(root) {
+  function scheduleCatalogPriceSync(root, delay) {
+    markVisiblePricesLoading(root || document);
     if (catalogSyncTimer) window.clearTimeout(catalogSyncTimer);
     catalogSyncTimer = window.setTimeout(function() {
       if (catalogSyncRunning) return;
@@ -619,11 +682,11 @@
       updateCatalogPrices(root || document).finally(function() {
         catalogSyncRunning = false;
       });
-    }, 160);
+    }, Math.max(0, Number(delay || 0)));
   }
 
   function startCatalogPriceSync() {
-    scheduleCatalogPriceSync(document);
+    scheduleCatalogPriceSync(document, 80);
     if (catalogSyncObserver || !document.body || typeof MutationObserver !== 'function') return;
 
     catalogSyncObserver = new MutationObserver(function(mutations) {
@@ -645,7 +708,7 @@
         }
         if (shouldSync) break;
       }
-      if (shouldSync) scheduleCatalogPriceSync(document);
+      if (shouldSync) scheduleCatalogPriceSync(document, 80);
     });
 
     catalogSyncObserver.observe(document.body, { childList: true, subtree: true });
@@ -664,10 +727,11 @@
   window.Tech7Prices.parse = getNum;
   window.Tech7Prices.format = formatMoney;
   window.Tech7Prices.current = currentProduct;
+  markVisiblePricesLoading(document);
   window.Tech7Prices.ready = looksLikeProduct ? resolvePrice(currentProduct).then(updatePrice) : Promise.resolve(null);
 
   onReady(startCatalogPriceSync);
-  window.addEventListener('load', function() { scheduleCatalogPriceSync(document); }, { once: true });
+  window.addEventListener('load', function() { scheduleCatalogPriceSync(document, 80); }, { once: true });
 
   var runtimeReady = loadScript('tech7-local-runtime-loaded', '/assets/js/tech7-local-runtime.js?v=20260523-routes-only', 'Tech7LocalRuntime')
     .then(function(runtime) {

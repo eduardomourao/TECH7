@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
+import bcrypt from "bcryptjs";
 
 process.env.DATABASE_URL = "";
 process.env.POSTGRES_URL = "";
@@ -117,6 +118,27 @@ try {
     });
     assert.equal(res.status, 503);
     assert.equal(body.error, "admin_not_configured");
+  });
+
+  await withCheck("admin login failures do not enumerate username or password", async () => {
+    process.env.ADMIN_USERNAME = "admin-sec-test";
+    process.env.ADMIN_PASSWORD_HASH = await bcrypt.hash("correct-password", 4);
+
+    const missingUser = await request("/api/admin/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ username: "missing-admin", password: "correct-password" })
+    });
+    const wrongPassword = await request("/api/admin/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ username: "admin-sec-test", password: "wrong-password" })
+    });
+
+    assert.equal(missingUser.res.status, 401);
+    assert.equal(wrongPassword.res.status, 401);
+    assert.deepEqual(missingUser.body, wrongPassword.body);
+    assert.equal(missingUser.body.error, "invalid_credentials");
   });
 
   await withCheck("cart snapshot cannot mutate catalog", async () => {

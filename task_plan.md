@@ -1,5 +1,31 @@
 # Plano de execucao - performance producao TECH7 (2026-06-13)
 
+## Performance de carregamento de precos - 2026-06-22
+- [x] Ler AGENTS.md, memoria relevante e skills obrigatorias.
+- [x] Verificar Ruflo disponivel.
+- [ ] Confirmar projeto Supabase e campo real de preco.
+- [ ] Medir baseline atual no navegador com Network/Performance.
+- [ ] Mapear frontend/endpoints/fallbacks/cache/mock de precos.
+- [ ] Implementar correcao para primeiro preco correto ou loading neutro.
+- [ ] Otimizar chamadas duplicadas/sequenciais e endpoint/payload se necessario.
+- [ ] Rodar validacoes npm pedidas.
+- [ ] Validar desktop/mobile com Chrome/fallback documentado.
+
+### Guardrails Precos
+- Fonte de verdade: banco Supabase, preferencialmente `products.price_cents`.
+- Primeiro valor visivel deve ser preco real do banco ou loading neutro.
+- Nao usar `precos.json`, mock local ou HTML estatico como preco final.
+- Nao quebrar carrinho, checkout, parcelas ou WhatsApp.
+- Cache so pode ser curto, server-side, e invalidavel apos edicao no Admin.
+
+### Subagentes solicitados
+- `price-load-investigator`: tentativa criada, falhou por `stream disconnected`.
+- `supabase-price-agent`: tentativa criada, falhou por `stream disconnected`.
+- `api-performance-agent`: tentativa criada, falhou por `stream disconnected`.
+- `frontend-runtime-agent`: tentativa criada, falhou por `stream disconnected`.
+- `cache-strategy-agent`: cobrir manualmente no processo principal.
+- `chrome-qa-agent`: cobrir manualmente no processo principal.
+
 ## Admin `/Admin` - persistencia de edicao produto - 2026-06-20
 - [x] Confirmar cwd, estado do git e skills obrigatorias.
 - [x] Confirmar Supabase ativo e schema real de produtos/imagens/categorias.
@@ -1043,3 +1069,126 @@ Registrar no `AGENTS.md` as regras globais fornecidas pelo usuario, incluindo Ru
 - Nao alterar dados de produtos.
 - Manter `adminAuth` protegendo rotas admin.
 - Preservar compatibilidade temporaria com sessoes antigas em memoria quando existir.
+## 2026-06-21 - missing-samsung-s-models-agent
+
+Goal: mapear modelos Samsung linha S existentes na Tech 7, extrair com Firecrawl apenas modelos faltantes do site fonte `https://www.x3distribuidoraloja.com.br/produtos-originais-samsung-autentico`, importar somente produtos faltantes com imagens vinculadas ao produto correto e validar banco/site.
+
+Clarification 2026-06-21:
+- O usuário corrigiu o critério: considerar modelos linha S no Tech7 apenas quando houver produto de tela/display com qualidade `Original` ou `Original Retirada`.
+- Itens como bateria, tampa, placa, flex e OLED genérico não contam como cobertura do modelo para esta análise.
+- Reabrindo comparação com filtro por tela/display + original/original retirada.
+
+Phases:
+- [complete] Confirmar ferramentas, Ruflo, ONE/Supabase e schema atual.
+- [complete] Mapear produtos Samsung linha S existentes no banco Tech 7.
+- [complete] Extrair catálogo fonte com Firecrawl e normalizar modelos linha S.
+- [complete] Comparar existente vs fonte, bloquear ambíguos e gerar manifest imagem-produto.
+- [complete] Importar somente faltantes aprovados no Supabase. Resultado: zero itens aprovados.
+- [complete] Validar persistência no Supabase e visual no Chrome/fallback.
+
+Rules:
+- ONE-first para banco; se indisponível, registrar fallback para Supabase.
+- Não importar linha A, M, Note, Z/Fold/Flip, tablets ou acessórios genéricos.
+- Não importar modelo equivalente já existente.
+- Imagem precisa vir da página individual do produto e ter vínculo claro.
+- Descrição pode ser adaptada ao padrão Tech 7 sem copiar texto longo.
+
+Decision:
+- `NO_IMPORT_REQUIRED`: todos os modelos S20-S25 do escopo já existem no Tech7. Nenhum insert/update em produto foi feito.
+
+Validation:
+- `npm run validate:routes`: OK.
+- `npm run validate:product-images`: OK, 26/26 imagens visíveis.
+- `npm run validate:product-cards`: OK, 23044 arquivos escaneados, 0 problemas.
+- `@chrome` não estava disponível como tool direta; Node REPL MCP falhou com `sandboxPolicy`; fallback final Playwright executado em viewport mobile 390x844.
+
+### Importacao apos confirmacao do usuario - 2026-06-21
+- [complete] Reconfirmar projeto Supabase ativo `lzsaaufsdcmqlasjrqck`.
+- [complete] Confirmar que os 7 slugs/ids aprovados nao existiam antes do insert.
+- [complete] Extrair/confirmar cada candidato por URL individual no Firecrawl.
+- [complete] Criar produtos em `products` com `section='display-e-lcd'`, `brand='samsung'`, ativos e precos da fonte.
+- [complete] Criar registros em `product_images` com imagens vinculadas ao produto correto.
+- [complete] Validar persistencia no Supabase, paginas publicas locais, busca e npm.
+
+Resultado importacao:
+- Importados: S20 FE, S22 Ultra, S23 Ultra, S24, S24 Ultra, S25, S25 Plus.
+- Total: 7 produtos e 31 imagens.
+- Ainda faltantes sem fonte valida clara: S21 FE e S23 Plus.
+- Evidencias: `_validation/missing-samsung-s-models/imported-products.json` e `_validation/missing-samsung-s-models/imported-products-visual-validation.json`.
+
+### Layout unico de produto para novos produtos - 2026-06-21
+- [complete] Comparar produto novo dinamico com pagina estatica antiga.
+- [complete] Identificar causa: `server/app.js` gerava produto novo com template simplificado proprio (`t7-dynamic-*`).
+- [complete] Corrigir renderer dinamico para usar shell real de pagina de produto estatica como base.
+- [complete] Preservar classes e blocos principais das paginas existentes: `box-col-product`, `box-gallery`, `product-colum-right`, `produto-preco`, `form_comprar`, `box-frete`, `page-info-product`, footer e scripts do tema.
+- [complete] Validar produto novo mobile/desktop contra pagina antiga de referencia.
+
+### Correcao para template Samsung de referencia - 2026-06-21
+- [complete] Usar como referencia exata `/display/samsung/tela-display-lcd-samsung-note-20-ultra-n986-oled/`.
+- [complete] Reconfirmar no Supabase os 7 produtos importados de `firecrawl:x3`.
+- [complete] Ajustar `server/app.js` para carregar o shell HTML do produto Samsung de referencia.
+- [complete] Substituir somente a area do produto por dados dinamicos: titulo, preco, descricao, imagens, categoria, marca, estoque e metadados.
+- [complete] Confirmar que os produtos importados nao usam mais `t7-dynamic-header`.
+- [complete] Validar exemplo S24 e amostra S25 Plus em desktop e mobile.
+- [complete] Rodar checks obrigatorios de sintaxe, assets, rotas, endpoints e build.
+
+### Layout Samsung S Original Retirada - paridade total - 2026-06-21
+- [complete] Ler regras locais, skills obrigatorias e memoria relevante.
+- [complete] Confirmar Ruflo e estado Git.
+- [complete] Inspecionar `server/app.js` e template Samsung de referencia.
+- [complete] Completar paridade do bloco dinamico com secoes antigas faltantes.
+- [complete] Rodar checks de sintaxe e validadores npm.
+- [complete] Validar visualmente os 7 produtos em navegador/fallback Chrome.
+- [complete] Remover fallback minimo do fluxo principal para impedir pagina branca/diferente.
+- [complete] Validar S24/S25 Plus com Chrome real via plugin em desktop/mobile.
+
+### Produtos visitados sem imagens - 2026-06-21
+- [complete] Ler regras locais, skills obrigatorias e memoria relevante.
+- [complete] Confirmar Ruflo e preservar worktree existente.
+- [complete] Reproduzir no Chrome real a secao `Produtos visitados` com itens antigos sem imagem.
+- [complete] Corrigir resolucao/hidratacao de imagens para cards visitados.
+- [complete] Validar DOM, screenshot real e checks locais.
+
+### Veja tambem com faixa laranja vazia - 2026-06-21
+- [complete] Confirmar Ruflo e skills obrigatorias.
+- [complete] Reproduzir em Chrome real e identificar elemento vazio.
+- [complete] Remover/ocultar apenas faixa vazia nos cards relacionados.
+- [complete] Validar visualmente e rodar checks locais.
+
+### Performance/correcao de carregamento de precos - 2026-06-22
+- [complete] Confirmar Supabase ativo e campo correto (`products.price_cents`).
+- [complete] Medir baseline com Network/Performance e screenshots desktop/mobile.
+- [complete] Remover exibicao inicial de preco estatico/localStorage nao verificado.
+- [complete] Deduplicar loader duplicado e chamadas repetidas de catalogo.
+- [complete] Usar batch no carrinho e bloquear fallback para preco local antigo.
+- [complete] Revalidar busca, home, categoria, produto, visitados, carrinho e checkout.
+- [complete] Rodar validadores obrigatorios do projeto.
+
+Resultado:
+- Primeiro texto de preco agora e loading neutro ou preco vindo do banco.
+- `wrongFlashCount=0` no Chrome fallback em desktop/mobile.
+- Evidencia principal: `_validation/price-load-performance/after-price-load.json`.
+
+### Regressao avancada de impacto - 2026-06-23
+- [complete] Testar novamente funcoes fora do preco: busca/autocomplete, categoria real, produto, carrinho, checkout, Admin protegido e endpoints.
+- [complete] Corrigir risco de re-render com mesma assinatura ficar preso em `Carregando preco`.
+- [complete] Corrigir hidratacao de preco em produtos visitados com URL curta.
+- [complete] Validar em Google Chrome local via `node_repl`/Playwright fallback.
+- [complete] Rodar validadores obrigatorios apos os ajustes.
+
+Resultado:
+- `_validation/price-regression/advanced-regression.json`: 9 passed, 0 failed, `localBrowserEvents=[]`.
+- Validadores OK: `validate:backend-prices`, `validate:product-cards`, `validate:endpoints`, `validate:routes`, `validate:build`.
+
+### Correcao API de frete e deploy GitHub - 2026-06-23
+- [complete] Reproduzir falha real da API de frete em producao e confirmar local funcional.
+- [complete] Corrigir causa raiz operacional: envs `MELHOR_ENVIO_*` ausentes no Vercel Production.
+- [complete] Validar endpoint de frete, produto e checkout em navegador real local.
+- [complete] Rodar validadores finais antes do deploy.
+- [in_progress] Commitar e fazer push para `main` para disparar deploy GitHub.
+- [pending] Verificar resultado do deploy quando possivel.
+
+Resultado parcial:
+- Producao antes: readiness 503 por `MELHOR_ENVIO_ORIGIN_ZIPCODE` e `MELHOR_ENVIO_TOKEN_OR_OAUTH` ausentes.
+- Local apos env: Melhor Envio live OK; produto e checkout mostram SEDEX/Jadlog/Loggi.
+- `npm run validate:build` OK.

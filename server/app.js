@@ -42,6 +42,26 @@ function normalizePublicPath(value) {
   return clean;
 }
 
+function isSensitivePublicPath(requestPath) {
+  const parts = String(requestPath || "")
+    .split(/[?#]/)[0]
+    .split("/")
+    .filter(Boolean)
+    .map((part) => part.toLowerCase());
+  if (!parts.length) return false;
+  if (parts.some((part) => part.startsWith("."))) return true;
+  const blocked = new Set([
+    "_validation",
+    "validation-artifacts",
+    "backup",
+    "backups",
+    "node_modules",
+    ".agents",
+    ".codex"
+  ]);
+  return parts.some((part) => blocked.has(part));
+}
+
 function loadStaticRedirects() {
   if (staticRedirectCache) return staticRedirectCache;
   try {
@@ -105,6 +125,19 @@ function isProduction() {
   return process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production";
 }
 
+const SECURITY_CSP = [
+  "default-src 'self' https: data: blob:",
+  "script-src 'self' 'unsafe-inline' https:",
+  "style-src 'self' 'unsafe-inline' https:",
+  "img-src 'self' https: data: blob:",
+  "connect-src 'self' https:",
+  "font-src 'self' https: data:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self' https:",
+  "frame-ancestors 'none'"
+].join("; ");
+
 function isAdminLoginRequest(req, prefix) {
   return req.method === "POST" && req.path === joinRoute(prefix, "/admin/login");
 }
@@ -147,10 +180,7 @@ function applySecurityHeaders(req, res, next) {
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   res.set("X-Frame-Options", "DENY");
-  res.set(
-    "Content-Security-Policy-Report-Only",
-    "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: data: blob:; connect-src 'self' https:; font-src 'self' https: data:; frame-ancestors 'none'"
-  );
+  res.set("Content-Security-Policy", SECURITY_CSP);
   if (isProduction() || req.secure || String(req.headers["x-forwarded-proto"] || "").includes("https")) {
     res.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
   }
@@ -252,7 +282,7 @@ function dynamicProductParts(requestPath) {
   return { section, brand, slug };
 }
 
-function renderDynamicProductHtml(row, requestPath) {
+function renderMinimalDynamicProductHtml(row, requestPath) {
   const images = imagesFromProductRow(row);
   const image = images[0] || "/_assets/tech7/product-placeholder.svg";
   const title = row.name || row.title || row.slug;
@@ -316,6 +346,212 @@ function renderDynamicProductHtml(row, requestPath) {
   <script src="/preco-loader.js"></script>
 </body>
 </html>`;
+}
+
+const PRODUCT_PAGE_TEMPLATE_PATH = path.join(
+  STATIC_DIR,
+  "display",
+  "samsung",
+  "tela-display-lcd-samsung-note-20-ultra-n986-oled",
+  "index.html"
+);
+let productPageTemplateCache = null;
+
+function loadProductPageTemplate() {
+  if (productPageTemplateCache !== null) return productPageTemplateCache;
+  try {
+    productPageTemplateCache = fs.readFileSync(PRODUCT_PAGE_TEMPLATE_PATH, "utf8");
+  } catch (_error) {
+    productPageTemplateCache = "";
+  }
+  return productPageTemplateCache;
+}
+
+function formatPriceNumber(value) {
+  return (Number(value || 0) / 100).toFixed(2);
+}
+
+function buildStaticStyleGallery(images, title) {
+  const safeImages = images.length ? images : ["/_assets/tech7/product-placeholder.svg"];
+  const thumbs = safeImages.map((url, index) => {
+    const position = index + 1;
+    const active = index === 0 ? " active" : "";
+    return `<div class="item swiper-slide"><div class="box-img index-list${active}" data-index="${position}"><img src="${escapeHtml(url)}" alt="${escapeHtml(title)} - Image thumb ${position}" class="swiper-lazy" data-src="${escapeHtml(url)}" width="300" height="300" loading="lazy"></div></div>`;
+  }).join("");
+  const mainImages = safeImages.map((url, index) => {
+    const position = index + 1;
+    const active = index === 0 ? " active" : "";
+    return `<div class="item swiper-slide"><div class="box-img index-list${active}" data-index="${position}"><div class="zoom"><img src="${escapeHtml(url)}" alt="${escapeHtml(title)}" class="swiper-lazy" data-src="${escapeHtml(url)}" width="2000" height="2000" loading="${index === 0 ? "eager" : "lazy"}"></div></div></div>`;
+  }).join("");
+  return `
+    <div class="product-colum-left">
+      <div class="box-gallery flex">
+        <div class="nav-images">
+          <div class="list swiper-container"><div class="swiper-wrapper">${thumbs}</div></div>
+          <div class="controls">
+            <div class="arrow prev"><svg class="icon" viewBox="0 0 451.847 451.847"><path d="M97.141,225.92c0-8.095,3.091-16.192,9.259-22.366L300.689,9.27c12.359-12.359,32.397-12.359,44.751,0c12.354,12.354,12.354,32.388,0,44.748L173.525,225.92l171.903,171.909c12.354,12.354,12.354,32.391,0,44.744c-12.354,12.365-32.386,12.365-44.745,0l-194.29-194.281C100.226,242.115,97.141,234.018,97.141,225.92z"></path></svg></div>
+            <div class="arrow next"><svg class="icon" viewBox="0 0 451.846 451.847"><path d="M345.441,248.292L151.154,442.573c-12.359,12.365-32.397,12.365-44.75,0c-12.354-12.354-12.354-32.391,0-44.744L278.318,225.92L106.409,54.017c-12.359-12.359-12.354-32.394,0-44.748c12.354-12.359,32.391-12.359,44.75,0l194.287,194.284c6.177,6.18,9.262,14.271,9.262,22.366C354.708,234.018,351.617,242.115,345.441,248.292z"></path></svg></div>
+          </div>
+        </div>
+        <div class="image-show">
+          <div class="list swiper-container"><div class="swiper-wrapper">${mainImages}</div></div>
+          <div class="dots"></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function buildStaticStyleProductSection(row, requestPath) {
+  const images = imagesFromProductRow(row);
+  const image = images[0] || "/_assets/tech7/product-placeholder.svg";
+  const title = row.name || row.title || row.slug;
+  const description = row.description_text || textFromHtml(row.description_html) || `Produto TECH 7 na categoria ${row.section || ""}.`;
+  const price = moneyFromCents(row.price_cents);
+  const priceNumber = formatPriceNumber(row.price_cents);
+  const installment = moneyFromCents(Math.ceil(Number(row.price_cents || 0) / 3));
+  const canonical = `/${String(requestPath || "").replace(/^\/+/, "").replace(/\/index\.html$/i, "")}`;
+  const sectionLabel = String(row.section || "DISPLAY").replace(/-/g, " ").toUpperCase();
+  const brandLabel = String(row.brand || "SAMSUNG").replace(/-/g, " ").toUpperCase();
+  const stockText = row.stock == null ? "1" : String(row.stock);
+  const stock = `<tr><td>Estoque</td><td>${escapeHtml(stockText)}</td></tr>`;
+  const reference = row.id;
+  const gallery = buildStaticStyleGallery(images, title);
+  const descriptionHtml = row.description_html || `<p>${escapeHtml(description)}</p>`;
+  const hiddenPaymentAndComments = `
+        <div style="display: none !important;">
+          <span data-tab-container-id="#formasPagto" data-tab-url="/api/products/payment-options?loja=996644&amp;IdProd=${escapeHtml(row.id)}&amp;IdVariacao=%s" style="display: none !important;">Formas de Pagamento</span>
+          <div class="section-box payment_methods" data-tab-id="#formasPagto" style="display: none !important;"></div>
+        </div>
+        <div class="section-box comments" data-tab-id="#coments">
+          <div class="title-section"><span>Avaliações</span></div>
+          <h2 class="color">Deixe seu comentário e sua avaliação</h2><br>
+          <div id="comentario_cliente">
+            <form action="/api/products/add-comment?loja=996644" class="tray-hide" data-logged-user="true" id="form-comments" method="post">
+              <label><h3>Nome</h3><br><input class="text" data-input-customer="name" disabled id="nome_comentario" name="ProductComment[name]" type="text" value=""></label><br><br>
+              <label><h3>E-mail</h3><br><input class="text" data-input-customer="email" disabled id="email_comentario" name="ProductComment[email]" type="email" value=""></label><br><br>
+              <label><h3>Mensagem</h3><br><textarea class="textarea" cols="1" data-message="Campo mensagem obrigatório, digite a mensagem por favor" id="mensagem_coment" name="ProductComment[comment]" required rows="5" style="width: 99%"></textarea></label>
+              <h5>- Máximo de <span id="restante">512</span> caracteres. Emojis não são suportados.</h5><br>
+              <h3>Clique para Avaliar</h3><br>
+              <div class="rateBlock"><ul class="stars"><li class="starn" data-id="1" data-message="Ruim"></li><li class="starn" data-id="2" data-message="Regular"></li><li class="starn" data-id="3" data-message="Bom"></li><li class="starn" data-id="4" data-message="Ótimo"></li><li class="starn" data-id="5" data-message="Excelente"></li><li class="nota ajuste-nota">Avaliação: <strong id="rate"></strong></li></ul></div>
+              <input data-message="Avaliação do produto obrigatória, dê sua avaliação por favor." id="nota_comentario" name="ProductComment[rating]" required style="display: none;" type="text" value="">
+              <input name="ProductComment[product_id]" type="hidden" value="${escapeHtml(row.id)}">
+              <input data-input-customer="id" name="ProductComment[customer_id]" type="hidden" value="">
+              <img alt="Enviar" class="image pointer" id="bt-submit-comments" src="/_assets/images.tcdn.com.br/commerce/assets/store/img/enviar.gif" title="Enviar" width="70" height="27" loading="lazy">
+            </form>
+            <div id="div_erro"><div class="blocoAlerta" style="display: none;"></div></div>
+            <a class="tray-hide" data-logged-user="false" href="/loja/login_layout.php?loja=996644&amp;origem=comentario_produto&amp;IdProd=${escapeHtml(row.id)}">Faça seu login e comente.</a>
+          </div>
+          <div class="blocoSucesso" style="display: none;">Seu comentário foi enviado com sucesso, Obrigado por opinar em nossa loja</div>
+        </div>`;
+
+  return `
+    <div class="clearfix">
+      <div class="breadcrumb flex f-wrap">
+        <span class="breadcrumb-item flex align-center"><a class="t-color" href="/">Home</a></span>
+        <span class="breadcrumb-item"><a href="/${escapeHtml(row.section || "")}" title="${escapeHtml(sectionLabel)}">${escapeHtml(sectionLabel)}</a></span>
+        ${row.brand ? `<span class="breadcrumb-item"><a href="/${escapeHtml(row.section || "")}/${escapeHtml(row.brand)}" title="${escapeHtml(brandLabel)}">${escapeHtml(brandLabel)}</a></span>` : ""}
+        <span class="breadcrumb-item">${escapeHtml(title)}</span>
+      </div>
+      <div class="box-col-product flex">
+        ${gallery}
+        <div class="product-colum-right">
+          <div class="relative-area">
+            <div class="fixed-info">
+              <div class="load-css" id="loading-product-container"><div class="icon"></div></div>
+              <div class="list-seal-product flex f-wrap"><div class="tag featured">Destaque</div><div class="tag new">Lançamento</div></div>
+              <h1 class="product-name">${escapeHtml(title)}</h1>
+              <div class="product-release-date"></div>
+              <div class="line-info flex align-center"><span class="ref" data-url="/api/products/variant-reference?loja=996644" id="product-reference">${escapeHtml(reference)}</span><div class="list-star flex cursor"><div class="icon"></div><div class="icon"></div><div class="icon"></div><div class="icon"></div><div class="icon"></div><span class="total">0 Opiniões</span></div></div>
+              <span class="produto-bonus bonus_produto">Na compra desse produto ganhe <strong class="code bgcolor" id="idBonusVariacao">${escapeHtml(String(Math.max(1, Math.round(Number(row.price_cents || 0) / 100))))}</strong><strong class="color">Pontos Fidelidade</strong></span>
+              <form action="/loja/cartService.php?loja=996644&amp;acao=incluir&amp;IdProd=${escapeHtml(row.id)}" data-app="product.buy-form" data-id="${escapeHtml(row.id)}" id="form_comprar" method="post">
+                <div class="box-variants"><input id="selectedVariant" name="variacao" type="hidden" value=""><input id="variantSelectedType" type="hidden" value=""><input id="variantSelectedValue" type="hidden" value=""><input id="showLabelAvailability" type="hidden" value=""><input id="shortestAvailabilityBetweenVariations" type="hidden" value=""><input id="uniformAvailabilityLabel" type="hidden" value=""><div style="clear:both;"></div></div>
+                <div data-url-pricebox="/api/products/variant-price?loja=996644" id="product-priceBox">
+                  <div class="produto-preco bg-tone-5 border-tone-5" data-app="product.price-box">
+                    <input id="variacao" type="hidden" value="0">
+                    <input id="preco_atual" type="hidden" value="${escapeHtml(priceNumber)}">
+                    <div data-product-id="${escapeHtml(row.id)}" id="coupon-badge"></div>
+                    <div align="left" id="preco"><br><div id="produto_preco"><span class="color-tone-2 txt-por">Por:</span><br><span class="PrecoPrincipal color-tone-2"><abbr class="currency" title="BRL"> R$ </abbr><span data-app="product.price" data-tray-tst="price_product" id="variacaoPreco">${escapeHtml(price.replace(/^R\$\s*/, ""))}</span><input id="preco_atual" type="hidden" value="${escapeHtml(priceNumber)}"></span><br><span id="precoDe"></span><h5 class="produto-economize" id="economize"></h5><span id="info_preco"><br><span class="txt-corparcelas"><span class="txt-corparcelas"><span class="preco-parc2"> ou <strong class="color">3x</strong> de <strong class="preco-parc2">${escapeHtml(installment)}</strong></span></span></span></span></div></div>
+                    <div id="produto_nao_disp"><input id="verifica_variacao" name="verifica_variacao" type="hidden" value=""><input id="verifica_clientes_aguardando" name="verifica_clientes_aguardando" type="hidden" value="1"><input id="verifica_estoque_venda" name="verifica_estoque_venda" type="hidden" value=""><input id="verifica_variacao_dupla_valor" name="verifica_variacao_dupla_valor" type="hidden" value="0"><input id="layout_variacao" name="layout_variacao" type="hidden" value="2"><input id="define_radio_select" name="define_radio_select" type="hidden" value=""><input id="variant_selected" name="variant_selected" type="hidden" value="0"></div>
+                  </div>
+                </div>
+                <div align="left" class="produto-formas-pagamento" id="info"><a class="color" data-cache="cache" href="${escapeHtml(canonical)}#formaPagto" id="showPaymentMethods" rel="nofollow">+ Ver todas as formas de pagamentos</a></div>
+                <div class="box-price"><span class="blocoAlerta" id="span_erro_carrinho" style="display:none;">Selecione uma opção para variação do produto</span><span class="passo" data-url-form="/api/products/variant-form?loja=996644" id="product-form-box"><div data-app="product.quantity" id="quantidade"><label class="color">Quantidade: <input class="text" id="quant" maxlength="5" name="quant" size="1" type="text" value="1"></label><span id="estoque_variacao">${row.stock != null ? ` / ${escapeHtml(stockText)}` : ""}</span><input id="estoque_" type="hidden"></div><div align="left" class="remove-bg" data-app="product.buy-button" id="bt_comprar"><button class="botao-commerce botao-comprar" data-tray-tst="button_buy_product" id="button-buy" type="submit"><span class="botao-commerce-img">Comprar</span></button><div align="left" id="loading_btn" style="display:none"><img src="/_assets/images.tcdn.com.br/commerce/assets/store/img/loading.gif" alt="" width="48" height="48" loading="lazy">Calculando ...</div></div></span></div>
+              </form>
+              <div class="box-frete">
+                <div class="produto-calcular-frete bg-tone-5 border-tone-5" data-app="product.zip-box"><div class="cepbox" id="cepbox"><h6 class="cepbox-text color-tone-1">Simulador de Frete</h6><label for="cep1">CEP:</label><input autocomplete="zip-code" class="text" data-app="product.zip1" id="cep1" maxlength="5" name="cep1" size="5" type="tel" value=""> - <input autocomplete="zip-code" class="text" data-app="product.zip2" id="cep2" maxlength="3" name="cep2" size="3" type="tel" value=""><a class="botao-commerce botao-simular-frete" data-app="product.shipping-calculate" data-modal-width="80%" data-title="${escapeHtml(title)}" data-url="/api/products/shipping?loja=996644&amp;simular=ok&amp;cep1=%s&amp;cep2=%s&amp;quantidade=%s&amp;variacao=%s&amp;id_produto=${escapeHtml(row.id)}" href="${escapeHtml(canonical)}" id="shippingSimulatorButton">Calcular frete</a></div><span class="blocoAlerta" id="span_erro_cep" style="display:none;">Digite o seu CEP, por favor.</span><span class="blocoAlerta" id="span_erro_variacao" style="display:none;">Selecione uma opção para variação do produto</span></div>
+                <form class="new-frete flex justify-between"><label class="box-left flex align-center"><svg height="23.13" viewBox="0 0 28 23.13" width="28" xmlns="http://www.w3.org/2000/svg"><g transform="translate(-243 -747)"><g transform="translate(243 744.565)"><path d="M.982 17.272V5.359a1.2 1.2 0 0 1 1.2-1.2h11.906a1.2 1.2 0 0 1 1.2 1.2v11.913a.4.4 0 0 1-.4.4H1.382a.4.4 0 0 1-.4-.4zm9.618 4.081a2.486 2.486 0 1 1-2.486-2.486 2.486 2.486 0 0 1 2.486 2.486zM28 19.267v1.212a.4.4 0 0 1-.4.4h-3.234a3.281 3.281 0 0 0-6.494 0h-6.514a3.28 3.28 0 0 0-1.106-2.011h6.176V7.439a.8.8 0 0 1 .8-.8H21a3.2 3.2 0 0 1 2.649 1.408l2.432 3.6a3.2 3.2 0 0 1 .547 1.789v5.429h.972a.4.4 0 0 1 .4.4z"></path></g></g></svg><span class="text">INFORME SEU CEP</span><input class="crazy_cep" maxlength="9" minlength="9" name="number-frete" placeholder="00000-000" required type="tel"></label><button class="submit-frete">Calcular</button></form><div class="result"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="page-info-product">
+        <div class="section-box description" data-tab-id="#descricao"><div class="title-section"><span>Descrição Geral</span></div><div class="board_htm">${descriptionHtml}</div></div>
+        <div class="section-box" id="ficha"><div class="title-section"><span>Informações sobre o produto</span></div><div class="board_htm"><table><tr><td>Código</td><td>${escapeHtml(row.id)}</td></tr>${stock}<tr><td>Categoria</td><td>${escapeHtml(sectionLabel)}</td></tr><tr><td>Marca</td><td>${escapeHtml(brandLabel)}</td></tr></table></div></div>
+        ${hiddenPaymentAndComments}
+      </div>
+    </div>`;
+}
+
+function replaceMetaContent(html, selector, value) {
+  const escaped = escapeHtml(value);
+  return html.replace(new RegExp(`(<meta[^>]+${selector}[^>]+content=")[^"]*(")`, "i"), `$1${escaped}$2`)
+    .replace(new RegExp(`(<meta[^>]+content=")[^"]*("[^>]+${selector}[^>]*>)`, "i"), `$1${escaped}$2`);
+}
+
+function findProductTemplateBounds(template) {
+  const startMatch = String(template || "").match(/<div\s+class=["']clearfix["']>\s*<div\s+class=["']breadcrumb\b/i);
+  if (!startMatch || startMatch.index == null) return null;
+  const productEnd = template.indexOf('<div id="prognoos_lsi">', startMatch.index);
+  if (productEnd === -1) return null;
+  return { productStart: startMatch.index, productEnd };
+}
+
+function renderDynamicProductHtml(row, requestPath) {
+  const template = loadProductPageTemplate();
+  const bounds = findProductTemplateBounds(template);
+  if (!bounds) {
+    throw new Error(`product_template_unavailable:${PRODUCT_PAGE_TEMPLATE_PATH}`);
+  }
+  const { productStart, productEnd } = bounds;
+
+  const images = imagesFromProductRow(row);
+  const image = images[0] || "/_assets/tech7/product-placeholder.svg";
+  const title = row.name || row.title || row.slug;
+  const description = row.description_text || textFromHtml(row.description_html) || `Produto TECH 7 na categoria ${row.section || ""}.`;
+  const price = moneyFromCents(row.price_cents);
+  const canonical = `/${String(requestPath || "").replace(/^\/+/, "").replace(/\/index\.html$/i, "")}`;
+  const productSection = buildStaticStyleProductSection(row, requestPath);
+  const dataLayer = [{
+    pageTitle: title,
+    pageCategory: "Produto",
+    idProduct: row.id,
+    nameProduct: title,
+    category: row.section || "",
+    priceSell: formatPriceNumber(row.price_cents),
+    price: formatPriceNumber(row.price_cents),
+    brand: row.brand || "",
+    reference: row.id,
+    availability: row.active === false || row.is_active === false ? "NO" : "YES",
+    urlImage: image,
+    urlProduct: canonical,
+    listSku: [],
+    characteristcs: [],
+    breadcrumb: `Página Inicial > ${row.section || ""} > ${row.brand || ""}`
+  }];
+
+  let html = `${template.slice(0, productStart)}${productSection}${template.slice(productEnd)}`;
+  html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)} - TECH 7</title>`);
+  html = html.replace(/<link href="index\.html" rel="canonical"\/?>/i, `<link href="${escapeHtml(canonical)}" rel="canonical"/>`);
+  html = replaceMetaContent(html, 'name="description"', description);
+  html = replaceMetaContent(html, 'property="og:title"', title);
+  html = replaceMetaContent(html, 'property="og:description"', description);
+  html = replaceMetaContent(html, 'property="og:image"', image);
+  html = replaceMetaContent(html, 'property="og:url"', canonical);
+  html = html.replace(/<script>dataLayer = \[[\s\S]*?\]<\/script>/i, `<script>dataLayer = ${JSON.stringify(dataLayer)}</script>`);
+  html = html.replace(/gtag\('event', 'view_item', \{[\s\S]*?\}\);\s*/i, "");
+  html = html.replace(/<script src="\.\.\/\.\.\/\.\.\/preco-loader\.js"><\/script>/i, '<script src="/preco-loader.js"></script>');
+  return html;
 }
 
 async function tryServeDynamicProductPage(req, res, next) {
@@ -533,6 +769,12 @@ export function createApp(options = {}) {
   if (serveStatic) {
     app.get(["/loja", "/loja/"], (_req, res) => {
       res.redirect(302, "/");
+    });
+
+    app.use((req, res, next) => {
+      if (!["GET", "HEAD"].includes(req.method)) return next();
+      if (!isSensitivePublicPath(req.path)) return next();
+      return res.status(404).type("text").send("Not found");
     });
 
     app.use((req, res, next) => {

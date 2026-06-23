@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { supabase, isSupabaseConfigured, mockDb, mockFilter, mockInsert, mockUpdate } from "../services/supabase.js";
 import { mockProductMatchesSection, resolveSectionFilterValues } from "../utils/product-filters.js";
+import { adminAuth } from "../middleware/adminAuth.js";
 
 export const router = Router();
 
@@ -138,7 +139,7 @@ router.get("/:id", async (req, res, next) => {
 });
 
 // POST /api/products
-router.post("/", async (req, res, next) => {
+router.post("/", adminAuth, async (req, res, next) => {
   try {
     const { slug, name, description, price, old_price, stock, image_url, category, brand } = req.body || {};
 
@@ -177,7 +178,7 @@ router.post("/", async (req, res, next) => {
 });
 
 // PUT /api/products/:id
-router.put("/:id", async (req, res, next) => {
+router.put("/:id", adminAuth, async (req, res, next) => {
   try {
     const allowed = ["slug", "name", "description", "price", "old_price", "stock", "image_url", "category", "brand", "active"];
     const changes = {};
@@ -213,7 +214,7 @@ router.put("/:id", async (req, res, next) => {
 });
 
 // DELETE /api/products/:id — soft delete
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", adminAuth, async (req, res, next) => {
   try {
     if (isSupabaseConfigured) {
       const { error, count } = await supabase

@@ -1477,6 +1477,7 @@
       name: name,
       price: price,
       installments: installments,
+      priceVerified: !!officialPriceReady,
       image: image || '/_assets/tech7/product-placeholder.svg',
       url: normalizeVisitedUrl(window.location.pathname || product.urlProduct)
     };
@@ -1537,6 +1538,87 @@
     return '';
   }
 
+  function imageFromVisitedProductHtml(html, productUrl) {
+    if (!html || !window.DOMParser) return '';
+    var doc;
+    try {
+      doc = new DOMParser().parseFromString(String(html), 'text/html');
+    } catch (_err) {
+      return '';
+    }
+
+    var candidates = [
+      ['meta[property="og:image"], meta[name="twitter:image"]', 'content'],
+      ['.image-show img:not(.zoomImg), .product-colum-left img:not(.zoomImg)', 'src'],
+      ['.image-show img:not(.zoomImg), .product-colum-left img:not(.zoomImg)', 'data-src'],
+      ['.image-show img:not(.zoomImg), .product-colum-left img:not(.zoomImg)', 'data-lazy'],
+      ['.box-gallery img:not(.zoomImg)', 'src'],
+      ['.box-gallery img:not(.zoomImg)', 'data-src']
+    ];
+
+    for (var i = 0; i < candidates.length; i++) {
+      var node = doc.querySelector(candidates[i][0]);
+      if (!node) continue;
+      var raw = node.getAttribute(candidates[i][1]) || '';
+      if (!raw) continue;
+      try {
+        raw = new URL(raw, productUrl || window.location.href).href;
+      } catch (_ignored) {}
+      var image = localAssetImage(raw);
+      if (image && !isProductPlaceholderImage(image)) return image;
+    }
+
+    return '';
+  }
+
+  function hydrateVisitedProductImages(products) {
+    if (visitedProductImageHydrating || !window.fetch || !Array.isArray(products) || !products.length) return;
+    var missing = products.filter(function (product) {
+      return product && product.url && !resolveVisitedProductImage(product);
+    }).slice(0, 6);
+    if (!missing.length) return;
+
+    visitedProductImageHydrating = true;
+    Promise.all(missing.map(function (product) {
+      var path = normalizeVisitedUrl(product.url);
+      return fetch(path, { cache: 'force-cache' })
+        .then(function (response) { return response.ok ? response.text() : ''; })
+        .then(function (html) {
+          return {
+            url: path,
+            image: imageFromVisitedProductHtml(html, new URL(path, window.location.href).href)
+          };
+        })
+        .catch(function () {
+          return { url: path, image: '' };
+        });
+    })).then(function (results) {
+      var found = {};
+      results.forEach(function (result) {
+        if (result && result.url && result.image && !isProductPlaceholderImage(result.image)) {
+          found[result.url] = result.image;
+        }
+      });
+      if (!Object.keys(found).length) return;
+
+      var saved = readVisitedProducts();
+      var changed = false;
+      saved.forEach(function (item) {
+        var route = normalizeVisitedUrl(item.url);
+        if (found[route] && item.image !== found[route]) {
+          item.image = found[route];
+          changed = true;
+        }
+      });
+      if (changed) {
+        persistVisitedProducts(saved);
+        renderVisitedProducts();
+      }
+    }).finally(function () {
+      visitedProductImageHydrating = false;
+    });
+  }
+
   function readVisitedProducts() {
     try {
       var parsed = JSON.parse(localStorage.getItem('visitedProducts') || '[]');
@@ -1548,6 +1630,7 @@
           name: String(item.name || ''),
           price: String(item.price || ''),
           installments: String(item.installments || ''),
+          priceVerified: item.priceVerified === true,
           image: resolveVisitedProductImage(item) || '/_assets/tech7/product-placeholder.svg',
           url: normalizeVisitedUrl(item.url)
         };
@@ -1574,17 +1657,92 @@
     return next;
   }
 
+  function visitedPriceLookup(product) {
+    var path = normalizeVisitedUrl(product && product.url);
+    var parts = path.split('/').filter(Boolean);
+    if (parts[parts.length - 1] === 'index.html' || parts[parts.length - 1] === 'index.htm') parts.pop();
+    var slug = '';
+    var marca = '';
+    if (parts.length >= 3) {
+      marca = parts[1] || '';
+      slug = parts[2] || '';
+    } else if (parts.length >= 2) {
+      slug = parts[1] || '';
+    } else if (parts.length === 1) {
+      slug = parts[0] || '';
+    }
+    return {
+      secao: parts[0] || '',
+      marca: marca,
+      slug: slug
+    };
+  }
+
+  function visitedInstallmentsFromCents(cents) {
+    cents = Number(cents || 0);
+    if (!Number.isFinite(cents) || cents < 200) return '';
+    var installment = (cents / 100) / (1 - PAYMENT_LINK_FEE_RATE) / INSTALLMENT_COUNT;
+    return 'em 3x de ' + formatMoneyBRL(installment) + ' MasterCard - Elo';
+  }
+
+  function hydrateVisitedProductPrices(products) {
+    if (visitedProductPriceHydrating || !Array.isArray(products) || !products.length) return;
+    if (!window.Tech7Prices || typeof window.Tech7Prices.resolveBatch !== 'function') return;
+
+    var pending = products.filter(function (product) {
+      var lookup = visitedPriceLookup(product);
+      return product && !product.priceVerified && lookup.slug;
+    }).slice(0, 8);
+    if (!pending.length) return;
+
+    visitedProductPriceHydrating = true;
+    var lookups = pending.map(visitedPriceLookup);
+    window.Tech7Prices.resolveBatch(lookups).then(function (items) {
+      items = Array.isArray(items) ? items : [];
+      var byRoute = {};
+      for (var i = 0; i < pending.length; i++) {
+        var item = items[i] || {};
+        var cents = Number(item.price_cents || 0);
+        var available = !!item.found && Number.isFinite(cents) && cents >= 200;
+        byRoute[normalizeVisitedUrl(pending[i].url)] = {
+          price: available ? formatMoneyBRL(cents / 100) : 'Preco sob consulta',
+          installments: available ? visitedInstallmentsFromCents(cents) : '',
+          priceVerified: true
+        };
+      }
+
+      var saved = readVisitedProducts();
+      var changed = false;
+      saved.forEach(function (item) {
+        var update = byRoute[normalizeVisitedUrl(item.url)];
+        if (!update) return;
+        item.price = update.price;
+        item.installments = update.installments;
+        item.priceVerified = true;
+        changed = true;
+      });
+      if (changed) {
+        persistVisitedProducts(saved);
+        renderVisitedProducts();
+      }
+    }).catch(function () {
+      // Mantem loading neutro em vez de voltar a exibir preco local antigo.
+    }).finally(function () {
+      visitedProductPriceHydrating = false;
+    });
+  }
+
   function visitedProductCard(product) {
     var url = normalizeVisitedUrl(product.url);
     var image = resolveVisitedProductImage(product) || '/_assets/tech7/product-placeholder.svg';
     var name = String(product.name || 'Produto TECH 7');
-    var price = String(product.price || 'Preco sob consulta');
-    var installments = String(product.installments || '');
+    var price = product.priceVerified ? String(product.price || 'Preco sob consulta') : 'Carregando preco';
+    var installments = product.priceVerified ? String(product.installments || '') : '';
     return '<div class="item swiper-slide">' +
       '<div class="product nb show-down" data-t7-unified-card="1">' +
       '<a class="info-product t7-unified-product-card" href="' + escapeHtml(url) + '">' +
       '<div class="image"><span class="space-image second">' +
-      '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(name) + '" class="swiper-lazy transform" data-src="' + escapeHtml(image) + '" width="450" height="450" loading="lazy">' +
+      '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(name) + '" class="lazyloaded" data-src="' + escapeHtml(image) + '" width="450" height="450" loading="lazy" decoding="async">' +
       '</span></div>' +
       '<div class="product-name">' + escapeHtml(name) + '</div>' +
       '<div class="down-line"><div class="list-star flex justify-center"><div class="icon"></div><div class="icon"></div><div class="icon"></div><div class="icon"></div><div class="icon"></div></div>' +
@@ -1598,7 +1756,12 @@
 
   function renderVisitedProducts() {
     var section = document.querySelector('.visited-section');
-    if (!section) return;
+    if (!section) {
+      var storedProducts = readVisitedProducts();
+      hydrateVisitedProductPrices(storedProducts);
+      hydrateVisitedProductImages(storedProducts);
+      return;
+    }
     var target = section.querySelector('.list-append');
     if (!target) return;
 
@@ -1627,8 +1790,11 @@
 
     section.style.removeProperty('display');
     target.innerHTML = '<div class="swiper-wrapper list-product">' + products.map(visitedProductCard).join('') + '</div>';
+    ensureProductCardImagesVisible();
     syncVisitedProductCardSize();
     bindVisitedProductsCarousel();
+    hydrateVisitedProductPrices(products);
+    hydrateVisitedProductImages(products);
   }
 
   function catalogListNode() {
@@ -1874,9 +2040,6 @@
     var pagination = document.querySelector('.catalog-footer.pagination, .pagination');
     if (pagination && state && state.filtered) pagination.style.display = 'none';
     ensureProductCardImagesVisible();
-    if (window.Tech7Prices && typeof window.Tech7Prices.syncCatalog === 'function') {
-      window.Tech7Prices.syncCatalog(list);
-    }
   }
 
   function backendCatalogParams(form) {
@@ -1914,7 +2077,7 @@
     if (list) {
       list.setAttribute('aria-busy', 'true');
       Array.prototype.slice.call(list.querySelectorAll('.product-price .price-off, .product-price')).forEach(function (node) {
-        node.textContent = 'Preco sob consulta';
+        node.textContent = 'Carregando preco';
       });
     }
     return fetchBackendCatalog(params)
@@ -2176,6 +2339,8 @@
   var cardSearchIndex = null;
   var cardSearchIndexLoading = false;
   var cardSearchIndexScheduled = false;
+  var visitedProductImageHydrating = false;
+  var visitedProductPriceHydrating = false;
 
   function normalizeCardRoute(value) {
     return String(value || '')
@@ -2424,8 +2589,9 @@
       '.product-related .product .second-image{display:none!important;}',
       '.product-related .product .product-name{display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;min-height:44px!important;max-height:44px!important;overflow:hidden!important;margin:0!important;text-align:center!important;font-size:.9375rem!important;font-weight:600!important;line-height:1.35!important;color:#fff!important;}',
       '.product-related .product .down-line{display:flex!important;flex-direction:column!important;gap:8px!important;width:100%!important;margin-top:auto!important;text-align:center!important;overflow:hidden!important;}',
-      '.product-related .product .box-price,.product-related .product .price,.product-related .product .product-price{width:100%!important;margin:0!important;text-align:center!important;}',
-      '.product-related .product .product-price,.product-related .product .product-price p,.product-related .product .price-off{display:block!important;margin:0!important;color:var(--color_price,var(--tech-accent,#ff6a00))!important;font-weight:700!important;line-height:1.35!important;}',
+      '.product-related .product .box-price,.product-related .product .price,.product-related .product .product-price{width:100%!important;margin:0!important;background:transparent!important;text-align:center!important;}',
+      '.product-related .product .product-price,.product-related .product .product-price p,.product-related .product .price-off{display:block!important;margin:0!important;background:transparent!important;color:var(--color_price,var(--tech-accent,#ff6a00))!important;font-weight:700!important;line-height:1.35!important;}',
+      '.product-related .product:hover .product-price,.product-related .product:hover .product-price p,.product-related .product:hover .price-off,.product-related .product:focus-within .product-price,.product-related .product:focus-within .product-price p,.product-related .product:focus-within .price-off{background:transparent!important;color:var(--color_price,var(--tech-accent,#ff6a00))!important;}',
       '.product-related .product .product-payment{display:block!important;min-height:34px!important;max-height:48px!important;overflow:hidden!important;margin:0!important;color:#aaa!important;font-size:.8125rem!important;line-height:1.25!important;text-align:center!important;}',
       '.product-related .prev.arrow-icon,.product-related .next.arrow-icon{display:none!important;}',
       '@media (max-width:767px){.product-related .list-product,.product-related .swiper-wrapper{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;}.product-related .product{min-height:330px!important;padding:10px!important;border-radius:10px!important;}.product-related .product .product-name{min-height:40px!important;max-height:40px!important;font-size:.8125rem!important;}.product-related .product .product-payment{font-size:.75rem!important;max-height:38px!important;}}',
@@ -3709,7 +3875,7 @@
       '.product-related .product .t7-unified-product-card .space-image,.visited-section .product .t7-unified-product-card .space-image{pointer-events:none!important;}',
       '.visited-section .list-append .product .image{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;aspect-ratio:1/1!important;margin:0!important;padding:0!important;overflow:hidden!important;flex:0 0 auto!important;}',
       '.visited-section .list-append .product .space-image{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:100%!important;max-width:none!important;margin:0!important;overflow:hidden!important;}',
-      '.visited-section .list-append .product .image img{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;margin:0 auto!important;}',
+      '.visited-section .list-append .product .image img{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;margin:0 auto!important;}',
       '.visited-section .list-append .product .info-product{position:relative!important;z-index:2!important;display:flex!important;flex:1 1 auto!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:10px!important;width:100%!important;height:100%!important;min-height:0!important;overflow:hidden!important;background:#1a1a1a!important;color:inherit!important;padding:12px 14px!important;text-decoration:none!important;text-align:center!important;}',
       '.visited-section .list-append .product .product-name{display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;min-height:44px!important;max-height:44px!important;overflow:hidden!important;margin:0!important;color:#fff!important;font-size:.9375rem!important;font-weight:600!important;line-height:1.35!important;text-align:center!important;}',
       '.visited-section .list-append .product .down-line{display:flex!important;flex-direction:column!important;gap:8px!important;width:100%!important;margin-top:auto!important;background:#1a1a1a!important;border-top:1px solid #2a2a2a!important;color:#ff6a00!important;overflow:hidden!important;text-align:center!important;}',

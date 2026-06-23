@@ -115,8 +115,7 @@ router.post("/resolve-prices", asyncRoute(async (req, res) => {
 
   const { rows } = await queryWithRetry(
     `
-      select id, slug, name, brand, section, price_cents, currency, image_url, primary_image_url,
-             active, is_active, description_text, description_html, stock, metadata, updated_at
+      select id, slug, brand, section, price_cents, image_url, primary_image_url, updated_at
       from products
       where active = true
         and coalesce(is_active, true) = true

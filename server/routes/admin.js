@@ -932,15 +932,15 @@ router.post("/login", rateLimit({
   }
   if (username !== admin.username) {
     return res.status(401).json({
-      error: "username_incorrect",
-      message: "Usuário incorreto"
+      error: "invalid_credentials",
+      message: "Usuário ou senha inválidos"
     });
   }
   const passwordOk = await bcrypt.compare(password, admin.passwordHash).catch(() => false);
   if (!passwordOk) {
     return res.status(401).json({
-      error: "password_incorrect",
-      message: "Senha incorreta"
+      error: "invalid_credentials",
+      message: "Usuário ou senha inválidos"
     });
   }
   const sessionToken = createSessionToken(admin.username);

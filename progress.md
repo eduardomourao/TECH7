@@ -1,5 +1,13 @@
 ﻿# Progresso - performance producao TECH7 (2026-06-13)
 
+- 2026-06-22: iniciado objetivo de reduzir delay dos precos mantendo primeiro valor correto do Supabase.
+- 2026-06-22: AGENTS.md lido; skills obrigatorias `caveman` e `planning-with-files` lidas/aplicadas.
+- 2026-06-22: memoria consultada para contexto TECH7, Supabase, Chrome e workflow; final deve citar memoria usada.
+- 2026-06-22: `npx ruflo@latest --version` retornou `ruflo v3.12.4`, mas processo excedeu timeout de 30s; registrado como Ruflo disponivel com CLI instavel.
+- 2026-06-22: `@supabase` ficou disponivel via plugin Supabase.
+- 2026-06-22: `@chrome` direto nao expos namespace proprio; `node_repl` indica controle do Chrome Plugin como caminho preferido nesta sessao.
+- 2026-06-22: subagentes `supabase-price-agent`, `price-load-investigator`, `api-performance-agent` e `frontend-runtime-agent` falharam por `stream disconnected`; trabalho continuara manualmente sem repetir a mesma falha.
+
 - 2026-06-20: iniciado objetivo de investigar por que edicoes admin de titulo, imagem, descricao e categoria nao aparecem no site.
 - 2026-06-20: skills obrigatorias lidas/aplicadas: `caveman` e `planning-with-files`.
 - 2026-06-20: memoria consultada para contexto do fluxo admin novo produto; final deve citar memoria usada.
@@ -714,3 +722,137 @@
 - Pedido iniciado: upload de imagem retorna `bucket NAME invalid`.
 - Patch aplicado em `server/routes/admin.js`: `normalizeStorageBucketName()` limpa aspas/backticks e valida regex segura para bucket Supabase.
 - `getSupabaseStorageConfig()` agora usa bucket normalizado, com fallback `product-images`.
+## 2026-06-21 - missing-samsung-s-models-agent
+
+- 02:19:49 - Iniciado fluxo para mapear/importar apenas Samsung linha S faltantes.
+- 02:19:49 - Skills obrigatórias lidas: `caveman`, `planning-with-files`.
+- 02:19:49 - Ruflo confirmado: `v3.12.4`.
+- 02:19:49 - `git status --short` sem alterações iniciais.
+- 02:23 - ONE e Composio não disponíveis na tool surface; fallback para `@supabase` registrado.
+- 02:24 - Projeto Supabase `lzsaaufsdcmqlasjrqck` confirmado como ativo/saudável.
+- 02:25 - Schema real lido: produtos/imagens/categorias confirmados.
+- 02:28 - Modelos Tech7 normalizados; todos os modelos S20-S25 do prompt existem.
+- 02:31 - Firecrawl usado na fonte; modelos fonte comparados contra Tech7.
+- 02:33 - Criados `_validation/missing-samsung-s-models/report.json` e `README.md`.
+- 02:33 - Decisão: zero importações; não houve alteração em produtos.
+- 02:35 - `npm run validate:routes` OK.
+- 02:37 - `npm run validate:product-images` OK: 26/26.
+- 02:39 - `npm run validate:product-cards` OK: 23044 arquivos, 0 problemas.
+- 02:40 - `@chrome` sem tool direta; Node REPL MCP falhou por `sandboxPolicy`; Playwright fallback salvou 3 screenshots e JSON, todos OK.
+- 02:45 - Usuário corrigiu escopo: refazer análise considerando só telas/display linha S `Original` ou `Original Retirada`.
+- 10:34 - Supabase reconsultado com filtro estrito `section in ('display-e-lcd','tela-display-lcd')` e `original`.
+- 10:36 - Firecrawl reexecutado na fonte para produtos tipo frontal/tela/display/LCD original.
+- 10:38 - Relatório estrito salvo em `_validation/missing-samsung-s-models/original-display-analysis.json`; importação ainda não executada.
+- 10:56 - Usuario pediu importar candidatos aprovados.
+- 10:56 - Supabase ativo reconfirmado: `lzsaaufsdcmqlasjrqck`.
+- 10:57 - Confirmado que nenhum dos 7 ids/slugs propostos existia antes do insert.
+- 10:58 - Firecrawl confirmou pagina individual de S20 FE.
+- 10:59 - Firecrawl confirmou paginas individuais de S22 Ultra e S23 Ultra.
+- 11:00 - Firecrawl confirmou paginas individuais de S24, S24 Ultra, S25 e S25 Plus; houve rate limit curto no S25 Plus, resolvido aguardando reset.
+- 11:02 - Inseridos 7 produtos em `products` e 31 imagens em `product_images`.
+- 11:03 - Supabase reconsultado: todos os 7 produtos ativos, com preco e imagem principal persistidos.
+- 11:04 - Validacao local HTTP: paginas publicas e APIs de busca/produtos retornaram 200.
+- 11:04 - Validacao visual fallback Playwright mobile 390x844 salva em `_validation/missing-samsung-s-models/imported-products-visual-validation.json`.
+- 11:05 - `npm run validate:routes` OK.
+- 11:06 - `npm run validate:product-images` OK: 26/26 imagens visiveis.
+- 11:07 - `npm run validate:product-cards` OK: 23044 arquivos, 0 problemas.
+- 11:35 - Iniciado ajuste para garantir layout identico em novos produtos.
+- 11:36 - Ruflo confirmado `v3.12.4`; skills obrigatorias lidas.
+- 11:37 - Identificado que produtos novos usavam `renderDynamicProductHtml()` simplificado em `server/app.js`.
+- 11:39 - `server/app.js` alterado para renderizar produtos dinamicos dentro do shell estatico real de produto.
+- 11:40 - `node --check server/app.js` OK.
+- 11:40 - Servidor temporario iniciado em `127.0.0.1:3010` para validar codigo novo.
+- 11:41 - Produto novo S25 Plus validado com shell antigo: `box-col-product`, `page-info-product`, footer, scripts do tema e sem `t7-dynamic-header`.
+- 11:41 - Playwright fallback validou mobile e desktop: sem overflow, sem console errors, botao Comprar visivel, frete visivel e footer presente.
+- 11:42 - `npm run validate:routes` OK.
+- 11:42 - `npm run validate:assets` OK.
+- 11:44 - `npm run validate:build` OK.
+
+## Correcao template Samsung de referencia - Progress - 2026-06-21
+- 13:21 - Pedido retomado para corrigir produtos ja criados com base exata no produto `/display/samsung/tela-display-lcd-samsung-note-20-ultra-n986-oled/`.
+- 13:22 - Skills obrigatorias `caveman` e `planning-with-files` consideradas; Ruflo confirmado `v3.12.4`.
+- 13:23 - `@supabase` carregado; projeto ativo confirmado: `lzsaaufsdcmqlasjrqck` / `supabase-bisque-bridge`.
+- 13:24 - Servidor temporario iniciado em `127.0.0.1:3012`.
+- 13:25 - Supabase confirmou 7 produtos `firecrawl:x3` ativos e imagens principais persistidas.
+- 13:28 - `server/app.js` ajustado para usar o template Samsung Note 20 Ultra indicado pelo usuario.
+- 13:29 - `node --check server/app.js` OK.
+- 13:31 - HTML do S24 validado: shell de produto correto, sem `t7-dynamic-header`, com galeria, frete, relacionados e footer.
+- 13:33 - Todos os 7 produtos importados retornaram 200 com shell de produto correto.
+- 13:36 - `@chrome` nao ficou disponivel como ferramenta callable; Playwright fallback validou referencia, S24 e S25 Plus em desktop/mobile.
+- 13:37 - Evidencias salvas em `_validation/product-layout-reference/`.
+- 13:39 - Checks OK: `node --check server/routes/admin.js`, `node --check assets/js/admin.js`.
+- 13:40 - Validacoes OK: `npm run validate:assets`, `npm run validate:routes`, `npm run validate:endpoints`, `npm run validate:build`.
+
+## Layout Samsung S Original Retirada - Progress - 2026-06-21
+- Pedido retomado: novos produtos Samsung linha S originais/retirados devem ficar identicos as outras paginas de produto.
+- Ruflo confirmado `v3.12.4`; skills `caveman` e `planning-with-files` lidas/aplicadas.
+- Worktree ja estava sujo com `server/app.js` e arquivos de planejamento modificados antes desta rodada; preservar alteracoes existentes.
+- Diagnostico inicial: renderer dinamico ja usa o shell Samsung, mas ainda gera um bloco interno sem todas as secoes antigas.
+- Primeira validacao local falhou antes do navegador porque `_validation/missing-samsung-s-models/imported-products.json` tem BOM; script ajustado para remover BOM ao ler o JSON.
+- `server/app.js` corrigido para incluir no bloco dinamico as secoes de formas de pagamento ocultas e comentarios/avaliacoes iguais ao template Samsung de referencia.
+- Validador local criado em `_validation/product-layout-reference/validate-layout-final.mjs`.
+- Validacao visual/estrutural final OK: 7 produtos, 14 casos desktop/mobile, 7 checagens de HTML cru; sem `t7-dynamic-header`, sem overflow e sem falhas internas.
+- Evidencia final salva em `_validation/product-layout-reference/layout-reference-final-validation.json` e screenshots `final-*.png`.
+- Checks finais OK: `node --check server/app.js`, `node --check _validation/product-layout-reference/validate-layout-final.mjs`, `npm run validate:routes`, `npm run validate:assets`, `npm run validate:endpoints`, `npm run validate:build`, `git diff --check`.
+- Usuario enviou prints mostrando S24 no fallback minimo e referencia correta em producao.
+- `server/app.js` ajustado novamente: `findProductTemplateBounds()` faz busca tolerante do bloco antigo e `renderDynamicProductHtml()` nao retorna mais `renderMinimalDynamicProductHtml()` quando o template falha.
+- Servidor limpo iniciado em `http://127.0.0.1:3000`; `/api/health` OK com `database=connected`.
+- Chrome real via plugin/node_repl validou S24 novo, S25 Plus novo e referencia em desktop/mobile; resultado OK em `_validation/product-layout-reference/real-chrome-product-layout-report.json`.
+- Screenshot conferida visualmente: `_validation/product-layout-reference/real-chrome-s24-new-desktop.png` mostra o layout antigo completo igual a referencia, nao o fallback branco.
+- Revalidacao automatizada OK em `TECH7_BASE_URL=http://127.0.0.1:3000`: 7 produtos, 14 casos, 7 HTML cru.
+- Checks pos-ajuste OK: `node --check server/app.js`, `npm run validate:routes`, `npm run validate:assets`, `npm run validate:endpoints`, `npm run validate:build`, `git diff --check`.
+
+## Produtos visitados sem imagens - Progress - 2026-06-21
+- Pedido recebido: aba `Produtos visitados` renderizava cards com area de imagem em branco.
+- Reproducao em Chrome real via plugin/node_repl: cards tinham `src`, mas as imagens estavam com `opacity: 0`, classe `swiper-lazy transform` e `naturalWidth: 0` antes de entrar/carregar corretamente.
+- `assets/js/tech7-local-runtime.js` ajustado para renderizar imagens visitadas como `lazyloaded`, forcar visibilidade/opacidade na secao e chamar `ensureProductCardImagesVisible()` logo apos montar o carrossel.
+- Adicionada hidratacao para historico antigo: quando um produto visitado nao tem imagem real, o runtime busca a propria pagina do produto, extrai `og:image`/imagem principal e grava a imagem no `localStorage`.
+- Validacao Chrome real OK: Note 20 Ultra, S23 Plus e S25 Plus carregaram com `naturalWidth > 0`, `opacity: 1`; S25 Plus sem imagem salva foi preenchido por URL externa da pagina.
+- Evidencias visuais: `_validation/visited-products-images/before-forced-history.png`, `_validation/visited-products-images/after-scrolled-history.png`, `_validation/visited-products-images/after-patch-real-chrome.png`.
+- Checks OK: `node --check assets/js/tech7-local-runtime.js`, `npm run validate:assets`, `npm run validate:routes`, `npm run validate:build`, `git diff --check`.
+
+## Veja tambem com faixa laranja vazia - Progress - 2026-06-21
+- Pedido recebido: cards do `Veja tambem` exibiam uma faixa laranja vazia no lugar do preco/status.
+- Reproducao em Chrome real: em hover/focus, o card relacionado aplicava `background: rgb(255, 106, 0)` e `color: rgb(255, 106, 0)` ao `<p>Produto Indisponível</p>`, deixando o texto invisivel e aparentando barra vazia.
+- `assets/js/tech7-local-runtime.js` ajustado no CSS injetado de `.product-related` para manter `.price`, `.product-price`, `.price-off` e `<p>` com fundo transparente e texto laranja tambem em hover/focus.
+- Validacao Chrome real OK: quatro cards relacionados testados sem `emptyOrangeBar` e sem `textInvisibleOnOrange`; quarto card em hover manteve `Produto Indisponível` visivel.
+- Evidencias visuais: `_validation/related-empty-orange/before-related-orange-hover.png` e `_validation/related-empty-orange/after-related-orange-hover-fixed.png`.
+- Checks OK: `node --check assets/js/tech7-local-runtime.js`, `npm run validate:assets`, `npm run validate:routes`, `npm run validate:build`, `git diff --check`.
+
+## Performance/correcao de carregamento de precos - Progress - 2026-06-22
+- Skills obrigatorias e auxiliares consideradas; Ruflo respondeu `v3.12.4`, mas a chamada ficou instavel/timeout e a execucao seguiu manualmente.
+- Subagentes solicitados foram tentados; criacao falhou por desconexao de stream, entao os papeis foram cobertos manualmente na investigacao.
+- `@supabase` usado: projeto `lzsaaufsdcmqlasjrqck`; confirmado `price_cents` como campo completo e S24 com `price_cents=119900`.
+- `@chrome` direto nao ficou exposto como namespace; validacao foi feita com Chrome via `node_repl`/Playwright, com Network/Performance e screenshots desktop/mobile.
+- Baseline salva em `_validation/price-load-performance/baseline-price-load.json`: havia preco HTML/localStorage errado antes do backend (`R$ 50,00`, `R$ 750,00`, `R$ 1,23`) e chamadas duplicadas no produto.
+- Alterados loader, carrinho, checkout, runtime de visitados, botao de compra e endpoint de resolucao de precos.
+- Servidor local reiniciado em `127.0.0.1:3000` para carregar a alteracao de backend; `/api/health` OK.
+- Medicao final salva em `_validation/price-load-performance/after-price-load.json`: `wrongFlashCount=0` em todos os fluxos desktop/mobile.
+- Checks finais OK: `node --check preco-loader.js`, `cart-manager.js`, `produto-comprar.js`, `assets/js/tech7-local-runtime.js`, `server/routes/products.js`; `npm run validate:backend-prices`, `validate:product-cards`, `validate:endpoints`, `validate:routes`, `validate:build`.
+
+### Regressao pos-precos - 2026-06-23
+- Pedido recebido: validar se as alteracoes de preco nao impactaram Admin ou outras funcoes.
+- Chrome real via fallback `node_repl`/Playwright validou: home, categoria Samsung, busca, produto S24, produtos visitados, compra real pelo botao, carrinho apos adicionar, checkout, produto mobile e Admin.
+- Resultado smoke storefront: produto adicionou no carrinho, checkout manteve `R$ 1.199,00`, e nenhum fluxo exibiu `R$ 1,23`, `R$ 750,00` ou `R$ 1.300,00`.
+- Admin: `admin.html` carregou login; `/api/admin/session`, `/api/admin/products` e `/api/admin/categories` retornaram 401 esperado sem sessao; login invalido falhou controladamente; sem erro JS real.
+- Evidencias: `_validation/price-regression/regression-smoke.json`, `_validation/price-regression/admin-smoke.json` e screenshots em `_validation/price-regression/`.
+- Validadores OK: `validate:backend-prices`, `validate:product-cards`, `validate:endpoints`, `validate:routes`, `validate:build`.
+
+### Regressao avancada pos-precos - 2026-06-23
+- Subagente read-only encontrou dois riscos reais ligados a preco: re-render de catalogo com mesma assinatura podia ficar em `Carregando preco`, e URL curta em produtos visitados podia nao hidratar preco.
+- Corrigido em `preco-loader.js`: quando a assinatura ja foi resolvida, os nos DOM novos recebem o preco do cache verificado em vez de retornar antes de atualizar a tela.
+- Corrigido em `assets/js/tech7-local-runtime.js`: `visitedPriceLookup()` aceita `secao/slug` e o historico salvo hidrata preco mesmo quando a pagina atual nao tem `.visited-section`.
+- Chrome fallback com Google Chrome instalado validou 9/9 em `_validation/price-regression/advanced-regression.json`: home/autocomplete, categoria real, re-render com mesma assinatura, busca real + `/api/search`, visitados URL curta, produto real, carrinho, checkout e endpoints.
+- Provas principais: categoria `/display-e-lcd/samsung/` ficou com `loadingCount=0`; re-render reaplicou 6 precos do cache e `stuck=0`; visitado URL curta hidratou `R$ 1.199,00`; `/api/products/resolve-prices` retornou `price_cents=119900`.
+- Validadores apos os ajustes OK: `node --check preco-loader.js`, `node --check assets/js/tech7-local-runtime.js`, `npm run validate:backend-prices`, `npm run validate:product-cards`, `npm run validate:endpoints`, `npm run validate:routes`, `npm run validate:build`, `git diff --check`.
+- Observacao fora do escopo de preco: subagente sinalizou que `backend/src/routes/orders.js` tem lista de pedidos protegida por `adminAuth`, mas detalhe por ID publico; nao alterado nesta rodada para nao misturar fluxo de pedido/cliente com correcao de preco.
+
+### API de frete Melhor Envio - 2026-06-23
+- Pedido recebido: corrigir API de frete, testar real e fazer deploy pelo GitHub com as alteracoes novas.
+- `@chrome`/Chrome MCP direto nao ficou callable; validacao real foi feita com Playwright apontando para Google Chrome instalado.
+- Supabase plugin falhou por timeout de startup; fallback usado porque a falha confirmada era de env Vercel, nao de dado/schema.
+- Producao antes: `https://tech-7.vercel.app/api/shipping/melhor-envio/readiness` retornou 503 por falta de `MELHOR_ENVIO_ORIGIN_ZIPCODE` e `MELHOR_ENVIO_TOKEN_OR_OAUTH`.
+- Vercel Production atualizado via `npx vercel env add`: `MELHOR_ENVIO_API_URL`, `MELHOR_ENVIO_ORIGIN_ZIPCODE`, `MELHOR_ENVIO_TOKEN`.
+- Local real OK: `npm run validate:melhor-envio`, `npm run validate:melhor-envio:live` e `POST /api/shipping/melhor-envio/quote` retornaram cotacao.
+- Navegador real OK: produto e checkout exibiram opcoes Correios SEDEX, Jadlog e Loggi; evidencias em `_validation/shipping-api/`.
+- Proximo passo: rodar `validate:build`, commit/push em `main`, aguardar deploy e revalidar producao.
